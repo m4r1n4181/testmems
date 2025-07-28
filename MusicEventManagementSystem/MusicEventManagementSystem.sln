@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.36105.23 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicEventManagementSystem", "MusicEventManagementSystem\MusicEventManagementSystem.csproj", "{2AD20B12-1A36-45E9-B715-502514C536D6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2AD20B12-1A36-45E9-B715-502514C536D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AD20B12-1A36-45E9-B715-502514C536D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AD20B12-1A36-45E9-B715-502514C536D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AD20B12-1A36-45E9-B715-502514C536D6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {715478D3-7410-4069-93CC-0648E2C98150}
+	EndGlobalSection
+EndGlobal
