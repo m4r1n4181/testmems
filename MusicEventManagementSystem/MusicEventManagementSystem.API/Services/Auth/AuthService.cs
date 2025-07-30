@@ -32,6 +32,7 @@ namespace MusicEventManagementSystem.Services.Auth
 
                 var user = new ApplicationUser
                 {
+                    UserName = registerDto.Email,
                     Email = registerDto.Email,
                     FirstName = registerDto.FirstName,
                     LastName = registerDto.LastName,

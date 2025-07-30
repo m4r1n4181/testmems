@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.36105.23 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicEventManagementSystem", "MusicEventManagementSystem\MusicEventManagementSystem.csproj", "{2AD20B12-1A36-45E9-B715-502514C536D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicEventManagementSystem.API", "MusicEventManagementSystem.API\MusicEventManagementSystem.API.csproj", "{09E229B7-97DD-E2EB-124C-F17B829273DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2AD20B12-1A36-45E9-B715-502514C536D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2AD20B12-1A36-45E9-B715-502514C536D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2AD20B12-1A36-45E9-B715-502514C536D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2AD20B12-1A36-45E9-B715-502514C536D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09E229B7-97DD-E2EB-124C-F17B829273DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09E229B7-97DD-E2EB-124C-F17B829273DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09E229B7-97DD-E2EB-124C-F17B829273DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09E229B7-97DD-E2EB-124C-F17B829273DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {715478D3-7410-4069-93CC-0648E2C98150}
+		SolutionGuid = {E9953C03-3FF0-4DD2-97AC-6CDCCCC6FEE8}
 	EndGlobalSection
 EndGlobal
