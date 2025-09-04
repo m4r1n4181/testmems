@@ -53,14 +53,14 @@ namespace MusicEventManagementSystem.API.Services
 
         public async Task<bool> DeleteVenueAsync(int venueId)
         {
-            var existingVenue = await _venueRepository.GetByIdAsync(venueId);
+            var venue = await _venueRepository.GetByIdAsync(venueId);
 
-            if (existingVenue == null)
+            if (venue == null)
             {
                 return false;
             }
 
-            _venueRepository.Delete(existingVenue);
+            _venueRepository.Delete(venue);
             await _venueRepository.SaveChangesAsync();
             return true;
         }

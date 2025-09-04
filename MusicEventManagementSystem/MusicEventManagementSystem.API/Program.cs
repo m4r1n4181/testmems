@@ -25,11 +25,18 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 }).AddEntityFrameworkStores<ApplicationDbContext>()
   .AddDefaultTokenProviders();
 
+// 3. Register repositories
 builder.Services.AddScoped<IVenueRepository, VenueRepository>();
+builder.Services.AddScoped<ISegmentRepository, SegmentRepository>();
+builder.Services.AddScoped<IZoneRepository, ZoneRepository>();
+builder.Services.AddScoped<ISpecialOfferRepository, SpecialOfferRepository>();
 
 // 3. Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
+builder.Services.AddScoped<ISegmentService, SegmentService>();
+builder.Services.AddScoped<IZoneService, ZoneService>();
+builder.Services.AddScoped<ISpecialOfferService, SpecialOfferService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
