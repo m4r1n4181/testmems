@@ -1,5 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.Repositories;
+using MusicEventManagementSystem.API.Repositories.IRepositories;
+using MusicEventManagementSystem.API.Services;
+using MusicEventManagementSystem.API.Services.IService;
 using MusicEventManagementSystem.Data;
 using MusicEventManagementSystem.Models.Auth;
 using MusicEventManagementSystem.Services.Auth;
@@ -21,8 +25,11 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 }).AddEntityFrameworkStores<ApplicationDbContext>()
   .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<IVenueRepository, VenueRepository>();
+
 // 3. Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IVenueService, VenueService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
