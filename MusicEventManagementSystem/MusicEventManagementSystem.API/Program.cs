@@ -30,6 +30,10 @@ builder.Services.AddScoped<IVenueRepository, VenueRepository>();
 builder.Services.AddScoped<ISegmentRepository, SegmentRepository>();
 builder.Services.AddScoped<IZoneRepository, ZoneRepository>();
 builder.Services.AddScoped<ISpecialOfferRepository, SpecialOfferRepository>();
+builder.Services.AddScoped<ITicketTypeRepository, TicketTypeRepository>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<IRecodedSaleRepository, RecordedSaleRepository>();
+builder.Services.AddScoped<IPricingRuleRepository, PricingRuleRepository>();
 
 // 3. Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -37,6 +41,10 @@ builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<ISegmentService, SegmentService>();
 builder.Services.AddScoped<IZoneService, ZoneService>();
 builder.Services.AddScoped<ISpecialOfferService, SpecialOfferService>();
+builder.Services.AddScoped<ITicketTypeService, TicketTypeService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<IRecordedSaleService, RecordedSaleService>();
+builder.Services.AddScoped<IPricingRuleService, PricingRuleService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
