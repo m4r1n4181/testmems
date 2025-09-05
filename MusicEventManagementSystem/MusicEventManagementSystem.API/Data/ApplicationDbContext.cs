@@ -18,8 +18,11 @@ namespace MusicEventManagementSystem.Data
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<RecordedSale> RecordedSales { get; set; }
         public DbSet<PricingRule> PricingRules { get; set; }
+
+        // DbSets for Media-Campaign Subsystem
         public DbSet<Campaign> Campaigns { get; set; }
         public DbSet<Ad> Ads { get; set; }
+        public DbSet<MediaTask> MediaTasks { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
