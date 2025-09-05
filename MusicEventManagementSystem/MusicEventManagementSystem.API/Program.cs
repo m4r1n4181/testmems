@@ -1,5 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.Repositories;
+using MusicEventManagementSystem.API.Repositories.IRepositories;
+using MusicEventManagementSystem.API.Services;
+using MusicEventManagementSystem.API.Services.IService;
 using MusicEventManagementSystem.Data;
 using MusicEventManagementSystem.Models.Auth;
 using MusicEventManagementSystem.Services.Auth;
@@ -21,8 +25,38 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 }).AddEntityFrameworkStores<ApplicationDbContext>()
   .AddDefaultTokenProviders();
 
-// 3. Register services
+// 3. Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+// 4. Register repositories
+builder.Services.AddScoped<IVenueRepository, VenueRepository>();
+builder.Services.AddScoped<ISegmentRepository, SegmentRepository>();
+builder.Services.AddScoped<IZoneRepository, ZoneRepository>();
+builder.Services.AddScoped<ISpecialOfferRepository, SpecialOfferRepository>();
+builder.Services.AddScoped<ITicketTypeRepository, TicketTypeRepository>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<IRecodedSaleRepository, RecordedSaleRepository>();
+builder.Services.AddScoped<IPricingRuleRepository, PricingRuleRepository>();
+
+// 5. Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IVenueService, VenueService>();
+builder.Services.AddScoped<ISegmentService, SegmentService>();
+builder.Services.AddScoped<IZoneService, ZoneService>();
+builder.Services.AddScoped<ISpecialOfferService, SpecialOfferService>();
+builder.Services.AddScoped<ITicketTypeService, TicketTypeService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<IRecordedSaleService, RecordedSaleService>();
+builder.Services.AddScoped<IPricingRuleService, PricingRuleService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -40,9 +74,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
