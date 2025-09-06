@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.Models.Auth;
+using System.Threading.Channels;
 
 namespace MusicEventManagementSystem.Data
 {
@@ -24,6 +25,11 @@ namespace MusicEventManagementSystem.Data
         public DbSet<Ad> Ads { get; set; }
         public DbSet<MediaTask> MediaTasks { get; set; }
         public DbSet<MediaWorkflow> MediaWorkflows { get; set; }
+        public DbSet<AdType> AdTypes { get; set; }
+       /* public DbSet<MusicEventManagementSystem.API.Models.MediaVersion> Versions { get; set; }
+        public DbSet<Channel> Channels { get; set; }
+        public DbSet<IntegrationStatus> IntegrationStatuses { get; set; }
+        public DbSet<Approval> Approvals { get; set; }*/
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

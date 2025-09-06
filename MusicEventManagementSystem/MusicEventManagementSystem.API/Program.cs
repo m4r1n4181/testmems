@@ -37,7 +37,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 4. Register repositories
+// 4. Register repositories for Ticket-Sales Subsystem
 builder.Services.AddScoped<IVenueRepository, VenueRepository>();
 builder.Services.AddScoped<ISegmentRepository, SegmentRepository>();
 builder.Services.AddScoped<IZoneRepository, ZoneRepository>();
@@ -46,11 +46,20 @@ builder.Services.AddScoped<ITicketTypeRepository, TicketTypeRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<IRecodedSaleRepository, RecordedSaleRepository>();
 builder.Services.AddScoped<IPricingRuleRepository, PricingRuleRepository>();
-builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
-builder.Services.AddScoped<IMediaTaskRepository, MediaTaskRepository>();
-builder.Services.AddScoped<IMediaWorkflowRepository, MediaWorkflowRepository>();
 
-// 5. Register services
+// 5. Register Media Campaign repositories
+builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
+builder.Services.AddScoped<IAdTypeRepository, AdTypeRepository>();
+builder.Services.AddScoped<IMediaWorkflowRepository, MediaWorkflowRepository>();
+builder.Services.AddScoped<IMediaTaskRepository, MediaTaskRepository>();
+/*builder.Services.AddScoped<IAdRepository, AdRepository>();
+builder.Services.AddScoped<IVersionRepository, VersionRepository>();
+builder.Services.AddScoped<IChannelRepository, ChannelRepository>();
+builder.Services.AddScoped<IIntegrationStatusRepository, IntegrationStatusRepository>();
+builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();*/
+
+
+// 6. Register services for Ticket-sales Subsystem
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<ISegmentService, SegmentService>();
@@ -60,9 +69,17 @@ builder.Services.AddScoped<ITicketTypeService, TicketTypeService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IRecordedSaleService, RecordedSaleService>();
 builder.Services.AddScoped<IPricingRuleService, PricingRuleService>();
+
+// 8. Register Media Campaign services
 builder.Services.AddScoped<ICampaignService, CampaignService>();
-builder.Services.AddScoped<IMediaTaskService, MediaTaskService>();
+builder.Services.AddScoped<IAdTypeService, AdTypeService>();
 builder.Services.AddScoped<IMediaWorkflowService, MediaWorkflowService>();
+builder.Services.AddScoped<IMediaTaskService, MediaTaskService>();
+/*builder.Services.AddScoped<IAdService, AdService>();
+builder.Services.AddScoped<IVersionService, VersionService>();
+builder.Services.AddScoped<IChannelService, ChannelService>();
+builder.Services.AddScoped<IIntegrationStatusService, IntegrationStatusService>();
+builder.Services.AddScoped<IApprovalService, ApprovalService>();*/
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
