@@ -22,7 +22,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
-        {/* Protected routes */}
+        {/* Protected routes - Ticket Sales*/}
         <Route path="/dashboard" 
           element={
             <ProtectedRoute>
@@ -121,8 +121,11 @@ function App() {
           } 
         />
 
+        {/* Protected routes - Event Management*/}
+        
         {/* Redirect root to dashboard */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
         
         {/* Catch all - redirect to dashboard */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
