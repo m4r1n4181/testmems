@@ -48,6 +48,7 @@ builder.Services.AddScoped<IRecodedSaleRepository, RecordedSaleRepository>();
 builder.Services.AddScoped<IPricingRuleRepository, PricingRuleRepository>();
 builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
 builder.Services.AddScoped<IMediaTaskRepository, MediaTaskRepository>();
+builder.Services.AddScoped<IMediaWorkflowRepository, MediaWorkflowRepository>();
 
 // 5. Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -61,6 +62,7 @@ builder.Services.AddScoped<IRecordedSaleService, RecordedSaleService>();
 builder.Services.AddScoped<IPricingRuleService, PricingRuleService>();
 builder.Services.AddScoped<ICampaignService, CampaignService>();
 builder.Services.AddScoped<IMediaTaskService, MediaTaskService>();
+builder.Services.AddScoped<IMediaWorkflowService, MediaWorkflowService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

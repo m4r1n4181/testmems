@@ -23,6 +23,7 @@ namespace MusicEventManagementSystem.Data
         public DbSet<Campaign> Campaigns { get; set; }
         public DbSet<Ad> Ads { get; set; }
         public DbSet<MediaTask> MediaTasks { get; set; }
+        public DbSet<MediaWorkflow> MediaWorkflows { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

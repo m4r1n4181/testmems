@@ -1,27 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MusicEventManagementSystem.API.Models;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services.IService;
 
 namespace MusicEventManagementSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MediaTaskController : ControllerBase
+    public class MediaWorkflowController : ControllerBase
     {
-        private readonly IMediaTaskService _mediaTaskService;
+        private readonly IMediaWorkflowService _mediaWorkflowService;
 
-        public MediaTaskController(IMediaTaskService mediaTaskService)
+        public MediaWorkflowController(IMediaWorkflowService mediaWorkflowService)
         {
-            _mediaTaskService = mediaTaskService;
+            _mediaWorkflowService = mediaWorkflowService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MediaTask>>> GetAllTasks()
+        public async Task<ActionResult<IEnumerable<MediaWorkflow>>> GetAllWorkflows()
         {
             try
             {
-                var tasks = await _mediaTaskService.GetAllTasksAsync();
-                return Ok(tasks);
+                var workflows = await _mediaWorkflowService.GetAllWorkflowsAsync();
+                return Ok(workflows);
             }
             catch (Exception ex)
             {
@@ -30,16 +31,16 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<MediaTask>> GetTaskById(int id)
+        public async Task<ActionResult<MediaWorkflow>> GetWorkflowById(int id)
         {
             try
             {
-                var task = await _mediaTaskService.GetTaskByIdAsync(id);
-                if (task == null)
+                var workflow = await _mediaWorkflowService.GetWorkflowByIdAsync(id);
+                if (workflow == null)
                 {
-                    return NotFound($"Task with ID {id} not found.");
+                    return NotFound($"Workflow with ID {id} not found.");
                 }
-                return Ok(task);
+                return Ok(workflow);
             }
             catch (Exception ex)
             {
@@ -48,7 +49,7 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<MediaTask>> CreateTask([FromBody] MediaTask task)
+        public async Task<ActionResult<MediaWorkflow>> CreateWorkflow([FromBody] MediaWorkflow workflow)
         {
             try
             {
@@ -57,8 +58,8 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var createdTask = await _mediaTaskService.CreateTaskAsync(task);
-                return CreatedAtAction(nameof(GetTaskById), new { id = createdTask.IdTask }, createdTask);
+                var createdWorkflow = await _mediaWorkflowService.CreateWorkflowAsync(workflow);
+                return CreatedAtAction(nameof(GetWorkflowById), new { id = createdWorkflow.IdWorkflow }, createdWorkflow);
             }
             catch (Exception ex)
             {
@@ -67,7 +68,7 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<MediaTask>> UpdateTask(int id, [FromBody] MediaTask task)
+        public async Task<ActionResult<MediaWorkflow>> UpdateWorkflow(int id, [FromBody] MediaWorkflow workflow)
         {
             try
             {
@@ -76,13 +77,13 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var updatedTask = await _mediaTaskService.UpdateTaskAsync(id, task);
-                if (updatedTask == null)
+                var updatedWorkflow = await _mediaWorkflowService.UpdateWorkflowAsync(id, workflow);
+                if (updatedWorkflow == null)
                 {
-                    return NotFound($"Task with ID {id} not found.");
+                    return NotFound($"Workflow with ID {id} not found.");
                 }
 
-                return Ok(updatedTask);
+                return Ok(updatedWorkflow);
             }
             catch (Exception ex)
             {
@@ -91,14 +92,14 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteTask(int id)
+        public async Task<ActionResult> DeleteWorkflow(int id)
         {
             try
             {
-                var isDeleted = await _mediaTaskService.DeleteTaskAsync(id);
+                var isDeleted = await _mediaWorkflowService.DeleteWorkflowAsync(id);
                 if (!isDeleted)
                 {
-                    return NotFound($"Task with ID {id} not found.");
+                    return NotFound($"Workflow with ID {id} not found.");
                 }
 
                 return NoContent();
