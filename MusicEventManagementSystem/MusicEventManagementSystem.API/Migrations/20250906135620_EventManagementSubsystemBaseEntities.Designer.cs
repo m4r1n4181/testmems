@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MusicEventManagementSystem.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicEventManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250906135620_EventManagementSubsystemBaseEntities")]
+    partial class EventManagementSubsystemBaseEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -181,6 +184,8 @@ namespace MusicEventManagementSystem.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ResourceId");
+
                     b.ToTable("Equipment");
                 });
 
@@ -195,8 +200,8 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("CreatedById")
-                        .HasColumnType("uuid");
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
@@ -223,6 +228,8 @@ namespace MusicEventManagementSystem.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LocationId");
+
                     b.ToTable("Events");
                 });
 
@@ -247,6 +254,8 @@ namespace MusicEventManagementSystem.Migrations
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ResourceId");
 
                     b.ToTable("Infrastructures");
                 });
@@ -311,6 +320,12 @@ namespace MusicEventManagementSystem.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("PerformerId");
+
+                    b.HasIndex("VenueId");
+
                     b.ToTable("Performances");
                 });
 
@@ -344,6 +359,10 @@ namespace MusicEventManagementSystem.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PerformanceId");
+
+                    b.HasIndex("ResourceId");
 
                     b.ToTable("PerformanceResources");
                 });
@@ -552,6 +571,8 @@ namespace MusicEventManagementSystem.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ResourceId");
+
                     b.ToTable("Services");
                 });
 
@@ -610,6 +631,8 @@ namespace MusicEventManagementSystem.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ResourceId");
 
                     b.ToTable("Staff");
                 });
@@ -691,10 +714,12 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<int>("ResourceId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("VehicleType")
+                    b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ResourceId");
 
                     b.ToTable("Vehicles");
                 });
@@ -768,6 +793,8 @@ namespace MusicEventManagementSystem.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PerformanceId");
 
                     b.ToTable("WorkTasks");
                 });
@@ -930,6 +957,129 @@ namespace MusicEventManagementSystem.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Equipment", b =>
+                {
+                    b.HasOne("MusicEventManagementSystem.API.Models.Resource", "Resource")
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Resource");
+                });
+
+            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Event", b =>
+                {
+                    b.HasOne("MusicEventManagementSystem.API.Models.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Infrastructure", b =>
+                {
+                    b.HasOne("MusicEventManagementSystem.API.Models.Resource", "Resource")
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Resource");
+                });
+
+            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Performance", b =>
+                {
+                    b.HasOne("MusicEventManagementSystem.API.Models.Event", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MusicEventManagementSystem.API.Models.Performer", "Performer")
+                        .WithMany()
+                        .HasForeignKey("PerformerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MusicEventManagementSystem.API.Models.Venue", "Venue")
+                        .WithMany()
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("Performer");
+
+                    b.Navigation("Venue");
+                });
+
+            modelBuilder.Entity("MusicEventManagementSystem.API.Models.PerformanceResource", b =>
+                {
+                    b.HasOne("MusicEventManagementSystem.API.Models.Performance", "Performance")
+                        .WithMany()
+                        .HasForeignKey("PerformanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MusicEventManagementSystem.API.Models.Resource", "Resource")
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Performance");
+
+                    b.Navigation("Resource");
+                });
+
+            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Service", b =>
+                {
+                    b.HasOne("MusicEventManagementSystem.API.Models.Resource", "Resource")
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Resource");
+                });
+
+            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Staff", b =>
+                {
+                    b.HasOne("MusicEventManagementSystem.API.Models.Resource", "Resource")
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Resource");
+                });
+
+            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Vehicle", b =>
+                {
+                    b.HasOne("MusicEventManagementSystem.API.Models.Resource", "Resource")
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Resource");
+                });
+
+            modelBuilder.Entity("MusicEventManagementSystem.API.Models.WorkTask", b =>
+                {
+                    b.HasOne("MusicEventManagementSystem.API.Models.Performance", "Performance")
+                        .WithMany()
+                        .HasForeignKey("PerformanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Performance");
                 });
 #pragma warning restore 612, 618
         }
