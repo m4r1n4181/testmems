@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MusicEventManagementSystem.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicEventManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250907221502_Version")]
+    partial class Version
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -276,36 +279,6 @@ namespace MusicEventManagementSystem.Migrations
                     b.HasIndex("MediaWorkflowId");
 
                     b.ToTable("MediaTasks");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.MediaVersion", b =>
-                {
-                    b.Property<int>("MediaVersionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MediaVersionId"));
-
-                    b.Property<int>("AdId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("FileType")
-                        .HasColumnType("text");
-
-                    b.Property<string>("FileURL")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsFinalVersion")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("VersionFileName")
-                        .HasColumnType("text");
-
-                    b.HasKey("MediaVersionId");
-
-                    b.HasIndex("AdId");
-
-                    b.ToTable("MediaVersions");
                 });
 
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.MediaWorkflow", b =>
@@ -706,17 +679,6 @@ namespace MusicEventManagementSystem.Migrations
                     b.HasOne("MusicEventManagementSystem.API.Models.MediaWorkflow", null)
                         .WithMany("Tasks")
                         .HasForeignKey("MediaWorkflowId");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.MediaVersion", b =>
-                {
-                    b.HasOne("MusicEventManagementSystem.API.Models.Ad", "Ad")
-                        .WithMany()
-                        .HasForeignKey("AdId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Ad");
                 });
 
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.MediaWorkflow", b =>

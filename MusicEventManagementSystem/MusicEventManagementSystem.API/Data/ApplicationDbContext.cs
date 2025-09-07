@@ -26,7 +26,7 @@ namespace MusicEventManagementSystem.Data
         public DbSet<MediaTask> MediaTasks { get; set; }
         public DbSet<MediaWorkflow> MediaWorkflows { get; set; }
         public DbSet<AdType> AdTypes { get; set; }
-        //public DbSet<MediaVersion> MediaVersions { get; set; }
+        public DbSet<MediaVersion> MediaVersions { get; set; }
        // public DbSet<Channel> Channels { get; set; }
         //public DbSet<IntegrationStatus> IntegrationStatuses { get; set; }
         //public DbSet<Approval> Approvals { get; set; }
