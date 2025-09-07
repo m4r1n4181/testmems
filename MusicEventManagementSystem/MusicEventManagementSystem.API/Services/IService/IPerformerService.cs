@@ -7,8 +7,8 @@ namespace MusicEventManagementSystem.API.Services.IService
     {
         Task<IEnumerable<Performer>> GetAllPerformersAsync();
         Task<Performer?> GetPerformerByIdAsync(int id);
-        Task<Performer> CreatePerformerAsync(PerformerDto performer);
-        Task<Performer?> UpdatePerformerAsync(int id, PerformerDto performer);
+        Task<Performer> CreatePerformerAsync(PerformerDto performerDto);
+        Task<Performer?> UpdatePerformerAsync(int id, PerformerDto performerDto);
         Task<bool> DeletePerformerAsync(int id);
     }
 }

@@ -28,6 +28,20 @@ namespace MusicEventManagementSystem.Data
         public DbSet<Document> Documents { get; set; }
         public DbSet<Communication> Communications { get; set; }
 
+        // DbSets za Event Management podsistem
+        public DbSet<Event> Events { get; set; }
+        public DbSet<Resource> Resources { get; set; }
+        public DbSet<Equipment> Equipment { get; set; }
+        public DbSet<Location> Locations { get; set; }
+        public DbSet<Performance> Performances { get; set; }
+        public DbSet<PerformanceResource> PerformanceResources { get; set; }
+        public DbSet<WorkTask> WorkTasks { get; set; }
+        public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<Staff> Staff { get; set; }
+        public DbSet<Service> Services { get; set; }
+        public DbSet<Performer> Performers { get; set; }
+        public DbSet<Infrastructure> Infrastructures { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

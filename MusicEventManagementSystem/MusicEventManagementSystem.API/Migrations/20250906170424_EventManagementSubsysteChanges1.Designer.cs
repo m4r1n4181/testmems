@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MusicEventManagementSystem.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicEventManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250906170424_EventManagementSubsysteChanges1")]
+    partial class EventManagementSubsysteChanges1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -154,48 +157,6 @@ namespace MusicEventManagementSystem.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Communication", b =>
-                {
-                    b.Property<int>("CommunicationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CommunicationId"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Direction")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("RepliedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("CommunicationId");
-
-                    b.ToTable("Communications");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Contract", b =>
-                {
-                    b.Property<int>("ContractId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ContractId"));
-
-                    b.Property<string>("ContractType")
-                        .IsRequired()
-                        .HasColumnType("text");
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.Equipment", b =>
                 {
                     b.Property<int>("Id")
@@ -236,154 +197,6 @@ namespace MusicEventManagementSystem.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime?>("SignedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Version")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("ContractId");
-
-                    b.ToTable("Contracts");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Document", b =>
-                {
-                    b.Property<int>("DocumentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DocumentId"));
-
-                    b.Property<string>("Path")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Version")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("DocumentId");
-
-                    b.ToTable("Documents");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Negotiation", b =>
-                {
-                    b.Property<int>("NegotiationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("NegotiationId"));
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("ProposedFee")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("NegotiationId");
-
-                    b.ToTable("Negotiations");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Performer", b =>
-                {
-                    b.Property<int>("PerformerId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PerformerId"));
-
-                    b.Property<TimeSpan>("AverageResponseTime")
-                        .HasColumnType("interval");
-
-                    b.Property<string>("Contact")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Genre")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("MaxPrice")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("MinPrice")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Popularity")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TechnicalRequirements")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("PerformerId");
-
-                    b.ToTable("Performers");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Phase", b =>
-                {
-                    b.Property<int>("PhaseId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PhaseId"));
-
-                    b.Property<TimeSpan>("EstimatedDuration")
-                        .HasColumnType("interval");
-
-                    b.Property<int>("OrderNumber")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("PhaseName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("PhaseId");
-
-                    b.ToTable("Phases");
 
                     b.Property<Guid>("CreatedById")
                         .HasColumnType("uuid");
@@ -651,14 +464,6 @@ namespace MusicEventManagementSystem.Migrations
                     b.ToTable("RecordedSales");
                 });
 
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Requirement", b =>
-                {
-                    b.Property<int>("RequirementId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("RequirementId"));
-
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.Resource", b =>
                 {
                     b.Property<int>("Id")
@@ -677,17 +482,6 @@ namespace MusicEventManagementSystem.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("Fulfilled")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("RequirementId");
-
-                    b.ToTable("Requirements");
-                    
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
 

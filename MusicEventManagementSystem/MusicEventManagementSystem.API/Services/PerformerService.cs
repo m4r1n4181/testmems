@@ -30,13 +30,15 @@ namespace MusicEventManagementSystem.API.Services
             {
                 Name = performer.Name,
                 Contact = performer.Contact,
+                Email = performer.Email,
                 Genre = performer.Genre,
                 Popularity = performer.Popularity,
                 TechnicalRequirements = performer.TechnicalRequirements,
                 MinPrice = performer.MinPrice,
                 MaxPrice = performer.MaxPrice,
                 AverageResponseTime = performer.AverageResponseTime,
-                Status = performer.Status
+                Status = performer.Status,
+                UpdatedAt = DateTime.UtcNow
             };
 
             await _performerRepository.AddAsync(newPerformer);
@@ -54,6 +56,7 @@ namespace MusicEventManagementSystem.API.Services
 
             existingPerformer.Name = performerDto.Name;
             existingPerformer.Contact = performerDto.Contact;
+            existingPerformer.Email = performerDto.Email;
             existingPerformer.Genre = performerDto.Genre;
             existingPerformer.Popularity = performerDto.Popularity;
             existingPerformer.TechnicalRequirements = performerDto.TechnicalRequirements;
@@ -61,13 +64,14 @@ namespace MusicEventManagementSystem.API.Services
             existingPerformer.MaxPrice = performerDto.MaxPrice;
             existingPerformer.AverageResponseTime = performerDto.AverageResponseTime;
             existingPerformer.Status = performerDto.Status;
+            existingPerformer.UpdatedAt = DateTime.UtcNow;
 
             _performerRepository.Update(existingPerformer);
             await _performerRepository.SaveChangesAsync();
 
             return existingPerformer;
         }
-
+        
         public async Task<bool> DeletePerformerAsync(int id)
         {
             var performer = await _performerRepository.GetByIdAsync(id);
@@ -81,4 +85,3 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
     }
-}
