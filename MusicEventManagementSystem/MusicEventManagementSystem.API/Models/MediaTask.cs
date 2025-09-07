@@ -2,10 +2,10 @@
 {
     public class MediaTask
     {
-        public int IdTask { get; set; }
+        public int MediaTaskId { get; set; }
         public string? TaskName { get; set; }
         public int Order { get; set; }
         public string? TaskStatus { get; set; }
-        public int IdWorkflow { get; set; }
+        public int WorkflowId { get; set; }
     }
 }

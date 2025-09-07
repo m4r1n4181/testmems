@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MusicEventManagementSystem.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicEventManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250906021159_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,7 +189,19 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("text");
 
+                    b.Property<int>("TypeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WorkflowId")
+                        .HasColumnType("integer");
+
                     b.HasKey("AdId");
+
+                    b.HasIndex("AdTypeId");
+
+                    b.HasIndex("CampaignId");
+
+                    b.HasIndex("MediaWorkflowId");
 
                     b.ToTable("Ads");
                 });
@@ -671,6 +686,33 @@ namespace MusicEventManagementSystem.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Ad", b =>
+                {
+                    b.HasOne("MusicEventManagementSystem.API.Models.AdType", "AdType")
+                        .WithMany()
+                        .HasForeignKey("AdTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MusicEventManagementSystem.API.Models.Campaign", "Campaign")
+                        .WithMany("Ads")
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MusicEventManagementSystem.API.Models.MediaWorkflow", "MediaWorkflow")
+                        .WithMany("Ads")
+                        .HasForeignKey("MediaWorkflowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AdType");
+
+                    b.Navigation("Campaign");
+
+                    b.Navigation("MediaWorkflow");
+                });
+
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.MediaTask", b =>
                 {
                     b.HasOne("MusicEventManagementSystem.API.Models.MediaWorkflow", null)
@@ -678,8 +720,15 @@ namespace MusicEventManagementSystem.Migrations
                         .HasForeignKey("MediaWorkflowId");
                 });
 
+            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Campaign", b =>
+                {
+                    b.Navigation("Ads");
+                });
+
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.MediaWorkflow", b =>
                 {
+                    b.Navigation("Ads");
+
                     b.Navigation("Tasks");
                 });
 #pragma warning restore 612, 618

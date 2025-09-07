@@ -62,7 +62,7 @@ namespace MusicEventManagementSystem.API.Controllers
                 }
 
                 var createdCampaign = await _campaignService.CreateCampaignAsync(campaign);
-                return CreatedAtAction(nameof(GetCampaignById), new { id = createdCampaign.IdCampaign }, createdCampaign);
+                return CreatedAtAction(nameof(GetCampaignById), new { id = createdCampaign.CampaignId }, createdCampaign);
             }
             catch (Exception ex)
             {

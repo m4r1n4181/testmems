@@ -59,7 +59,7 @@ namespace MusicEventManagementSystem.API.Controllers
                 }
 
                 var createdAdType = await _adTypeService.CreateAdTypeAsync(adType);
-                return CreatedAtAction(nameof(GetAdTypeById), new { id = createdAdType.IdType }, createdAdType);
+                return CreatedAtAction(nameof(GetAdTypeById), new { id = createdAdType.AdTypeId }, createdAdType);
             }
             catch (Exception ex)
             {

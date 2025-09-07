@@ -58,7 +58,7 @@ namespace MusicEventManagementSystem.API.Controllers
                 }
 
                 var createdTask = await _mediaTaskService.CreateTaskAsync(task);
-                return CreatedAtAction(nameof(GetTaskById), new { id = createdTask.IdTask }, createdTask);
+                return CreatedAtAction(nameof(GetTaskById), new { id = createdTask.MediaTaskId }, createdTask);
             }
             catch (Exception ex)
             {

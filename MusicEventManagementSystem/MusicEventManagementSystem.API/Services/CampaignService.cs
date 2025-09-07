@@ -39,7 +39,7 @@ namespace MusicEventManagementSystem.API.Services
                 return null;
             }
 
-            existingCampaign.IdEvent = campaign.IdEvent;
+            existingCampaign.EventId = campaign.EventId;
             existingCampaign.Name = campaign.Name;
             existingCampaign.StartDate = campaign.StartDate;
             existingCampaign.EndDate = campaign.EndDate;

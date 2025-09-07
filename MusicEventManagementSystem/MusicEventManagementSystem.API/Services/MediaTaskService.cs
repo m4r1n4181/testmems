@@ -44,7 +44,7 @@ namespace MusicEventManagementSystem.API.Services
             existingTask.TaskName = task.TaskName;
             existingTask.Order = task.Order;
             existingTask.TaskStatus = task.TaskStatus;
-            existingTask.IdWorkflow = task.IdWorkflow;
+            existingTask.WorkflowId = task.WorkflowId;
 
             _mediaTaskRepository.Update(existingTask);
             await _mediaTaskRepository.SaveChangesAsync();

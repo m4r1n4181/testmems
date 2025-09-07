@@ -1,28 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MusicEventManagementSystem.API.Models;
-using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services.IService;
 
 namespace MusicEventManagementSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MediaWorkflowController : ControllerBase
+    public class AdController : ControllerBase
     {
-        private readonly IMediaWorkflowService _mediaWorkflowService;
+        private readonly IAdService _adService;
 
-        public MediaWorkflowController(IMediaWorkflowService mediaWorkflowService)
+        public AdController(IAdService adService)
         {
-            _mediaWorkflowService = mediaWorkflowService;
+            _adService = adService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MediaWorkflow>>> GetAllWorkflows()
+        public async Task<ActionResult<IEnumerable<Ad>>> GetAllAds()
         {
             try
             {
-                var workflows = await _mediaWorkflowService.GetAllWorkflowsAsync();
-                return Ok(workflows);
+                var ads = await _adService.GetAllAdsAsync();
+                return Ok(ads);
             }
             catch (Exception ex)
             {
@@ -31,16 +30,16 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<MediaWorkflow>> GetWorkflowById(int id)
+        public async Task<ActionResult<Ad>> GetAdById(int id)
         {
             try
             {
-                var workflow = await _mediaWorkflowService.GetWorkflowByIdAsync(id);
-                if (workflow == null)
+                var ad = await _adService.GetAdByIdAsync(id);
+                if (ad == null)
                 {
-                    return NotFound($"Workflow with ID {id} not found.");
+                    return NotFound($"Ad with ID {id} not found.");
                 }
-                return Ok(workflow);
+                return Ok(ad);
             }
             catch (Exception ex)
             {
@@ -49,7 +48,7 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<MediaWorkflow>> CreateWorkflow([FromBody] MediaWorkflow workflow)
+        public async Task<ActionResult<Ad>> CreateAd([FromBody] Ad ad)
         {
             try
             {
@@ -58,8 +57,8 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var createdWorkflow = await _mediaWorkflowService.CreateWorkflowAsync(workflow);
-                return CreatedAtAction(nameof(GetWorkflowById), new { id = createdWorkflow.MediaWorkflowId }, createdWorkflow);
+                var createdAd = await _adService.CreateAdAsync(ad);
+                return CreatedAtAction(nameof(GetAdById), new { id = createdAd.AdId }, createdAd);
             }
             catch (Exception ex)
             {
@@ -68,7 +67,7 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<MediaWorkflow>> UpdateWorkflow(int id, [FromBody] MediaWorkflow workflow)
+        public async Task<ActionResult<Ad>> UpdateAd(int id, [FromBody] Ad ad)
         {
             try
             {
@@ -77,13 +76,13 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var updatedWorkflow = await _mediaWorkflowService.UpdateWorkflowAsync(id, workflow);
-                if (updatedWorkflow == null)
+                var updatedAd = await _adService.UpdateAdAsync(id, ad);
+                if (updatedAd == null)
                 {
-                    return NotFound($"Workflow with ID {id} not found.");
+                    return NotFound($"Ad with ID {id} not found.");
                 }
 
-                return Ok(updatedWorkflow);
+                return Ok(updatedAd);
             }
             catch (Exception ex)
             {
@@ -92,14 +91,14 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteWorkflow(int id)
+        public async Task<ActionResult> DeleteAd(int id)
         {
             try
             {
-                var isDeleted = await _mediaWorkflowService.DeleteWorkflowAsync(id);
+                var isDeleted = await _adService.DeleteAdAsync(id);
                 if (!isDeleted)
                 {
-                    return NotFound($"Workflow with ID {id} not found.");
+                    return NotFound($"Ad with ID {id} not found.");
                 }
 
                 return NoContent();

@@ -52,11 +52,11 @@ builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
 builder.Services.AddScoped<IAdTypeRepository, AdTypeRepository>();
 builder.Services.AddScoped<IMediaWorkflowRepository, MediaWorkflowRepository>();
 builder.Services.AddScoped<IMediaTaskRepository, MediaTaskRepository>();
-/*builder.Services.AddScoped<IAdRepository, AdRepository>();
-builder.Services.AddScoped<IVersionRepository, VersionRepository>();
-builder.Services.AddScoped<IChannelRepository, ChannelRepository>();
-builder.Services.AddScoped<IIntegrationStatusRepository, IntegrationStatusRepository>();
-builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();*/
+builder.Services.AddScoped<IAdRepository, AdRepository>();
+//builder.Services.AddScoped<IVersionRepository, VersionRepository>();
+//builder.Services.AddScoped<IChannelRepository, ChannelRepository>();
+//builder.Services.AddScoped<IIntegrationStatusRepository, IntegrationStatusRepository>();
+//builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();
 
 
 // 6. Register services for Ticket-sales Subsystem
@@ -75,11 +75,11 @@ builder.Services.AddScoped<ICampaignService, CampaignService>();
 builder.Services.AddScoped<IAdTypeService, AdTypeService>();
 builder.Services.AddScoped<IMediaWorkflowService, MediaWorkflowService>();
 builder.Services.AddScoped<IMediaTaskService, MediaTaskService>();
-/*builder.Services.AddScoped<IAdService, AdService>();
-builder.Services.AddScoped<IVersionService, VersionService>();
-builder.Services.AddScoped<IChannelService, ChannelService>();
-builder.Services.AddScoped<IIntegrationStatusService, IntegrationStatusService>();
-builder.Services.AddScoped<IApprovalService, ApprovalService>();*/
+builder.Services.AddScoped<IAdService, AdService>();
+//builder.Services.AddScoped<IVersionService, VersionService>();
+//builder.Services.AddScoped<IChannelService, ChannelService>();
+//builder.Services.AddScoped<IIntegrationStatusService, IntegrationStatusService>();
+//builder.Services.AddScoped<IApprovalService, ApprovalService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
