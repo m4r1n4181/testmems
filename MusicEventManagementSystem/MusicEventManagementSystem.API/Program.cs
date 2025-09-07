@@ -54,7 +54,7 @@ builder.Services.AddScoped<IMediaWorkflowRepository, MediaWorkflowRepository>();
 builder.Services.AddScoped<IMediaTaskRepository, MediaTaskRepository>();
 builder.Services.AddScoped<IAdRepository, AdRepository>();
 builder.Services.AddScoped<IMediaVersionRepository, MediaVersionRepository>();
-//builder.Services.AddScoped<IChannelRepository, ChannelRepository>();
+builder.Services.AddScoped<IMediaChannelRepository, MediaChannelRepository>();
 //builder.Services.AddScoped<IIntegrationStatusRepository, IntegrationStatusRepository>();
 //builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();
 
@@ -77,7 +77,7 @@ builder.Services.AddScoped<IMediaWorkflowService, MediaWorkflowService>();
 builder.Services.AddScoped<IMediaTaskService, MediaTaskService>();
 builder.Services.AddScoped<IAdService, AdService>();
 builder.Services.AddScoped<IMediaVersionService, MediaVersionService>();
-//builder.Services.AddScoped<IChannelService, ChannelService>();
+builder.Services.AddScoped<IMediaChannelService, MediaChannelService>();
 //builder.Services.AddScoped<IIntegrationStatusService, IntegrationStatusService>();
 //builder.Services.AddScoped<IApprovalService, ApprovalService>();
 
