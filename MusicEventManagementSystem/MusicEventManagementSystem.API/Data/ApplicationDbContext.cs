@@ -19,6 +19,15 @@ namespace MusicEventManagementSystem.Data
         public DbSet<RecordedSale> RecordedSales { get; set; }
         public DbSet<PricingRule> PricingRules { get; set; }
 
+        // DbSets for Performer Subsystem
+        public DbSet<Performer> Performers { get; set; }
+        public DbSet<Requirement> Requirements { get; set; }
+        public DbSet<Phase> Phases { get; set; }
+        public DbSet<Negotiation> Negotiations { get; set; }
+        public DbSet<Contract> Contracts { get; set; }
+        public DbSet<Document> Documents { get; set; }
+        public DbSet<Communication> Communications { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
