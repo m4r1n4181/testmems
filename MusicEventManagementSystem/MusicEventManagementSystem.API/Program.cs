@@ -56,7 +56,7 @@ builder.Services.AddScoped<IAdRepository, AdRepository>();
 builder.Services.AddScoped<IMediaVersionRepository, MediaVersionRepository>();
 builder.Services.AddScoped<IMediaChannelRepository, MediaChannelRepository>();
 //builder.Services.AddScoped<IIntegrationStatusRepository, IntegrationStatusRepository>();
-//builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();
+builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();
 
 
 // 6. Register services for Ticket-sales Subsystem
@@ -79,7 +79,7 @@ builder.Services.AddScoped<IAdService, AdService>();
 builder.Services.AddScoped<IMediaVersionService, MediaVersionService>();
 builder.Services.AddScoped<IMediaChannelService, MediaChannelService>();
 //builder.Services.AddScoped<IIntegrationStatusService, IntegrationStatusService>();
-//builder.Services.AddScoped<IApprovalService, ApprovalService>();
+builder.Services.AddScoped<IApprovalService, ApprovalService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
