@@ -379,44 +379,6 @@ namespace MusicEventManagementSystem.Migrations
                     b.ToTable("Campaigns");
                 });
 
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.IntegrationStatus", b =>
-                {
-                    b.Property<int>("IntegrationStatusId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IntegrationStatusId"));
-
-                    b.Property<int>("AdId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ChannelId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Error")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("LastSynced")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("MediaChannelId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("PublicationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("Status")
-                        .HasColumnType("integer");
-
-                    b.HasKey("IntegrationStatusId");
-
-                    b.HasIndex("AdId");
-
-                    b.HasIndex("MediaChannelId");
-
-                    b.ToTable("IntegrationStatuses");
-                });
-
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.MediaChannel", b =>
                 {
                     b.Property<int>("MediaChannelId")
@@ -1185,25 +1147,6 @@ namespace MusicEventManagementSystem.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.IntegrationStatus", b =>
-                {
-                    b.HasOne("MusicEventManagementSystem.API.Models.Ad", "Ad")
-                        .WithMany()
-                        .HasForeignKey("AdId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MusicEventManagementSystem.API.Models.MediaChannel", "MediaChannel")
-                        .WithMany()
-                        .HasForeignKey("MediaChannelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Ad");
-
-                    b.Navigation("MediaChannel");
                 });
 
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.MediaTask", b =>
