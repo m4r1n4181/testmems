@@ -30,10 +30,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://localhost:7050")
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowCredentials()
+              .SetIsOriginAllowed(_ => true);
     });
 });
 
@@ -59,6 +60,15 @@ builder.Services.AddScoped<IInfrastructureRepository, InfrastructureRepository>(
 builder.Services.AddScoped<IStaffRepository, StaffRepository>();
 builder.Services.AddScoped<IPerformanceResourceRepository, PerformanceResourceRepository>();
 
+// Performer subsystem repositories
+builder.Services.AddScoped<IPerformerRepository, PerformerRepository>();
+builder.Services.AddScoped<IRequirementRepository, RequirementRepository>();
+builder.Services.AddScoped<IPhaseRepository, PhaseRepository>();
+builder.Services.AddScoped<INegotiationRepository, NegotiationRepository>();
+builder.Services.AddScoped<IContractRepository, ContractRepository>();
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+builder.Services.AddScoped<ICommunicationRepository, CommunicationRepository>();
+
 // 5. Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
@@ -82,6 +92,15 @@ builder.Services.AddScoped<IInfrastructureService, InfrastructureService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<IPerformanceResourceService, PerformanceResourceService>();
 
+// Performer subsystem services
+builder.Services.AddScoped<IPerformerService, PerformerService>();
+builder.Services.AddScoped<IRequirementService, RequirementService>();
+builder.Services.AddScoped<IPhaseService, PhaseService>();
+builder.Services.AddScoped<INegotiationService, NegotiationService>();
+builder.Services.AddScoped<IContractService, ContractService>();
+builder.Services.AddScoped<IDocumentService, DocumentService>();
+builder.Services.AddScoped<ICommunicationService, CommunicationService>();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -96,9 +115,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseCors("AllowReactApp"); // Move CORS before HTTPS redirection
 
-app.UseCors("AllowReactApp");
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,3 +1,4 @@
+using MusicEventManagementSystem.API.DTOs;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
@@ -23,16 +24,29 @@ namespace MusicEventManagementSystem.API.Services
             return await _performerRepository.GetByIdAsync(id);
         }
 
-        public async Task<Performer> CreatePerformerAsync(Performer performer)
+        public async Task<Performer> CreatePerformerAsync(PerformerDto performer)
         {
-            performer.CreatedAt = DateTime.UtcNow;
-            performer.UpdatedAt = DateTime.UtcNow;
-            await _performerRepository.AddAsync(performer);
+            var newPerformer = new Performer
+            {
+                Name = performer.Name,
+                Contact = performer.Contact,
+                Email = performer.Email,
+                Genre = performer.Genre,
+                Popularity = performer.Popularity,
+                TechnicalRequirements = performer.TechnicalRequirements,
+                MinPrice = performer.MinPrice,
+                MaxPrice = performer.MaxPrice,
+                AverageResponseTime = performer.AverageResponseTime,
+                Status = performer.Status,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await _performerRepository.AddAsync(newPerformer);
             await _performerRepository.SaveChangesAsync();
-            return performer;
+            return newPerformer;
         }
 
-        public async Task<Performer?> UpdatePerformerAsync(int id, Performer performer)
+       public async Task<Performer?> UpdatePerformerAsync(int id, PerformerDto performerDto)
         {
             var existingPerformer = await _performerRepository.GetByIdAsync(id);
             if (existingPerformer == null)
@@ -40,18 +54,24 @@ namespace MusicEventManagementSystem.API.Services
                 return null;
             }
 
-            existingPerformer.Name = performer.Name;
-            existingPerformer.Genre = performer.Genre;
-            existingPerformer.Description = performer.Description;
-            existingPerformer.ContactEmail = performer.ContactEmail;
-            existingPerformer.ContactPhone = performer.ContactPhone;
+            existingPerformer.Name = performerDto.Name;
+            existingPerformer.Contact = performerDto.Contact;
+            existingPerformer.Email = performerDto.Email;
+            existingPerformer.Genre = performerDto.Genre;
+            existingPerformer.Popularity = performerDto.Popularity;
+            existingPerformer.TechnicalRequirements = performerDto.TechnicalRequirements;
+            existingPerformer.MinPrice = performerDto.MinPrice;
+            existingPerformer.MaxPrice = performerDto.MaxPrice;
+            existingPerformer.AverageResponseTime = performerDto.AverageResponseTime;
+            existingPerformer.Status = performerDto.Status;
             existingPerformer.UpdatedAt = DateTime.UtcNow;
 
             _performerRepository.Update(existingPerformer);
             await _performerRepository.SaveChangesAsync();
+
             return existingPerformer;
         }
-
+        
         public async Task<bool> DeletePerformerAsync(int id)
         {
             var performer = await _performerRepository.GetByIdAsync(id);
@@ -65,4 +85,3 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
     }
-}
