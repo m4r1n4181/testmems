@@ -6,6 +6,7 @@ namespace MusicEventManagementSystem.API.DTOs
     {
         public int PerformerId { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         public string Contact { get; set; } = string.Empty;
         public string Genre { get; set; } = string.Empty;
         public int Popularity { get; set; }
@@ -20,6 +21,9 @@ namespace MusicEventManagementSystem.API.DTOs
     {
         [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
         
         [Required(ErrorMessage = "Contact is required")]
         public string Contact { get; set; } = string.Empty;
@@ -49,6 +53,8 @@ namespace MusicEventManagementSystem.API.DTOs
     public class UpdatePerformerDto
     {
         public string Name { get; set; } = string.Empty;
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
         public string Contact { get; set; } = string.Empty;
         public string Genre { get; set; } = string.Empty;
         public int Popularity { get; set; }

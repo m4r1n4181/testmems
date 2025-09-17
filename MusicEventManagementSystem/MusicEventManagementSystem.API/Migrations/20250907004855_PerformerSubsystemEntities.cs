@@ -81,26 +81,93 @@ namespace MusicEventManagementSystem.Migrations
                     table.PrimaryKey("PK_Negotiations", x => x.NegotiationId);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Performers",
-                columns: table => new
-                {
-                    PerformerId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Contact = table.Column<string>(type: "text", nullable: false),
-                    Genre = table.Column<string>(type: "text", nullable: false),
-                    Popularity = table.Column<int>(type: "integer", nullable: false),
-                    TechnicalRequirements = table.Column<string>(type: "text", nullable: false),
-                    MinPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    MaxPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    AverageResponseTime = table.Column<TimeSpan>(type: "interval", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Performers", x => x.PerformerId);
-                });
+            // Align existing Performers table (created in a previous migration) with current model
+            // 1) Rename primary key column Id -> PerformerId
+            migrationBuilder.RenameColumn(
+                name: "Id",
+                table: "Performers",
+                newName: "PerformerId");
+
+            // 2) Drop legacy columns not present in current model
+            migrationBuilder.DropColumn(
+                name: "Description",
+                table: "Performers");
+            migrationBuilder.DropColumn(
+                name: "ContactEmail",
+                table: "Performers");
+            migrationBuilder.DropColumn(
+                name: "ContactPhone",
+                table: "Performers");
+            migrationBuilder.DropColumn(
+                name: "CreatedAt",
+                table: "Performers");
+            migrationBuilder.DropColumn(
+                name: "DeletedAt",
+                table: "Performers");
+
+            // 3) Add new columns required by current model
+            migrationBuilder.AddColumn<string>(
+                name: "Email",
+                table: "Performers",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<string>(
+                name: "Contact",
+                table: "Performers",
+                type: "text",
+                nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "Popularity",
+                table: "Performers",
+                type: "integer",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<string>(
+                name: "TechnicalRequirements",
+                table: "Performers",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<decimal>(
+                name: "MinPrice",
+                table: "Performers",
+                type: "numeric",
+                nullable: false,
+                defaultValue: 0m);
+
+            migrationBuilder.AddColumn<decimal>(
+                name: "MaxPrice",
+                table: "Performers",
+                type: "numeric",
+                nullable: false,
+                defaultValue: 0m);
+
+            migrationBuilder.AddColumn<TimeSpan>(
+                name: "AverageResponseTime",
+                table: "Performers",
+                type: "interval",
+                nullable: false,
+                defaultValue: new TimeSpan(0, 0, 0));
+
+            migrationBuilder.AddColumn<string>(
+                name: "Status",
+                table: "Performers",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
+
+            // 4) Remove defaults after backfilling
+            migrationBuilder.Sql("ALTER TABLE \"Performers\" ALTER COLUMN \"Email\" DROP DEFAULT;");
+            migrationBuilder.Sql("ALTER TABLE \"Performers\" ALTER COLUMN \"TechnicalRequirements\" DROP DEFAULT;");
+            migrationBuilder.Sql("ALTER TABLE \"Performers\" ALTER COLUMN \"MinPrice\" DROP DEFAULT;");
+            migrationBuilder.Sql("ALTER TABLE \"Performers\" ALTER COLUMN \"MaxPrice\" DROP DEFAULT;");
+            migrationBuilder.Sql("ALTER TABLE \"Performers\" ALTER COLUMN \"AverageResponseTime\" DROP DEFAULT;");
+            migrationBuilder.Sql("ALTER TABLE \"Performers\" ALTER COLUMN \"Status\" DROP DEFAULT;");
 
             migrationBuilder.CreateTable(
                 name: "Phases",

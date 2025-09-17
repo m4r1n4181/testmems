@@ -9,6 +9,7 @@ namespace MusicEventManagementSystem.API.Repositories
     {
         public PerformerRepository(ApplicationDbContext context) : base(context)
         {
+        }
 
         public async Task<Performer?> GetByNameAsync(string name)
         {
@@ -18,7 +19,6 @@ namespace MusicEventManagementSystem.API.Repositories
         public async Task<IEnumerable<Performer>> GetByGenreAsync(string genre)
         {
             return await _dbSet.Where(p => p.Genre.Contains(genre)).ToListAsync();
-        }
         }
     }
 }
