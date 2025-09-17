@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MusicEventManagementSystem.API.Models;
+using MusicEventManagementSystem.API.DTOs;
 using MusicEventManagementSystem.API.Services.IService;
 
 namespace MusicEventManagementSystem.API.Controllers
@@ -16,7 +17,7 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Performer>>> GetAllPerformers()
+        public async Task<ActionResult<IEnumerable<PerformerDto>>> GetAllPerformers()
         {
             try
             {
@@ -30,7 +31,7 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Performer>> GetPerformerById(int id)
+        public async Task<ActionResult<PerformerDto>> GetPerformerById(int id)
         {
             try
             {
@@ -48,7 +49,7 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Performer>> CreatePerformer([FromBody] Performer performer)
+        public async Task<ActionResult<PerformerDto>> CreatePerformer([FromBody] PerformerDto performer)
         {
             try
             {
@@ -58,7 +59,7 @@ namespace MusicEventManagementSystem.API.Controllers
                 }
 
                 var createdPerformer = await _performerService.CreatePerformerAsync(performer);
-                return CreatedAtAction(nameof(GetPerformerById), new { id = createdPerformer.Id }, createdPerformer);
+                return CreatedAtAction(nameof(GetPerformerById), new { id = createdPerformer.PerformerId }, createdPerformer);
             }
             catch (Exception ex)
             {
@@ -67,7 +68,7 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Performer>> UpdatePerformer(int id, [FromBody] Performer performer)
+        public async Task<ActionResult<PerformerDto>> UpdatePerformer(int id, [FromBody] PerformerDto performer)
         {
             try
             {

@@ -39,7 +39,6 @@ namespace MusicEventManagementSystem.Data
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<Staff> Staff { get; set; }
         public DbSet<Service> Services { get; set; }
-        public DbSet<Performer> Performers { get; set; }
         public DbSet<Infrastructure> Infrastructures { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
