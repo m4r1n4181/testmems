@@ -8,5 +8,12 @@
         public int Capacity { get; set; }
         public decimal BasePrice { get; set; }
         public string? Position { get; set; }
+
+        // Navigation property - Zone - (1,1) -> Segment
+        public int SegmentId { get; set; }
+        public Segment Segment { get; set; }
+
+        // Navigation property - Zone - (1,N) -> TicketType
+        public ICollection<TicketType> TicketTypes { get; set; } = new List<TicketType>();
     }
 }

@@ -11,5 +11,11 @@
         public string? ApplicationCondition { get; set; }
         public decimal DiscountValue { get; set; }
         public int TicketLimit { get; set; }
+
+        // Navigation property - SpecialOffer - (0,N) -> TicketType
+        public ICollection<TicketType> TicketTypes { get; set; } = new List<TicketType>();
+
+        // Navigation property - SpecialOffer - (0,N) -> RecordedSale
+        public ICollection<RecordedSale> RecordedSales { get; set; } = new List<RecordedSale>();
     }
 }

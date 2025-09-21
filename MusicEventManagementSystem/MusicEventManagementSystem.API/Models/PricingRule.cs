@@ -14,5 +14,11 @@
         public decimal EarlyBirdPercentage { get; set; }
         public string? DynamicCondition { get; set; }
         public decimal Modifier { get; set; }
+
+        // Navigation property - PricingRule - (0,N) -> TicketType
+        public ICollection<TicketType> TicketTypes { get; set; } = new List<TicketType>();
+
+        // Navigation property - PricingRule - (0,N) -> Event
+        // public ICollection<Event> Events { get; set; } = new List<Event>();
     }
 }
