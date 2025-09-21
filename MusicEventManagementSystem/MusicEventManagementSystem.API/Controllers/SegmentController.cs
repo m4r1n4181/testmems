@@ -18,6 +18,7 @@ namespace MusicEventManagementSystem.API.Controllers
             _segmentService = segmentService;
         }
 
+        // GET: api/segment
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Segment>>> GetAllSegments()
         {
@@ -32,6 +33,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // GET: api/segment/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Segment>> GetSegmentById(int id)
         {
@@ -52,6 +54,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // POST: api/segment
         [HttpPost]
         public async Task<ActionResult<Segment>> CreateSegment([FromBody] Segment segment)
         {
@@ -72,6 +75,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // PUT: api/segment/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult<Segment>> UpdateSegment(int id, [FromBody] Segment segment)
         {
@@ -97,6 +101,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // DELETE: api/segment/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteSegment(int id)
         {
@@ -110,6 +115,66 @@ namespace MusicEventManagementSystem.API.Controllers
                 }
 
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/segment/venue/{venueId}
+        [HttpGet("venue/{venueId}")]
+        public async Task<ActionResult<IEnumerable<Segment>>> GetSegmentsByVenueId(int venueId)
+        {
+            try
+            {
+                var segments = await _segmentService.GetByVenueIdAsync(venueId);
+                return Ok(segments);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/segment/type/{segmentType}
+        [HttpGet("type/{segmentType}")]
+        public async Task<ActionResult<IEnumerable<Segment>>> GetSegmentsByType(string segmentType)
+        {
+            try
+            {
+                var segments = await _segmentService.GetBySegmentTypeAsync(segmentType);
+                return Ok(segments);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/segment/{id}/zones
+        [HttpGet("{id}/zones")]
+        public async Task<ActionResult<IEnumerable<Zone>>> GetZonesBySegmentId(int id)
+        {
+            try
+            {
+                var zones = await _segmentService.GetZonesAsync(id);
+                return Ok(zones);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/segment/{id}/capacity
+        [HttpGet("{id}/capacity")]
+        public async Task<ActionResult<int>> CalculateSegmentTotalCapacity(int id)
+        {
+            try
+            {
+                var totalCapacity = await _segmentService.CalculateTotalCapacityAsync(id);
+                return Ok(totalCapacity);
             }
             catch (Exception ex)
             {
