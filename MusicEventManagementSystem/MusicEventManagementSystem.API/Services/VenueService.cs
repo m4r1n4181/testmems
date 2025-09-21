@@ -64,5 +64,26 @@ namespace MusicEventManagementSystem.API.Services
             await _venueRepository.SaveChangesAsync();
             return true;
         }
+
+        public async Task<IEnumerable<Venue>> GetByCityAsync(string city)
+        {
+            return await _venueRepository.GetByCityAsync(city);
+        }
+
+        public Task<IEnumerable<Venue>> GetByCapacityRangeAsync(int min, int max)
+        {
+            return _venueRepository.GetByCapacityRangeAsync(min, max);
+        }
+
+        public async Task<IEnumerable<Segment>> GetSegmentsAsync(int venueId)
+        {
+            return await _venueRepository.GetSegmentsAsync(venueId);
+        }
+
+        public async Task<int> CalculateTotalCapacityAsync(int venueId)
+        {
+            var segments = await _venueRepository.GetSegmentsAsync(venueId);
+            return segments.Sum(s => s.Capacity);
+        }
     }
 }
