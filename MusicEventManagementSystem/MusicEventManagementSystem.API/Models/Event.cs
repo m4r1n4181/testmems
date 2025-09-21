@@ -16,7 +16,11 @@ namespace MusicEventManagementSystem.API.Models
         public DateTime UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
 
+        // Navigation property - Event - (1,N) -> TicketType
+        public ICollection<TicketType> TicketTypes { get; set; } = new List<TicketType>();
 
+        // Navigation property - Event - (1,N) -> PricingRule
+        public ICollection<PricingRule> PricingRules { get; set; } = new List<PricingRule>();
     }
 
 }
