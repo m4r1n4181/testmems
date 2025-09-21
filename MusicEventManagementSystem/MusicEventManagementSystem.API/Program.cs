@@ -30,10 +30,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://localhost:7050")
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowCredentials()
+              .SetIsOriginAllowed(_ => true);
     });
 });
 
@@ -46,6 +47,27 @@ builder.Services.AddScoped<ITicketTypeRepository, TicketTypeRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<IRecodedSaleRepository, RecordedSaleRepository>();
 builder.Services.AddScoped<IPricingRuleRepository, PricingRuleRepository>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
+builder.Services.AddScoped<IPerformanceRepository, PerformanceRepository>();
+builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<IWorkTaskRepository, WorkTaskRepository>();
+builder.Services.AddScoped<IPerformerRepository, PerformerRepository>();
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+builder.Services.AddScoped<IInfrastructureRepository, InfrastructureRepository>();
+builder.Services.AddScoped<IStaffRepository, StaffRepository>();
+builder.Services.AddScoped<IPerformanceResourceRepository, PerformanceResourceRepository>();
+
+// Performer subsystem repositories
+builder.Services.AddScoped<IPerformerRepository, PerformerRepository>();
+builder.Services.AddScoped<IRequirementRepository, RequirementRepository>();
+builder.Services.AddScoped<IPhaseRepository, PhaseRepository>();
+builder.Services.AddScoped<INegotiationRepository, NegotiationRepository>();
+builder.Services.AddScoped<IContractRepository, ContractRepository>();
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+builder.Services.AddScoped<ICommunicationRepository, CommunicationRepository>();
 
 // 5. Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -57,6 +79,27 @@ builder.Services.AddScoped<ITicketTypeService, TicketTypeService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IRecordedSaleService, RecordedSaleService>();
 builder.Services.AddScoped<IPricingRuleService, PricingRuleService>();
+builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IResourceService, ResourceService>();
+builder.Services.AddScoped<IPerformanceService, PerformanceService>();
+builder.Services.AddScoped<IEquipmentService, EquipmentService>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IWorkTaskService, WorkTaskService>();
+builder.Services.AddScoped<IPerformerService, PerformerService>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IInfrastructureService, InfrastructureService>();
+builder.Services.AddScoped<IStaffService, StaffService>();
+builder.Services.AddScoped<IPerformanceResourceService, PerformanceResourceService>();
+
+// Performer subsystem services
+builder.Services.AddScoped<IPerformerService, PerformerService>();
+builder.Services.AddScoped<IRequirementService, RequirementService>();
+builder.Services.AddScoped<IPhaseService, PhaseService>();
+builder.Services.AddScoped<INegotiationService, NegotiationService>();
+builder.Services.AddScoped<IContractService, ContractService>();
+builder.Services.AddScoped<IDocumentService, DocumentService>();
+builder.Services.AddScoped<ICommunicationService, CommunicationService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -72,9 +115,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseCors("AllowReactApp"); // Move CORS before HTTPS redirection
 
-app.UseCors("AllowReactApp");
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
