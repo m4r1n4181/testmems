@@ -1,4 +1,5 @@
 ﻿using MusicEventManagementSystem.Models.Auth;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MusicEventManagementSystem.API.Models
 {
@@ -11,8 +12,8 @@ namespace MusicEventManagementSystem.API.Models
         public string? TransactionStatus { get; set; }
 
         // Navigation property - RecordedSale - (0,N) -> Ticket
-        public int ClientId { get; set; }
-        public ApplicationUser Client { get; set; }
+        public string ApplicationUserId { get; set; }
+        public ApplicationUser ApplicationUser { get; set; }
 
         // Navigation property - RecordedSale - (1,N) -> Ticket
         public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();

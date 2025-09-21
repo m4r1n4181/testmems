@@ -11,8 +11,8 @@
         public int ZoneId { get; set; }
         public Zone Zone { get; set; }
 
-        // public int EventId { get; set; }
-        // public Event Event { get; set; }
+        public int EventId { get; set; }
+        public Event Event { get; set; }
 
         // Navigation property - TicketType - (1,N) -> Ticket
         public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();

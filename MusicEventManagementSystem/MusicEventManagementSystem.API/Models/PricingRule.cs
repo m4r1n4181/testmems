@@ -19,6 +19,6 @@
         public ICollection<TicketType> TicketTypes { get; set; } = new List<TicketType>();
 
         // Navigation property - PricingRule - (0,N) -> Event
-        // public ICollection<Event> Events { get; set; } = new List<Event>();
+        public ICollection<Event> Events { get; set; } = new List<Event>();
     }
 }
