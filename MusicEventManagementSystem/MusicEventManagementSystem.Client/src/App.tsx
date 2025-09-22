@@ -1,18 +1,58 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from "./frontend/shared/components/Layout";
-import Dashboard from "./frontend/ticket-sales/pages/Dashboard";
-import Venues from "./frontend/ticket-sales/pages/Venues";
 import Login from "./frontend/auth/pages/Login";
 import Register from "./frontend/auth/pages/Register";
 import ProtectedRoute from "./frontend/shared/components/ProtectedRoute";
-import Zones from './frontend/ticket-sales/pages/Zones';
-import Segments from './frontend/ticket-sales/pages/Segments';
-import TicketTypes from './frontend/ticket-sales/pages/TicketTypes';
-import Tickets from './frontend/ticket-sales/pages/Tickets';
-import RecordedSales from './frontend/ticket-sales/pages/RecordedSales';
-import PricingRules from './frontend/ticket-sales/pages/PricingRules';
-import { Speech } from 'lucide-react';
-import SpecialOffers from './frontend/ticket-sales/pages/SpecialOffer';
+
+// Ticket Sales imports
+import TicketSalesDashboard from "./frontend/ticket-sales/pages/Dashboard";
+import TicketSalesVenues from "./frontend/ticket-sales/pages/Venues";
+import TicketSalesZones from './frontend/ticket-sales/pages/Zones';
+import TicketSalesSegments from './frontend/ticket-sales/pages/Segments';
+import TicketSalesTicketTypes from './frontend/ticket-sales/pages/TicketTypes';
+import TicketSalesTickets from './frontend/ticket-sales/pages/Tickets';
+import TicketSalesRecordedSales from './frontend/ticket-sales/pages/RecordedSales';
+import TicketSalesPricingRules from './frontend/ticket-sales/pages/PricingRules';
+import TicketSalesSpecialOffers from './frontend/ticket-sales/pages/SpecialOffer';
+
+// Event Organization imports
+import EventOrgDashboard from "./frontend/event-organization/pages/Dashboard";
+import EventOrgEvents from './frontend/event-organization/pages/Events';
+import EventOrgPerformances from './frontend/event-organization/pages/Performances';
+import EventOrgWorkTasks from './frontend/event-organization/pages/WorkTasks';
+import EventOrgCalendar from './frontend/event-organization/pages/Calendar';
+import EventOrgResources from './frontend/event-organization/pages/Resources';
+import EventOrgAnalytics from './frontend/event-organization/pages/Analytics';
+
+// Helper function to get user's department
+const getUserDepartment = (): number | null => {
+  const userStr = localStorage.getItem('user');
+  if (!userStr) return null;
+  try {
+    const user = JSON.parse(userStr);
+    return user.department;
+  } catch {
+    return null;
+  }
+};
+
+// Component to redirect to appropriate dashboard based on department
+const DepartmentRedirect = () => {
+  const department = getUserDepartment();
+  
+  switch (department) {
+    case 1: // TicketSales
+      return <Navigate to="/ticket-sales/dashboard" replace />;
+    case 2: // EventOrganization
+      return <Navigate to="/event-organization/dashboard" replace />;
+    case 3: // ArtistCommunication
+      return <Navigate to="/artist-communication/dashboard" replace />;
+    case 4: // MediaCampaign
+      return <Navigate to="/media-campaign/dashboard" replace />;
+    default:
+      return <Navigate to="/login" replace />;
+  }
+};
 
 function App() {
   return (
@@ -22,113 +62,184 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
+        {/* Department redirect route */}
+        {/* <Route path="/dashboard" element={<DepartmentRedirect />} /> */}
+
         {/* Protected routes - Ticket Sales*/}
-        <Route path="/dashboard" 
+        <Route path="/ticket-sales/dashboard" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <Dashboard />
+                <TicketSalesDashboard />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/venues" 
+          path="/ticket-sales/venues" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <Venues />
+                <TicketSalesVenues />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/segments" 
+          path="/ticket-sales/segments" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <Segments />
+                <TicketSalesSegments />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/zones" 
+          path="/ticket-sales/zones" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <Zones />
+                <TicketSalesZones />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/ticket-types" 
+          path="/ticket-sales/ticket-types" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <TicketTypes />
+                <TicketSalesTicketTypes />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/tickets" 
+          path="/ticket-sales/tickets" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <Tickets />
+                <TicketSalesTickets />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/pricing-rules" 
+          path="/ticket-sales/pricing-rules" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <PricingRules />
+                <TicketSalesPricingRules />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/special-offers" 
+          path="/ticket-sales/special-offers" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <SpecialOffers />
+                <TicketSalesSpecialOffers />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/recorded-sales" 
+          path="/ticket-sales/recorded-sales" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <RecordedSales />
+                <TicketSalesRecordedSales />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         {/* Protected routes - Event Management*/}
-        
-        {/* Redirect root to dashboard */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/event-organization/dashboard" 
+          element={
+            <ProtectedRoute allowedDepartments={[2]}>
+              <Layout>
+                <EventOrgDashboard />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
 
+        <Route path="/event-organization/events" 
+          element={
+            <ProtectedRoute allowedDepartments={[2]}>
+              <Layout>
+                <EventOrgEvents />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route path="/event-organization/performances" 
+          element={
+            <ProtectedRoute allowedDepartments={[2]}>
+              <Layout>
+                <EventOrgPerformances />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route path="/event-organization/work-tasks" 
+          element={
+            <ProtectedRoute allowedDepartments={[2]}>
+              <Layout>
+                <EventOrgWorkTasks />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route path="/event-organization/calendar" 
+          element={
+            <ProtectedRoute allowedDepartments={[2]}>
+              <Layout>
+                <EventOrgCalendar />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route path="/event-organization/resources" 
+          element={
+            <ProtectedRoute allowedDepartments={[2]}>
+              <Layout>
+                <EventOrgResources />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route path="/event-organization/analytics" 
+          element={
+            <ProtectedRoute allowedDepartments={[2]}>
+              <Layout>
+                <EventOrgAnalytics />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Redirect root to dashboard */}
+        <Route path="/" element={<DepartmentRedirect />} />
         
-        {/* Catch all - redirect to dashboard */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        {/* Catch all - redirect to appropriate dashboard */}
+        <Route path="*" element={<DepartmentRedirect />} />
       </Routes>
     </Router>
   );
