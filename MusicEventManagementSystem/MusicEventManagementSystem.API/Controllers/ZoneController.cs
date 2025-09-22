@@ -18,6 +18,7 @@ namespace MusicEventManagementSystem.API.Controllers
             _zoneService = zoneService;
         }
 
+        // GET: api/zone
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Zone>>> GetAllZones()
         {
@@ -32,6 +33,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // GET: api/zone/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Zone>> GetZoneById(int id)
         {
@@ -52,6 +54,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // POST: api/zone
         [HttpPost]
         public async Task<ActionResult<Zone>> CreateZone([FromBody] Zone zone)
         {
@@ -72,6 +75,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // PUT: api/zone/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult<Zone>> UpdateZone(int id, [FromBody] Zone zone)
         {
@@ -97,6 +101,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // DELETE: api/zone/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteZone(int id)
         {
@@ -110,6 +115,66 @@ namespace MusicEventManagementSystem.API.Controllers
                 }
 
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/zone/segment/{segmentId}
+        [HttpGet("segment/{segmentId}")]
+        public async Task<ActionResult<IEnumerable<Zone>>> GetZonesBySegmentId(int segmentId)
+        {
+            try
+            {
+                var zones = await _zoneService.GetBySegmentIdAsync(segmentId);
+                return Ok(zones);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/zone/price?min=&max=
+        [HttpGet("price")]
+        public async Task<ActionResult<IEnumerable<Zone>>> GetZonesByPriceRange([FromQuery] decimal min, [FromQuery] decimal max)
+        {
+            try
+            {
+                var zones = await _zoneService.GetByPriceRangeAsync(min, max);
+                return Ok(zones);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/zone/position/{position}
+        [HttpGet("position/{position}")]
+        public async Task<ActionResult<IEnumerable<Zone>>> GetZonesByPosition(string position)
+        {
+            try
+            {
+                var zones = await _zoneService.GetByPositionAsync(position);
+                return Ok(zones);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/zone/{id}/tickettypes
+        [HttpGet("{id}/tickettypes")]
+        public async Task<ActionResult<IEnumerable<TicketType>>> GetTicketTypesByZoneId(int id)
+        {
+            try
+            {
+                var ticketTypes = await _zoneService.GetTicketTypesAsync(id);
+                return Ok(ticketTypes);
             }
             catch (Exception ex)
             {

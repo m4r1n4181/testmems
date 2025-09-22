@@ -9,5 +9,10 @@ namespace MusicEventManagementSystem.API.Services.IService
         Task<Zone> CreateZoneAsync(Zone zone);
         Task<Zone?> UpdateZoneAsync(int id, Zone zone);
         Task<bool> DeleteZoneAsync(int id);
+
+        Task<IEnumerable<Zone>> GetBySegmentIdAsync(int segmentId);
+        Task<IEnumerable<Zone>> GetByPriceRangeAsync(decimal min, decimal max);
+        Task<IEnumerable<Zone>> GetByPositionAsync(string position);
+        Task<IEnumerable<TicketType>> GetTicketTypesAsync(int zoneId);
     }
 }
