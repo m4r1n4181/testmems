@@ -62,5 +62,81 @@ namespace MusicEventManagementSystem.API.Services
             await _ticketTypeRepository.SaveChangesAsync();
             return true;
         }
+
+        public async Task<IEnumerable<TicketType>> GetByZoneIdAsync(int zoneId)
+        {
+            return await _ticketTypeRepository.GetByZoneIdAsync(zoneId);
+        }
+
+        public async Task<IEnumerable<TicketType>> GetByEventIdAsync(int eventId)
+        {
+            return await _ticketTypeRepository.GetByEventIdAsync(eventId);
+        }
+
+        public async Task<IEnumerable<TicketType>> GetByStatusAsync(string status)
+        {
+            return await _ticketTypeRepository.GetByStatusAsync(status);
+        }
+
+        public async Task<IEnumerable<TicketType>> GetAvailableTicketTypesAsync()
+        {
+            return await _ticketTypeRepository.GetAvailableTicketTypesAsync();
+        }
+
+        public async Task<bool> UpdateAvailableQuantityAsync(int id, int quantity)
+        {
+            if (quantity < 0)
+            {
+                return false;
+            }
+
+            return await _ticketTypeRepository.UpdateAvailableQuantityAsync(id, quantity);
+        }
+
+        public async Task<IEnumerable<TicketType>> GetByZoneAndEventAsync(int zoneId, int eventId)
+        {
+            return await _ticketTypeRepository.GetByZoneAndEventAsync(zoneId, eventId);
+        }
+
+        public async Task<int> GetTotalAvailableQuantityByEventAsync(int eventId)
+        {
+            return await _ticketTypeRepository.GetTotalAvailableQuantityByEventAsync(eventId);
+        }
+
+        public async Task<bool> ReserveTicketsAsync(int ticketTypeId, int quantity)
+        {
+            if (quantity <= 0)
+            {
+                return false;
+            }
+
+            var existingTicketType = await _ticketTypeRepository.GetByIdAsync(ticketTypeId);
+
+            if (existingTicketType == null || existingTicketType.AvailableQuantity < quantity)
+            {
+                return false;
+            }
+
+            var newQuantity = existingTicketType.AvailableQuantity - quantity;
+            return await _ticketTypeRepository.UpdateAvailableQuantityAsync(ticketTypeId, newQuantity);
+        }
+
+        public async Task<bool> ReleaseTicketsAsync(int ticketTypeId, int quantity)
+        {
+            if (quantity <= 0)
+            {
+                return false;
+            }
+
+            var existingTicketType = await _ticketTypeRepository.GetByIdAsync(ticketTypeId);
+
+            if (existingTicketType == null)
+            {
+                return false;
+            }
+
+            var newQuantity = existingTicketType.AvailableQuantity + quantity;
+            return await _ticketTypeRepository.UpdateAvailableQuantityAsync(ticketTypeId, newQuantity);
+        }
     }
 }
