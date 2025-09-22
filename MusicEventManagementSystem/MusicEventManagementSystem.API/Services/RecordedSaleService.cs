@@ -25,6 +25,8 @@ namespace MusicEventManagementSystem.API.Services
 
         public async Task<RecordedSale> CreateRecordedSaleAsync(RecordedSale recordedSale)
         {
+            recordedSale.SaleDate = DateTime.UtcNow;
+
             await _recordedSaleRepository.AddAsync(recordedSale);
             await _recordedSaleRepository.SaveChangesAsync();
             return recordedSale;
@@ -61,6 +63,41 @@ namespace MusicEventManagementSystem.API.Services
             _recordedSaleRepository.Delete(recordedSale);
             await _recordedSaleRepository.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<RecordedSale>> GetSalesByUserAsync(string userId)
+        {
+            return await _recordedSaleRepository.GetSalesByUserAsync(userId);
+        }
+
+        public async Task<IEnumerable<RecordedSale>> GetSalesByDateRangeAsync(DateTime fromDate, DateTime toDate)
+        {
+            return await _recordedSaleRepository.GetSalesByDateRangeAsync(fromDate, toDate);
+        }
+
+        public async Task<IEnumerable<RecordedSale>> GetSalesByStatusAsync(string status)
+        {
+            return await _recordedSaleRepository.GetSalesByStatusAsync(status);
+        }
+
+        public async Task<IEnumerable<RecordedSale>> GetSalesByPaymentMethodAsync(string paymentMethod)
+        {
+            return await _recordedSaleRepository.GetSalesByPaymentMethodAsync(paymentMethod);
+        }
+
+        public async Task<decimal> GetTotalRevenueAsync()
+        {
+            return await _recordedSaleRepository.GetTotalRevenueAsync();
+        }
+
+        public async Task<decimal> GetRevenueByDateRangeAsync(DateTime from, DateTime to)
+        {
+            return await _recordedSaleRepository.GetRevenueByDateRangeAsync(from, to);
+        }
+
+        public async Task<int> GetSalesCountByStatusAsync(string status)
+        {
+            return await _recordedSaleRepository.GetSalesCountByStatusAsync(status);
         }
     }
 }

@@ -18,6 +18,7 @@ namespace MusicEventManagementSystem.API.Controllers
             _specialOfferService = specialOfferService;
         }
 
+        // GET: api/specialoffer
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SpecialOffer>>> GetAllSpecialOffers()
         {
@@ -32,6 +33,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // GET: api/specialoffer/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<SpecialOffer>> GetSpecialOfferById(int id)
         {
@@ -52,6 +54,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // POST: api/specialoffer
         [HttpPost]
         public async Task<ActionResult<SpecialOffer>> CreateSpecialOffer([FromBody] SpecialOffer specialOffer)
         {
@@ -72,6 +75,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // PUT: api/specialoffer/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult<SpecialOffer>> UpdateSpecialOffer(int id, [FromBody] SpecialOffer specialOffer)
         {
@@ -97,6 +101,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // DELETE: api/specialoffer/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteSpecialOffer(int id)
         {
@@ -110,6 +115,123 @@ namespace MusicEventManagementSystem.API.Controllers
                 }
 
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/specialoffer/active?date=
+        [HttpGet("active")]
+        public async Task<ActionResult<IEnumerable<SpecialOffer>>> GetActiveOffers([FromQuery] DateTime? date = null)
+        {
+            try
+            {
+                var checkDate = date ?? DateTime.Now;
+                var activeOffers = await _specialOfferService.GetActiveOffersAsync(checkDate);
+                return Ok(activeOffers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/specialoffer/by-type/{offerType}
+        [HttpGet("by-type/{offerType}")]
+        public async Task<ActionResult<IEnumerable<SpecialOffer>>> GetByOfferType(string offerType)
+        {
+            try
+            {
+                var offers = await _specialOfferService.GetByOfferTypeAsync(offerType);
+                return Ok(offers);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/specialoffer/by-date-range?start=&end=
+        [HttpGet("by-date-range")]
+        public async Task<ActionResult<IEnumerable<SpecialOffer>>> GetByDateRange([FromQuery] DateTime start, [FromQuery] DateTime end)
+        {
+            try
+            {
+                var offers = await _specialOfferService.GetByDateRangeAsync(start, end);
+                return Ok(offers);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/specialoffer/by-ticket-type/{ticketTypeId}
+        [HttpGet("by-ticket-type/{ticketTypeId}")]
+        public async Task<ActionResult<IEnumerable<SpecialOffer>>> GetByTicketType(int ticketTypeId)
+        {
+            try
+            {
+                var offers = await _specialOfferService.GetByTicketTypeAsync(ticketTypeId);
+                return Ok(offers);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/specialoffer/{id}/is-valid
+        [HttpGet("{id}/is-valid")]
+        public async Task<ActionResult<object>> IsOfferValid(int id, [FromQuery] DateTime? checkDate = null)
+        {
+            try
+            {
+                var dateToCheck = checkDate ?? DateTime.Now;
+                var isValid = await _specialOfferService.IsOfferValidAsync(id, dateToCheck);
+
+                return Ok(new
+                {
+                    SpecialOfferId = id,
+                    CheckDate = dateToCheck,
+                    IsValid = isValid
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/specialoffer/ticket-type/{ticketTypeId}/has-active-offer
+        [HttpGet("ticket-type/{ticketTypeId}/has-active-offer")]
+        public async Task<ActionResult<object>> HasActiveOfferForTicketType(int ticketTypeId, [FromQuery] DateTime? checkDate = null)
+        {
+            try
+            {
+                var dateToCheck = checkDate ?? DateTime.Now;
+                var hasActiveOffer = await _specialOfferService.HasActiveOfferForTicketTypeAsync(ticketTypeId, dateToCheck);
+
+                return Ok(new
+                {
+                    TicketTypeId = ticketTypeId,
+                    CheckDate = dateToCheck,
+                    HasActiveOffer = hasActiveOffer
+                });
             }
             catch (Exception ex)
             {

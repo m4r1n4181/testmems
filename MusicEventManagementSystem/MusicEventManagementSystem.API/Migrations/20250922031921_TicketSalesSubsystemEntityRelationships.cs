@@ -58,38 +58,32 @@ namespace MusicEventManagementSystem.Migrations
                 nullable: false,
                 defaultValue: "");
 
-            migrationBuilder.AddColumn<int>(
-                name: "PricingRuleId",
-                table: "Events",
-                type: "integer",
-                nullable: true);
-
             migrationBuilder.CreateTable(
-                name: "PricingRuleTicketType",
+                name: "EventPricingRules",
                 columns: table => new
                 {
-                    PricingRulesPricingRuleId = table.Column<int>(type: "integer", nullable: false),
-                    TicketTypesTicketTypeId = table.Column<int>(type: "integer", nullable: false)
+                    EventsId = table.Column<int>(type: "integer", nullable: false),
+                    PricingRulesPricingRuleId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PricingRuleTicketType", x => new { x.PricingRulesPricingRuleId, x.TicketTypesTicketTypeId });
+                    table.PrimaryKey("PK_EventPricingRules", x => new { x.EventsId, x.PricingRulesPricingRuleId });
                     table.ForeignKey(
-                        name: "FK_PricingRuleTicketType_PricingRules_PricingRulesPricingRuleId",
+                        name: "FK_EventPricingRules_Events_EventsId",
+                        column: x => x.EventsId,
+                        principalTable: "Events",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_EventPricingRules_PricingRules_PricingRulesPricingRuleId",
                         column: x => x.PricingRulesPricingRuleId,
                         principalTable: "PricingRules",
                         principalColumn: "PricingRuleId",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PricingRuleTicketType_TicketTypes_TicketTypesTicketTypeId",
-                        column: x => x.TicketTypesTicketTypeId,
-                        principalTable: "TicketTypes",
-                        principalColumn: "TicketTypeId",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "RecordedSaleSpecialOffer",
+                name: "RecordedSaleSpecialOffers",
                 columns: table => new
                 {
                     RecordedSalesRecordedSaleId = table.Column<int>(type: "integer", nullable: false),
@@ -97,15 +91,15 @@ namespace MusicEventManagementSystem.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RecordedSaleSpecialOffer", x => new { x.RecordedSalesRecordedSaleId, x.SpecialOffersSpecialOfferId });
+                    table.PrimaryKey("PK_RecordedSaleSpecialOffers", x => new { x.RecordedSalesRecordedSaleId, x.SpecialOffersSpecialOfferId });
                     table.ForeignKey(
-                        name: "FK_RecordedSaleSpecialOffer_RecordedSales_RecordedSalesRecorde~",
+                        name: "FK_RecordedSaleSpecialOffers_RecordedSales_RecordedSalesRecord~",
                         column: x => x.RecordedSalesRecordedSaleId,
                         principalTable: "RecordedSales",
                         principalColumn: "RecordedSaleId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_RecordedSaleSpecialOffer_SpecialOffers_SpecialOffersSpecial~",
+                        name: "FK_RecordedSaleSpecialOffers_SpecialOffers_SpecialOffersSpecia~",
                         column: x => x.SpecialOffersSpecialOfferId,
                         principalTable: "SpecialOffers",
                         principalColumn: "SpecialOfferId",
@@ -113,7 +107,31 @@ namespace MusicEventManagementSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SpecialOfferTicketType",
+                name: "TicketTypePricingRules",
+                columns: table => new
+                {
+                    PricingRulesPricingRuleId = table.Column<int>(type: "integer", nullable: false),
+                    TicketTypesTicketTypeId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TicketTypePricingRules", x => new { x.PricingRulesPricingRuleId, x.TicketTypesTicketTypeId });
+                    table.ForeignKey(
+                        name: "FK_TicketTypePricingRules_PricingRules_PricingRulesPricingRule~",
+                        column: x => x.PricingRulesPricingRuleId,
+                        principalTable: "PricingRules",
+                        principalColumn: "PricingRuleId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TicketTypePricingRules_TicketTypes_TicketTypesTicketTypeId",
+                        column: x => x.TicketTypesTicketTypeId,
+                        principalTable: "TicketTypes",
+                        principalColumn: "TicketTypeId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TicketTypeSpecialOffers",
                 columns: table => new
                 {
                     SpecialOffersSpecialOfferId = table.Column<int>(type: "integer", nullable: false),
@@ -121,15 +139,15 @@ namespace MusicEventManagementSystem.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SpecialOfferTicketType", x => new { x.SpecialOffersSpecialOfferId, x.TicketTypesTicketTypeId });
+                    table.PrimaryKey("PK_TicketTypeSpecialOffers", x => new { x.SpecialOffersSpecialOfferId, x.TicketTypesTicketTypeId });
                     table.ForeignKey(
-                        name: "FK_SpecialOfferTicketType_SpecialOffers_SpecialOffersSpecialOf~",
+                        name: "FK_TicketTypeSpecialOffers_SpecialOffers_SpecialOffersSpecialO~",
                         column: x => x.SpecialOffersSpecialOfferId,
                         principalTable: "SpecialOffers",
                         principalColumn: "SpecialOfferId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_SpecialOfferTicketType_TicketTypes_TicketTypesTicketTypeId",
+                        name: "FK_TicketTypeSpecialOffers_TicketTypes_TicketTypesTicketTypeId",
                         column: x => x.TicketTypesTicketTypeId,
                         principalTable: "TicketTypes",
                         principalColumn: "TicketTypeId",
@@ -172,31 +190,24 @@ namespace MusicEventManagementSystem.Migrations
                 column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Events_PricingRuleId",
-                table: "Events",
-                column: "PricingRuleId");
+                name: "IX_EventPricingRules_PricingRulesPricingRuleId",
+                table: "EventPricingRules",
+                column: "PricingRulesPricingRuleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PricingRuleTicketType_TicketTypesTicketTypeId",
-                table: "PricingRuleTicketType",
-                column: "TicketTypesTicketTypeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RecordedSaleSpecialOffer_SpecialOffersSpecialOfferId",
-                table: "RecordedSaleSpecialOffer",
+                name: "IX_RecordedSaleSpecialOffers_SpecialOffersSpecialOfferId",
+                table: "RecordedSaleSpecialOffers",
                 column: "SpecialOffersSpecialOfferId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SpecialOfferTicketType_TicketTypesTicketTypeId",
-                table: "SpecialOfferTicketType",
+                name: "IX_TicketTypePricingRules_TicketTypesTicketTypeId",
+                table: "TicketTypePricingRules",
                 column: "TicketTypesTicketTypeId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Events_PricingRules_PricingRuleId",
-                table: "Events",
-                column: "PricingRuleId",
-                principalTable: "PricingRules",
-                principalColumn: "PricingRuleId");
+            migrationBuilder.CreateIndex(
+                name: "IX_TicketTypeSpecialOffers_TicketTypesTicketTypeId",
+                table: "TicketTypeSpecialOffers",
+                column: "TicketTypesTicketTypeId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_RecordedSales_AspNetUsers_ApplicationUserId",
@@ -258,10 +269,6 @@ namespace MusicEventManagementSystem.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Events_PricingRules_PricingRuleId",
-                table: "Events");
-
-            migrationBuilder.DropForeignKey(
                 name: "FK_RecordedSales_AspNetUsers_ApplicationUserId",
                 table: "RecordedSales");
 
@@ -290,13 +297,16 @@ namespace MusicEventManagementSystem.Migrations
                 table: "Zones");
 
             migrationBuilder.DropTable(
-                name: "PricingRuleTicketType");
+                name: "EventPricingRules");
 
             migrationBuilder.DropTable(
-                name: "RecordedSaleSpecialOffer");
+                name: "RecordedSaleSpecialOffers");
 
             migrationBuilder.DropTable(
-                name: "SpecialOfferTicketType");
+                name: "TicketTypePricingRules");
+
+            migrationBuilder.DropTable(
+                name: "TicketTypeSpecialOffers");
 
             migrationBuilder.DropIndex(
                 name: "IX_Zones_SegmentId",
@@ -326,10 +336,6 @@ namespace MusicEventManagementSystem.Migrations
                 name: "IX_RecordedSales_ApplicationUserId",
                 table: "RecordedSales");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Events_PricingRuleId",
-                table: "Events");
-
             migrationBuilder.DropColumn(
                 name: "SegmentId",
                 table: "Zones");
@@ -357,10 +363,6 @@ namespace MusicEventManagementSystem.Migrations
             migrationBuilder.DropColumn(
                 name: "ApplicationUserId",
                 table: "RecordedSales");
-
-            migrationBuilder.DropColumn(
-                name: "PricingRuleId",
-                table: "Events");
         }
     }
 }

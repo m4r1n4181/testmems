@@ -18,6 +18,7 @@ namespace MusicEventManagementSystem.API.Controllers
             _recordedSaleService = recordedSaleService;
         }
 
+        // GET: api/recordedsale
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RecordedSale>>> GetAllRecordedSales()
         {
@@ -32,6 +33,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // GET: api/recordedsale/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<RecordedSale>> GetRecordedSaleById(int id)
         {
@@ -52,6 +54,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // POST: api/recordedsale
         [HttpPost]
         public async Task<ActionResult<RecordedSale>> CreateRecordedSale([FromBody] RecordedSale recordedSale)
         {
@@ -72,6 +75,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // PUT: api/recordedsale/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult<RecordedSale>> UpdateRecordedSale(int id, [FromBody] RecordedSale recordedSale)
         {
@@ -97,6 +101,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // DELETE: api/recordedsale/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteRecordedSale(int id)
         {
@@ -110,6 +115,111 @@ namespace MusicEventManagementSystem.API.Controllers
                 }
 
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/recordedsale/user/{userId}
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetSalesByUser(string userId)
+        {
+            try
+            {
+                var sales = await _recordedSaleService.GetSalesByUserAsync(userId);
+                return Ok(sales);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/recordedsale/date-range?fromDate=&toDate=
+        [HttpGet("date-range")]
+        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetSalesByDateRange([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
+        {
+            try
+            {
+                var sales = await _recordedSaleService.GetSalesByDateRangeAsync(fromDate, toDate);
+                return Ok(sales);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/recordedsale/status/{status}
+        [HttpGet("status/{status}")]
+        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetSalesByStatus(string status)
+        {
+            try
+            {
+                var sales = await _recordedSaleService.GetSalesByStatusAsync(status);
+                return Ok(sales);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/recordedsale/payment-method/{paymentMethod}
+        [HttpGet("payment-method/{paymentMethod}")]
+        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetSalesByPaymentMethod(string paymentMethod)
+        {
+            try
+            {
+                var sales = await _recordedSaleService.GetSalesByPaymentMethodAsync(paymentMethod);
+                return Ok(sales);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/recordedsale/revenue/total
+        [HttpGet("revenue/total")]
+        public async Task<ActionResult<decimal>> GetTotalRevenue()
+        {
+            try
+            {
+                var revenue = await _recordedSaleService.GetTotalRevenueAsync();
+                return Ok(revenue);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/recordedsale/revenue/date-range?fromDate=&toDate=
+        [HttpGet("revenue/date-range")]
+        public async Task<ActionResult<decimal>> GetRevenueByDateRange([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
+        {
+            try
+            {
+                var revenue = await _recordedSaleService.GetRevenueByDateRangeAsync(fromDate, toDate);
+                return Ok(revenue);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/recordedsale/count/status/{status}
+        [HttpGet("count/status/{status}")]
+        public async Task<ActionResult<int>> GetSalesCountByStatus(string status)
+        {
+            try
+            {
+                var count = await _recordedSaleService.GetSalesCountByStatusAsync(status);
+                return Ok(count);
             }
             catch (Exception ex)
             {
