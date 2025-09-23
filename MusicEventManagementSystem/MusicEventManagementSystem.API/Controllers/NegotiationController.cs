@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services;
 using MusicEventManagementSystem.API.Services.IService;
+using MusicEventManagementSystem.API.DTOs;
 using System;
 
 namespace MusicEventManagementSystem.API.Controllers
@@ -19,11 +20,11 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Negotiation>>> GetAllNegotiations()
+        public async Task<ActionResult<IEnumerable<NegotiationDto>>> GetAllNegotiations()
         {
             try
             {
-                var negotiations = await _negotiationService.GetAllNegotiationsAsync();
+                var negotiations = await _negotiationService.GetNegotiationsWithBasicDetailsAsync();
                 return Ok(negotiations);
             }
             catch (Exception ex)
@@ -52,8 +53,56 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        [HttpGet("{id}/details")]
+        public async Task<ActionResult<NegotiationWithDetailsDto>> GetNegotiationWithDetails(int id)
+        {
+            try
+            {
+                var negotiation = await _negotiationService.GetNegotiationWithDetailsAsync(id);
+
+                if (negotiation == null)
+                {
+                    return NotFound($"Negotiation with ID {id} not found.");
+                }
+
+                return Ok(negotiation);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("by-event/{eventId}")]
+        public async Task<ActionResult<IEnumerable<NegotiationDto>>> GetNegotiationsByEventId(int eventId)
+        {
+            try
+            {
+                var negotiations = await _negotiationService.GetNegotiationsByEventIdAsync(eventId);
+                return Ok(negotiations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("by-performer/{performerId}")]
+        public async Task<ActionResult<IEnumerable<NegotiationDto>>> GetNegotiationsByPerformerId(int performerId)
+        {
+            try
+            {
+                var negotiations = await _negotiationService.GetNegotiationsByPerformerIdAsync(performerId);
+                return Ok(negotiations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         [HttpPost]
-        public async Task<ActionResult<Negotiation>> CreateNegotiation([FromBody] Negotiation negotiation)
+        public async Task<ActionResult<Negotiation>> CreateNegotiation([FromBody] CreateNegotiationDto createDto)
         {
             try
             {
@@ -62,7 +111,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var createdNegotiation = await _negotiationService.CreateNegotiationAsync(negotiation);
+                var createdNegotiation = await _negotiationService.CreateNegotiationWithRelationshipsAsync(createDto);
 
                 return CreatedAtAction(nameof(GetNegotiationById), new { id = createdNegotiation.NegotiationId }, createdNegotiation);
             }
@@ -73,7 +122,7 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Negotiation>> UpdateNegotiation(int id, [FromBody] Negotiation negotiation)
+        public async Task<ActionResult<Negotiation>> UpdateNegotiation(int id, [FromBody] UpdateNegotiationDto updateDto)
         {
             try
             {
@@ -82,7 +131,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var updatedNegotiation = await _negotiationService.UpdateNegotiationAsync(id, negotiation);
+                var updatedNegotiation = await _negotiationService.UpdateNegotiationWithRelationshipsAsync(id, updateDto);
 
                 if (updatedNegotiation == null)
                 {
@@ -90,6 +139,46 @@ namespace MusicEventManagementSystem.API.Controllers
                 }
 
                 return Ok(updatedNegotiation);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("{id}/users/{userId}")]
+        public async Task<ActionResult> AddUserToNegotiation(int id, string userId)
+        {
+            try
+            {
+                var result = await _negotiationService.AddUserToNegotiationAsync(id, userId);
+                
+                if (!result)
+                {
+                    return BadRequest("User is already associated with this negotiation or negotiation not found.");
+                }
+
+                return Ok("User successfully added to negotiation.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{id}/users/{userId}")]
+        public async Task<ActionResult> RemoveUserFromNegotiation(int id, string userId)
+        {
+            try
+            {
+                var result = await _negotiationService.RemoveUserFromNegotiationAsync(id, userId);
+                
+                if (!result)
+                {
+                    return NotFound("User association with negotiation not found.");
+                }
+
+                return Ok("User successfully removed from negotiation.");
             }
             catch (Exception ex)
             {
