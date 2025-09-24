@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.Data;
@@ -16,7 +17,7 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.SpecialOffers.Include(so => so.TicketTypes).Include(so => so.RecordedSales).Where(so => so.StartDate <= currentDate && so.EndDate >= currentDate).OrderBy(so => so.EndDate).ToListAsync();
         }
 
-        public async Task<IEnumerable<SpecialOffer>> GetByOfferTypeAsync(string offerType)
+        public async Task<IEnumerable<SpecialOffer>> GetByOfferTypeAsync(OfferType offerType)
         {
             return await _context.SpecialOffers.Include(so => so.TicketTypes).Include(so => so.RecordedSales).Where(so => so.OfferType == offerType).OrderBy(so => so.StartDate).ToListAsync();
         }

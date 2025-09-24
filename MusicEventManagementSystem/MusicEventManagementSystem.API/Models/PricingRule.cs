@@ -1,4 +1,6 @@
-﻿namespace MusicEventManagementSystem.API.Models
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+
+namespace MusicEventManagementSystem.API.Models
 {
     public class PricingRule
     {
@@ -12,6 +14,7 @@
         public decimal OccupancyThreshold1 { get; set; }
         public decimal OccupancyThreshold2 { get; set; }
         public decimal EarlyBirdPercentage { get; set; }
+        public PricingCondition PricingCondition { get; set; }
         public string? DynamicCondition { get; set; }
         public decimal Modifier { get; set; }
 

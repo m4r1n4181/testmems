@@ -1,12 +1,14 @@
-﻿namespace MusicEventManagementSystem.API.Models
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+
+namespace MusicEventManagementSystem.API.Models
 {
     public class TicketType
     {
         public int TicketTypeId { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
-        public string? Status { get; set; }
         public int AvailableQuantity { get; set; }
+        public TicketTypeStatus? Status { get; set; }
 
         public int ZoneId { get; set; }
         public Zone Zone { get; set; }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.Data;
@@ -11,9 +12,9 @@ namespace MusicEventManagementSystem.API.Repositories
         {
         }
 
-        public async Task<IEnumerable<Ticket>> GetTicketsByStatusAsync(string status)
+        public async Task<IEnumerable<Ticket>> GetTicketsByStatusAsync(TicketStatus status)
         {
-            return await _context.Tickets.Where(t => t.Status!.ToLower() == status.ToLower()).ToListAsync();
+            return await _context.Tickets.Where(t => t.Status == status).ToListAsync();
         }
 
         public async Task<Ticket?> GetTicketByUniqueCodeAsync(string uniqueCode)
@@ -28,7 +29,7 @@ namespace MusicEventManagementSystem.API.Repositories
 
         public async Task<IEnumerable<Ticket>> GetSoldTicketsAsync()
         {
-            return await _context.Tickets.Where(t => t.Status!.ToLower() == "sold" || t.Status!.ToLower() == "used")
+            return await _context.Tickets.Where(t => t.Status == TicketStatus.Sold || t.Status! == TicketStatus.Used)
                 .OrderByDescending(t => t.IssueDate).ToListAsync();
         }
 
@@ -38,14 +39,14 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.Tickets.Where(t => t.IssueDate.Date == today).OrderByDescending(t => t.IssueDate).ToListAsync();
         }
 
-        public async Task<int> GetTicketsCountByStatusAsync(string status)
+        public async Task<int> GetTicketsCountByStatusAsync(TicketStatus status)
         {
-            return await _context.Tickets.CountAsync(t => t.Status!.ToLower() == status.ToLower());
+            return await _context.Tickets.CountAsync(t => t.Status! == status);
         }
 
         public async Task<decimal> GetTotalRevenueAsync()
         {
-            var tickets = await _context.Tickets.Where(t => t.Status!.ToLower() == "sold" || t.Status!.ToLower() == "used").ToListAsync();
+            var tickets = await _context.Tickets.Where(t => t.Status == TicketStatus.Sold || t.Status! == TicketStatus.Used).ToListAsync();
             
             return tickets.Sum(t => t.FinalPrice);
         }
@@ -53,15 +54,17 @@ namespace MusicEventManagementSystem.API.Repositories
         public async Task<decimal> GetRevenueByDateRangeAsync(DateTime from, DateTime to)
         {
             var tickets = await _context.Tickets.Where(t => t.IssueDate.Date >= from.Date && t.IssueDate.Date <= to.Date && 
-                (t.Status!.ToLower() == "sold" || t.Status!.ToLower() == "used")).ToListAsync();
+                (t.Status == TicketStatus.Sold || t.Status! == TicketStatus.Used)).ToListAsync();
         
             return tickets.Sum(t => t.FinalPrice);
         }
 
-        public async Task<decimal> GetRevenueByStatusAsync(string status)
+        public async Task<decimal> GetRevenueByStatusAsync(TicketStatus status)
         {
-            var tickets = await _context.Tickets.Where(t => t.Status!.ToLower() == status.ToLower()).ToListAsync();
-        
+            var tickets = await _context.Tickets
+                .Where(t => t.Status == status)
+                .ToListAsync();
+
             return tickets.Sum(t => t.FinalPrice);
         }
     }

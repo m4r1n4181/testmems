@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.Data;
@@ -23,16 +24,16 @@ namespace MusicEventManagementSystem.API.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<TicketType>> GetByStatusAsync(string status)
+        public async Task<IEnumerable<TicketType>> GetByStatusAsync(TicketTypeStatus status)
         {
             return await _context.TicketTypes
-                .Where(tt => tt.Status != null && tt.Status.ToLower() == status.ToLower())
+                .Where(tt => tt.Status != null && tt.Status == status)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<TicketType>> GetAvailableTicketTypesAsync()
         {
-            return await _context.TicketTypes.Where(tt => tt.AvailableQuantity > 0 &&(tt.Status == null || tt.Status.ToLower() == "active")).ToListAsync();
+            return await _context.TicketTypes.Where(tt => tt.AvailableQuantity > 0 &&(tt.Status == null || tt.Status == TicketTypeStatus.Active)).ToListAsync();
         }
 
         public async Task<bool> UpdateAvailableQuantityAsync(int id, int quantity)

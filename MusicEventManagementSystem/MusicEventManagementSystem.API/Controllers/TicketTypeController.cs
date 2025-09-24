@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services;
 using MusicEventManagementSystem.API.Services.IService;
@@ -154,7 +155,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/tickettype/status/{status}
         [HttpGet("status/{status}")]
-        public async Task<ActionResult<IEnumerable<TicketType>>> GetTicketTypesByStatus(string status)
+        public async Task<ActionResult<IEnumerable<TicketType>>> GetTicketTypesByStatus(TicketTypeStatus status)
         {
             try
             {

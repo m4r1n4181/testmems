@@ -1,4 +1,6 @@
-﻿namespace MusicEventManagementSystem.API.Models
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+
+namespace MusicEventManagementSystem.API.Models
 {
     public class Zone
     {
@@ -7,7 +9,7 @@
         public string? Description { get; set; }
         public int Capacity { get; set; }
         public decimal BasePrice { get; set; }
-        public string? Position { get; set; }
+        public ZonePosition? Position { get; set; }
 
         // Navigation property - Zone - (1,1) -> Segment
         public int SegmentId { get; set; }

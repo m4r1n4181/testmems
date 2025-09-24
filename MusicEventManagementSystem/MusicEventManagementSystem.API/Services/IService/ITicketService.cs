@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
 
 namespace MusicEventManagementSystem.API.Services.IService
 {
@@ -10,14 +11,14 @@ namespace MusicEventManagementSystem.API.Services.IService
         Task<Ticket?> UpdateTicketAsync(int id, Ticket ticket);
         Task<bool> DeleteTicketAsync(int id);
 
-        Task<IEnumerable<Ticket>> GetTicketsByStatusAsync(string status);
+        Task<IEnumerable<Ticket>> GetTicketsByStatusAsync(TicketStatus status);
         Task<Ticket?> GetTicketByUniqueCodeAsync(string uniqueCode);
         Task<Ticket?> GetTicketByQrCodeAsync(string qrCode);
 
-        Task<int> GetTicketsCountByStatusAsync(string status);
+        Task<int> GetTicketsCountByStatusAsync(TicketStatus status);
         Task<decimal> GetTotalRevenueAsync();
         Task<decimal> GetRevenueByDateRangeAsync(DateTime from, DateTime to);
-        Task<decimal> GetRevenueByStatusAsync(string status);
+        Task<decimal> GetRevenueByStatusAsync(TicketStatus status);
         Task<IEnumerable<Ticket>> GetSoldTicketsAsync();
         Task<IEnumerable<Ticket>> GetTodaysTicketsAsync();
 

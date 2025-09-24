@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services;
 using MusicEventManagementSystem.API.Services.IService;
@@ -154,7 +155,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/recordedsale/status/{status}
         [HttpGet("status/{status}")]
-        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetSalesByStatus(string status)
+        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetSalesByStatus(TransactionStatus status)
         {
             try
             {
@@ -169,7 +170,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/recordedsale/payment-method/{paymentMethod}
         [HttpGet("payment-method/{paymentMethod}")]
-        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetSalesByPaymentMethod(string paymentMethod)
+        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetSalesByPaymentMethod(PaymentMethod paymentMethod)
         {
             try
             {
@@ -214,7 +215,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/recordedsale/count/status/{status}
         [HttpGet("count/status/{status}")]
-        public async Task<ActionResult<int>> GetSalesCountByStatus(string status)
+        public async Task<ActionResult<int>> GetSalesCountByStatus(TransactionStatus status)
         {
             try
             {

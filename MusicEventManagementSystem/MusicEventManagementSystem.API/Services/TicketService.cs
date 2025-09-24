@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
@@ -63,7 +64,7 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
 
-        public async Task<IEnumerable<Ticket>> GetTicketsByStatusAsync(string status)
+        public async Task<IEnumerable<Ticket>> GetTicketsByStatusAsync(TicketStatus status)
         {
             return await _ticketRepository.GetTicketsByStatusAsync(status);
         }
@@ -78,7 +79,7 @@ namespace MusicEventManagementSystem.API.Services
             return await _ticketRepository.GetTicketByQrCodeAsync(qrCode);
         }
 
-        public async Task<int> GetTicketsCountByStatusAsync(string status)
+        public async Task<int> GetTicketsCountByStatusAsync(TicketStatus status)
         {
             return await _ticketRepository.GetTicketsCountByStatusAsync(status);
         }
@@ -93,7 +94,7 @@ namespace MusicEventManagementSystem.API.Services
             return await _ticketRepository.GetRevenueByDateRangeAsync(from, to);
         }
 
-        public async Task<decimal> GetRevenueByStatusAsync(string status)
+        public async Task<decimal> GetRevenueByStatusAsync(TicketStatus status)
         {
             return await _ticketRepository.GetRevenueByStatusAsync(status);
         }
@@ -112,12 +113,12 @@ namespace MusicEventManagementSystem.API.Services
         {
             var ticket = await _ticketRepository.GetByIdAsync(ticketId);
 
-            if (ticket == null || ticket.Status?.ToLower() != "available")
+            if (ticket == null || ticket.Status != TicketStatus.Available)
             {
                 return null;
             }
 
-            ticket.Status = "Sold";
+            ticket.Status = TicketStatus.Sold;
 
             _ticketRepository.Update(ticket);
             await _ticketRepository.SaveChangesAsync();
@@ -128,12 +129,12 @@ namespace MusicEventManagementSystem.API.Services
         {
             var ticket = await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
 
-            if (ticket == null || ticket.Status?.ToLower() != "sold")
+            if (ticket == null || ticket.Status != TicketStatus.Used)
             {
                 return null;
             }
 
-            ticket.Status = "Used";
+            ticket.Status = TicketStatus.Used;
 
             _ticketRepository.Update(ticket);
             await _ticketRepository.SaveChangesAsync();
@@ -149,7 +150,7 @@ namespace MusicEventManagementSystem.API.Services
                 return null;
             }
 
-            ticket.Status = "Cancelled";
+            ticket.Status = TicketStatus.Cancelled;
 
             _ticketRepository.Update(ticket);
             await _ticketRepository.SaveChangesAsync();
@@ -177,7 +178,7 @@ namespace MusicEventManagementSystem.API.Services
         // Helper methods
         private bool IsTicketValid(Ticket ticket)
         {
-            if (ticket != null && ticket.Status?.ToLower() == "sold")
+            if (ticket != null && ticket.Status == TicketStatus.Sold)
             {
                 return true;
             }

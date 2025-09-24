@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.Data;
@@ -21,9 +22,9 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.Zones.Where(z => z.BasePrice >= min && z.BasePrice <= max).ToListAsync();
         }
 
-        public async Task<IEnumerable<Zone>> GetByPositionAsync(string position)
+        public async Task<IEnumerable<Zone>> GetByPositionAsync(ZonePosition position)
         {
-            return await _context.Zones.Where(z => z.Position != null && z.Position.ToLower() == position.ToLower()).ToListAsync();
+            return await _context.Zones.Where(z => z.Position != null && z.Position == position).ToListAsync();
         }
 
         public async Task<IEnumerable<TicketType>> GetTicketTypesAsync(int zoneId)

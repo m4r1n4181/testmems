@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.Data;
@@ -21,33 +22,33 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.RecordedSales.Where(rs => rs.SaleDate.Date >= from.Date && rs.SaleDate.Date <= to.Date).OrderByDescending(rs => rs.SaleDate).ToListAsync();
         }
 
-        public async Task<IEnumerable<RecordedSale>> GetSalesByStatusAsync(string status)
+        public async Task<IEnumerable<RecordedSale>> GetSalesByStatusAsync(TransactionStatus status)
         {
-            return await _context.RecordedSales.Where(rs => rs.TransactionStatus != null && rs.TransactionStatus.ToLower() == status.ToLower()).OrderByDescending(rs => rs.SaleDate).ToListAsync();
+            return await _context.RecordedSales.Where(rs => rs.TransactionStatus != null && rs.TransactionStatus == status).OrderByDescending(rs => rs.SaleDate).ToListAsync();
         }
 
-        public async Task<IEnumerable<RecordedSale>> GetSalesByPaymentMethodAsync(string paymentMethod)
+        public async Task<IEnumerable<RecordedSale>> GetSalesByPaymentMethodAsync(PaymentMethod paymentMethod)
         {
-            return await _context.RecordedSales.Where(rs => rs.PaymentMethod != null && rs.PaymentMethod.ToLower() == paymentMethod.ToLower()).OrderByDescending(rs => rs.SaleDate).ToListAsync();
+            return await _context.RecordedSales.Where(rs => rs.PaymentMethod != null && rs.PaymentMethod == paymentMethod).OrderByDescending(rs => rs.SaleDate).ToListAsync();
         }
 
         public async Task<decimal> GetTotalRevenueAsync()
         {
-            var completedSales = await _context.RecordedSales.Where(rs => rs.TransactionStatus != null && rs.TransactionStatus.ToLower() == "completed").ToListAsync();
+            var completedSales = await _context.RecordedSales.Where(rs => rs.TransactionStatus != null && rs.TransactionStatus == TransactionStatus.Completed).ToListAsync();
 
             return completedSales.Sum(rs => rs.TotalAmount);
         }
 
         public async Task<decimal> GetRevenueByDateRangeAsync(DateTime from, DateTime to)
         {
-            var completedSales = await _context.RecordedSales.Where(rs => rs.SaleDate.Date >= from.Date && rs.SaleDate.Date <= to.Date && rs.TransactionStatus != null && rs.TransactionStatus.ToLower() == "completed").ToListAsync();
+            var completedSales = await _context.RecordedSales.Where(rs => rs.SaleDate.Date >= from.Date && rs.SaleDate.Date <= to.Date && rs.TransactionStatus != null && rs.TransactionStatus == TransactionStatus.Completed).ToListAsync();
             
             return completedSales.Sum(rs => rs.TotalAmount);
         }
 
-        public async Task<int> GetSalesCountByStatusAsync(string status)
+        public async Task<int> GetSalesCountByStatusAsync(TransactionStatus status)
         {
-            return await _context.RecordedSales.CountAsync(rs => rs.TransactionStatus != null && rs.TransactionStatus.ToLower() == status.ToLower());
+            return await _context.RecordedSales.CountAsync(rs => rs.TransactionStatus != null && rs.TransactionStatus == status);
         }
     }
 }

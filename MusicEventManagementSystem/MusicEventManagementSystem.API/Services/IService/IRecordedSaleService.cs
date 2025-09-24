@@ -1,4 +1,7 @@
 ﻿using MusicEventManagementSystem.API.Models;
+using TransactionStatus = MusicEventManagementSystem.API.Enums.TicketSales.TransactionStatus;
+using System.Transactions;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 
 namespace MusicEventManagementSystem.API.Services.IService
 {
@@ -12,10 +15,10 @@ namespace MusicEventManagementSystem.API.Services.IService
 
         Task<IEnumerable<RecordedSale>> GetSalesByUserAsync(string userId);
         Task<IEnumerable<RecordedSale>> GetSalesByDateRangeAsync(DateTime from, DateTime to);
-        Task<IEnumerable<RecordedSale>> GetSalesByStatusAsync(string status);
-        Task<IEnumerable<RecordedSale>> GetSalesByPaymentMethodAsync(string paymentMethod);
+        Task<IEnumerable<RecordedSale>> GetSalesByStatusAsync(TransactionStatus status);
+        Task<IEnumerable<RecordedSale>> GetSalesByPaymentMethodAsync(PaymentMethod paymentMethod);
         Task<decimal> GetTotalRevenueAsync();
         Task<decimal> GetRevenueByDateRangeAsync(DateTime from, DateTime to);
-        Task<int> GetSalesCountByStatusAsync(string status);
+        Task<int> GetSalesCountByStatusAsync(TransactionStatus status);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
@@ -77,13 +78,8 @@ namespace MusicEventManagementSystem.API.Services
             return await _specialOfferRepository.GetActiveOffersAsync(currentDate);
         }
 
-        public async Task<IEnumerable<SpecialOffer>> GetByOfferTypeAsync(string offerType)
+        public async Task<IEnumerable<SpecialOffer>> GetByOfferTypeAsync(OfferType offerType)
         {
-            if (string.IsNullOrWhiteSpace(offerType))
-            {
-                throw new ArgumentException("Offer type cannot be null or empty.", nameof(offerType));
-            }
-
             return await _specialOfferRepository.GetByOfferTypeAsync(offerType);
         }
 
@@ -133,8 +129,8 @@ namespace MusicEventManagementSystem.API.Services
             if (string.IsNullOrWhiteSpace(specialOffer.Name))
                 throw new ArgumentException("Special offer name cannot be empty.");
 
-            if (string.IsNullOrWhiteSpace(specialOffer.OfferType))
-                throw new ArgumentException("Offer type cannot be empty.");
+            if (!Enum.IsDefined(typeof(OfferType), specialOffer.OfferType))
+                throw new ArgumentException("Invalid offer type.");
 
             if (specialOffer.StartDate >= specialOffer.EndDate)
                 throw new ArgumentException("Start date must be before end date.");

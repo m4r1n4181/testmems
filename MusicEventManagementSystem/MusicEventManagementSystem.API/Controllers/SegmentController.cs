@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services;
 using MusicEventManagementSystem.API.Services.IService;
@@ -139,7 +140,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/segment/type/{segmentType}
         [HttpGet("type/{segmentType}")]
-        public async Task<ActionResult<IEnumerable<Segment>>> GetSegmentsByType(string segmentType)
+        public async Task<ActionResult<IEnumerable<Segment>>> GetSegmentsByType(SegmentType segmentType)
         {
             try
             {

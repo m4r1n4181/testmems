@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.Data;
@@ -16,9 +17,9 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.Segments.Where(s => s.VenueId == venueId).ToListAsync();
         }
 
-        public async Task<IEnumerable<Segment>> GetBySegmentTypeAsync(string segmentType)
+        public async Task<IEnumerable<Segment>> GetBySegmentTypeAsync(SegmentType segmentType)
         {
-            return await _context.Segments.Where(s => s.SegmentType != null && s.SegmentType.ToLower() == segmentType.ToLower()).ToListAsync();
+            return await _context.Segments.Where(s => s.SegmentType != null && s.SegmentType == segmentType).ToListAsync();
         }
 
         public async Task<IEnumerable<Zone>> GetZonesAsync(int segmentId)

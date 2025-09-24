@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services;
 using MusicEventManagementSystem.API.Services.IService;
@@ -140,7 +141,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/specialoffer/by-type/{offerType}
         [HttpGet("by-type/{offerType}")]
-        public async Task<ActionResult<IEnumerable<SpecialOffer>>> GetByOfferType(string offerType)
+        public async Task<ActionResult<IEnumerable<SpecialOffer>>> GetByOfferType(OfferType offerType)
         {
             try
             {

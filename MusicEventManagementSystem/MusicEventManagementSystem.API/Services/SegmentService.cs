@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
 
@@ -66,7 +67,7 @@ namespace MusicEventManagementSystem.API.Services
             return await _segmentRepository.GetByVenueIdAsync(venueId);
         }
 
-        public async Task<IEnumerable<Segment>> GetBySegmentTypeAsync(string segmentType)
+        public async Task<IEnumerable<Segment>> GetBySegmentTypeAsync(SegmentType segmentType)
         {
             return await _segmentRepository.GetBySegmentTypeAsync(segmentType);
         }

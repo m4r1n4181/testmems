@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
 
@@ -73,7 +74,7 @@ namespace MusicEventManagementSystem.API.Services
             return await _ticketTypeRepository.GetByEventIdAsync(eventId);
         }
 
-        public async Task<IEnumerable<TicketType>> GetByStatusAsync(string status)
+        public async Task<IEnumerable<TicketType>> GetByStatusAsync(TicketTypeStatus status)
         {
             return await _ticketTypeRepository.GetByStatusAsync(status);
         }

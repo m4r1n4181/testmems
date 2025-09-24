@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
 
@@ -73,7 +74,7 @@ namespace MusicEventManagementSystem.API.Services
             return await _zoneRepository.GetByPriceRangeAsync(min, max);
         }
 
-        public async Task<IEnumerable<Zone>> GetByPositionAsync(string position)
+        public async Task<IEnumerable<Zone>> GetByPositionAsync(ZonePosition position)
         {
             return await _zoneRepository.GetByPositionAsync(position);
         }

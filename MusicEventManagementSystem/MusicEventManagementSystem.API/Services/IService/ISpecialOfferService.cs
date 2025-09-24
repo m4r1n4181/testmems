@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
 
 namespace MusicEventManagementSystem.API.Services.IService
 {
@@ -11,7 +12,7 @@ namespace MusicEventManagementSystem.API.Services.IService
         Task<bool> DeleteSpecialOfferAsync(int id);
 
         Task<IEnumerable<SpecialOffer>> GetActiveOffersAsync(DateTime currentDate);
-        Task<IEnumerable<SpecialOffer>> GetByOfferTypeAsync(string offerType);
+        Task<IEnumerable<SpecialOffer>> GetByOfferTypeAsync(OfferType offerType);
         Task<IEnumerable<SpecialOffer>> GetByDateRangeAsync(DateTime start, DateTime end);
         Task<IEnumerable<SpecialOffer>> GetByTicketTypeAsync(int ticketTypeId);
         Task<bool> IsOfferValidAsync(int specialOfferId, DateTime checkDate);

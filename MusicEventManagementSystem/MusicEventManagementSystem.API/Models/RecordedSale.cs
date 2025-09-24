@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.Models.Auth;
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.Models.Auth;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MusicEventManagementSystem.API.Models
@@ -7,9 +8,9 @@ namespace MusicEventManagementSystem.API.Models
     {
         public int RecordedSaleId { get; set; }
         public decimal TotalAmount { get; set; }
-        public string? PaymentMethod { get; set; }
         public DateTime SaleDate { get; set; }
-        public string? TransactionStatus { get; set; }
+        public TransactionStatus? TransactionStatus { get; set; }
+        public PaymentMethod? PaymentMethod { get; set; }
 
         // Navigation property - RecordedSale - (0,N) -> Ticket
         public string ApplicationUserId { get; set; }

@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
 
 namespace MusicEventManagementSystem.API.Repositories.IRepositories
 {
@@ -6,7 +7,7 @@ namespace MusicEventManagementSystem.API.Repositories.IRepositories
     {
 
         Task<IEnumerable<SpecialOffer>> GetActiveOffersAsync(DateTime currentDate);
-        Task<IEnumerable<SpecialOffer>> GetByOfferTypeAsync(string offerType);
+        Task<IEnumerable<SpecialOffer>> GetByOfferTypeAsync(OfferType offerType);
         Task<IEnumerable<SpecialOffer>> GetByDateRangeAsync(DateTime start, DateTime end);
         Task<IEnumerable<SpecialOffer>> GetByTicketTypeAsync(int ticketTypeId);
 

@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
 
@@ -75,12 +76,12 @@ namespace MusicEventManagementSystem.API.Services
             return await _recordedSaleRepository.GetSalesByDateRangeAsync(fromDate, toDate);
         }
 
-        public async Task<IEnumerable<RecordedSale>> GetSalesByStatusAsync(string status)
+        public async Task<IEnumerable<RecordedSale>> GetSalesByStatusAsync(TransactionStatus status)
         {
             return await _recordedSaleRepository.GetSalesByStatusAsync(status);
         }
 
-        public async Task<IEnumerable<RecordedSale>> GetSalesByPaymentMethodAsync(string paymentMethod)
+        public async Task<IEnumerable<RecordedSale>> GetSalesByPaymentMethodAsync(PaymentMethod paymentMethod)
         {
             return await _recordedSaleRepository.GetSalesByPaymentMethodAsync(paymentMethod);
         }
@@ -95,7 +96,7 @@ namespace MusicEventManagementSystem.API.Services
             return await _recordedSaleRepository.GetRevenueByDateRangeAsync(from, to);
         }
 
-        public async Task<int> GetSalesCountByStatusAsync(string status)
+        public async Task<int> GetSalesCountByStatusAsync(TransactionStatus status)
         {
             return await _recordedSaleRepository.GetSalesCountByStatusAsync(status);
         }
