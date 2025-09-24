@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services;
 using MusicEventManagementSystem.API.Services.IService;
@@ -18,6 +19,7 @@ namespace MusicEventManagementSystem.API.Controllers
             _ticketService = ticketService;
         }
 
+        // GET: api/ticket
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Ticket>>> GetAllTickets()
         {
@@ -32,6 +34,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // GET: api/ticket/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Ticket>> GetTicketById(int id)
         {
@@ -52,6 +55,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // POST: api/ticket
         [HttpPost]
         public async Task<ActionResult<Ticket>> CreateTicket([FromBody] Ticket ticket)
         {
@@ -72,6 +76,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // PUT: api/ticket/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult<Ticket>> UpdateTicket(int id, [FromBody] Ticket ticket)
         {
@@ -97,6 +102,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // DELETE: api/ticket/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteTicket(int id)
         {
@@ -110,6 +116,267 @@ namespace MusicEventManagementSystem.API.Controllers
                 }
 
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/ticket/status/{status}
+        [HttpGet("status/{status}")]
+        public async Task<ActionResult<IEnumerable<Ticket>>> GetTicketsByStatus(TicketStatus status)
+        {
+            try
+            {
+                var tickets = await _ticketService.GetTicketsByStatusAsync(status);
+                return Ok(tickets);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/ticket/unique-code/{uniqueCode}
+        [HttpGet("unique-code/{uniqueCode}")]
+        public async Task<ActionResult<Ticket>> GetTicketByUniqueCode(string uniqueCode)
+        {
+            try
+            {
+                var ticket = await _ticketService.GetTicketByUniqueCodeAsync(uniqueCode);
+
+                if (ticket == null)
+                {
+                    return NotFound($"Ticket with unique code {uniqueCode} not found.");
+                }
+
+                return Ok(ticket);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/ticket/qr-code/{qrCode}
+        [HttpGet("qr-code/{qrCode}")]
+        public async Task<ActionResult<Ticket>> GetTicketByQrCode(string qrCode)
+        {
+            try
+            {
+                var ticket = await _ticketService.GetTicketByQrCodeAsync(qrCode);
+
+                if (ticket == null)
+                {
+                    return NotFound($"Ticket with QR code not found.");
+                }
+
+                return Ok(ticket);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/ticket/statistics/count/{status}
+        [HttpGet("statistics/count/{status}")]
+        public async Task<ActionResult<int>> GetTicketsCountByStatus(TicketStatus status)
+        {
+            try
+            {
+                var count = await _ticketService.GetTicketsCountByStatusAsync(status);
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/ticket/statistics/revenue
+        [HttpGet("statistics/revenue/total")]
+        public async Task<ActionResult<decimal>> GetTotalRevenue()
+        {
+            try
+            {
+                var revenue = await _ticketService.GetTotalRevenueAsync();
+                return Ok(revenue);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/ticket/statistics/revenue/date-range?from=1&to=
+        [HttpGet("statistics/revenue/date-range")]
+        public async Task<ActionResult<decimal>> GetRevenueByDateRange([FromQuery] DateTime from,[FromQuery] DateTime to)
+        {
+            try
+            {
+                if (from > to)
+                {
+                    return BadRequest("From date cannot be greater than to date.");
+                }
+
+                var revenue = await _ticketService.GetRevenueByDateRangeAsync(from, to);
+                return Ok(revenue);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/ticket/statistics/revenue/status/{status}
+        [HttpGet("statistics/revenue/status/{status}")]
+        public async Task<ActionResult<decimal>> GetRevenueByStatus(TicketStatus status)
+        {
+            try
+            {
+                var revenue = await _ticketService.GetRevenueByStatusAsync(status);
+                return Ok(revenue);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+        // GET: api/ticket/sold
+        [HttpGet("sold")]
+        public async Task<ActionResult<IEnumerable<Ticket>>> GetSoldTickets()
+        {
+            try
+            {
+                var tickets = await _ticketService.GetSoldTicketsAsync();
+                return Ok(tickets);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/ticket/today
+        [HttpGet("today")]
+        public async Task<ActionResult<IEnumerable<Ticket>>> GetTodaysTickets()
+        {
+            try
+            {
+                var tickets = await _ticketService.GetTodaysTicketsAsync();
+                return Ok(tickets);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/ticket/{id}/sell
+        [HttpPost("{id}/sell")]
+        public async Task<ActionResult<Ticket>> SellTicket(int id)
+        {
+            try
+            {
+                var ticket = await _ticketService.SellTicketAsync(id);
+
+                if (ticket == null)
+                {
+                    return BadRequest("Ticket cannot be sold. It may not exist or may not be available.");
+                }
+
+                return Ok(ticket);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/ticket/use/{uniqueCode}
+        [HttpPost("use/{uniqueCode}")]
+        public async Task<ActionResult<Ticket>> UseTicket(string uniqueCode)
+        {
+            try
+            {
+                var ticket = await _ticketService.UseTicketAsync(uniqueCode);
+
+                if (ticket == null)
+                {
+                    return BadRequest("Ticket cannot be used. It may not exist or may not be sold.");
+                }
+
+                return Ok(ticket);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/ticket/{id}/cancel
+        [HttpPost("{id}/cancel")]
+        public async Task<ActionResult<Ticket>> CancelTicket(int id)
+        {
+            try
+            {
+                var ticket = await _ticketService.CancelTicketAsync(id);
+
+                if (ticket == null)
+                {
+                    return NotFound($"Ticket with ID {id} not found.");
+                }
+
+                return Ok(ticket);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/ticket/validate/unique-code/{uniqueCode}
+        [HttpGet("validate/unique-code/{uniqueCode}")]
+        public async Task<ActionResult<bool>> ValidateUniqueCode(string uniqueCode)
+        {
+            try
+            {
+                var isValid = await _ticketService.IsUniqueCodeValidAsync(uniqueCode);
+                return Ok(new { IsValid = isValid });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/ticket/validate/qr-code/{qrCode}
+        [HttpGet("validate/qr-code/{qrCode}")]
+        public async Task<ActionResult<bool>> ValidateQrCode(string qrCode)
+        {
+            try
+            {
+                var isValid = await _ticketService.IsQrCodeValidAsync(qrCode);
+                return Ok(new { IsValid = isValid });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/ticket/can-use/{uniqueCode}
+        [HttpGet("can-use/{uniqueCode}")]
+        public async Task<ActionResult<bool>> CanTicketBeUsed(string uniqueCode)
+        {
+            try
+            {
+                var canBeUsed = await _ticketService.CanTicketBeUsedAsync(uniqueCode);
+                return Ok(new { CanBeUsed = canBeUsed });
             }
             catch (Exception ex)
             {

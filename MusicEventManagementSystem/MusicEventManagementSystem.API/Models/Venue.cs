@@ -1,4 +1,6 @@
-﻿namespace MusicEventManagementSystem.API.Models
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+
+namespace MusicEventManagementSystem.API.Models
 {
     public class Venue
     {
@@ -8,6 +10,9 @@
         public string? City { get; set; }
         public string? Address { get; set; }
         public int Capacity { get; set; }
-        public string? VenueType { get; set; }
+        public VenueType? VenueType { get; set; }
+
+        // Navigation property - Venue - (1,N) -> Segment
+        public ICollection<Segment> Segments { get; set; } = new List<Segment>();
     }
 }

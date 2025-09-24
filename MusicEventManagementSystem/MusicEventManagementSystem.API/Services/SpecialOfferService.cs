@@ -1,4 +1,6 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
 
@@ -25,6 +27,8 @@ namespace MusicEventManagementSystem.API.Services
 
         public async Task<SpecialOffer> CreateSpecialOfferAsync(SpecialOffer specialOffer)
         {
+            ValidateSpecialOffer(specialOffer);
+
             await _specialOfferRepository.AddAsync(specialOffer);
             await _specialOfferRepository.SaveChangesAsync();
             return specialOffer;
@@ -38,6 +42,8 @@ namespace MusicEventManagementSystem.API.Services
             {
                 return null;
             }
+
+            ValidateSpecialOffer(specialOffer);
 
             existingSpecialOffer.Name = specialOffer.Name;
             existingSpecialOffer.Description = specialOffer.Description;
@@ -65,6 +71,75 @@ namespace MusicEventManagementSystem.API.Services
             _specialOfferRepository.Delete(specialOffer);
             await _specialOfferRepository.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<SpecialOffer>> GetActiveOffersAsync(DateTime currentDate)
+        {
+            return await _specialOfferRepository.GetActiveOffersAsync(currentDate);
+        }
+
+        public async Task<IEnumerable<SpecialOffer>> GetByOfferTypeAsync(OfferType offerType)
+        {
+            return await _specialOfferRepository.GetByOfferTypeAsync(offerType);
+        }
+
+        public async Task<IEnumerable<SpecialOffer>> GetByDateRangeAsync(DateTime start, DateTime end)
+        {
+            if (start > end)
+            {
+                throw new ArgumentException("Start date cannot be greater than end date.");
+            }
+
+            return await _specialOfferRepository.GetByDateRangeAsync(start, end);
+        }
+
+        public async Task<IEnumerable<SpecialOffer>> GetByTicketTypeAsync(int ticketTypeId)
+        {
+            if (ticketTypeId <= 0)
+            {
+                throw new ArgumentException("Ticket type ID must be greater than 0.", nameof(ticketTypeId));
+            }
+
+            return await _specialOfferRepository.GetByTicketTypeAsync(ticketTypeId);
+        }
+
+        public async Task<bool> IsOfferValidAsync(int specialOfferId, DateTime checkDate)
+        {
+            if (specialOfferId <= 0)
+            {
+                return false;
+            }
+
+            return await _specialOfferRepository.IsOfferValidAsync(specialOfferId, checkDate);
+        }
+
+        public async Task<bool> HasActiveOfferForTicketTypeAsync(int ticketTypeId, DateTime currentDate)
+        {
+            if (ticketTypeId <= 0)
+            {
+                return false;
+            }
+
+            return await _specialOfferRepository.HasActiveOfferForTicketTypeAsync(ticketTypeId, currentDate);
+        }
+
+        // Helper method
+        private void ValidateSpecialOffer(SpecialOffer specialOffer)
+        {
+            if (string.IsNullOrWhiteSpace(specialOffer.Name))
+                throw new ArgumentException("Special offer name cannot be empty.");
+
+            if (!Enum.IsDefined(typeof(OfferType), specialOffer.OfferType))
+                throw new ArgumentException("Invalid offer type.");
+
+            if (specialOffer.StartDate >= specialOffer.EndDate)
+                throw new ArgumentException("Start date must be before end date.");
+
+            if (specialOffer.DiscountValue < 0)
+                throw new ArgumentException("Discount value cannot be negative.");
+
+            if (specialOffer.TicketLimit < 0)
+                throw new ArgumentException("Ticket limit cannot be negative.");
         }
     }
 }

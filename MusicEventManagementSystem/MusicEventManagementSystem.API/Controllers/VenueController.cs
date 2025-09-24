@@ -120,5 +120,65 @@ namespace MusicEventManagementSystem.API.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        // GET: api/venue/city/{city}
+        [HttpGet("city/{city}")]
+        public async Task<ActionResult<IEnumerable<Venue>>> GetVenuesByCity(string city)
+        {
+            try
+            {
+                var venues = await _venueService.GetByCityAsync(city);
+                return Ok(venues);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET /api/venue/capacity?min=500&max=2000
+        [HttpGet("capacity")]
+        public async Task<ActionResult<IEnumerable<Venue>>> GetByCapacityRange([FromQuery] int min, [FromQuery] int max)
+        {
+            try
+            {
+                var venues = await _venueService.GetByCapacityRangeAsync(min, max);
+                return Ok(venues);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET /api/venue/{id}/segments
+        [HttpGet("{id}/segments")]
+        public async Task<ActionResult<IEnumerable<Segment>>> GetSegments(int id)
+        {
+            try
+            {
+                var segments = await _venueService.GetSegmentsAsync(id);
+                return Ok(segments);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET /api/venue/{id}/capacity
+        [HttpGet("{id}/capacity")]
+        public async Task<ActionResult<int>> CalculateTotalCapacity(int id)
+        {
+            try
+            {
+                var totalCapacity = await _venueService.CalculateTotalCapacityAsync(id);
+                return Ok(totalCapacity);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }
