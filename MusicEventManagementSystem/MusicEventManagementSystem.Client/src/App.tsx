@@ -16,13 +16,7 @@ import TicketSalesPricingRules from './frontend/ticket-sales/pages/PricingRules'
 import TicketSalesSpecialOffers from './frontend/ticket-sales/pages/SpecialOffer';
 
 // Event Organization imports
-import EventOrgDashboard from "./frontend/event-organization/pages/Dashboard";
-import EventOrgEvents from './frontend/event-organization/pages/Events';
-import EventOrgPerformances from './frontend/event-organization/pages/Performances';
-import EventOrgWorkTasks from './frontend/event-organization/pages/WorkTasks';
-import EventOrgCalendar from './frontend/event-organization/pages/Calendar';
-import EventOrgResources from './frontend/event-organization/pages/Resources';
-import EventOrgAnalytics from './frontend/event-organization/pages/Analytics';
+// ...
 
 // Helper function to get user's department
 const getUserDepartment = (): number | null => {
@@ -159,77 +153,6 @@ function App() {
             <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
                 <TicketSalesRecordedSales />
-              </Layout>
-            </ProtectedRoute>
-          } 
-        />
-
-        {/* Protected routes - Event Management*/}
-        <Route path="/event-organization/dashboard" 
-          element={
-            <ProtectedRoute allowedDepartments={[2]}>
-              <Layout>
-                <EventOrgDashboard />
-              </Layout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route path="/event-organization/events" 
-          element={
-            <ProtectedRoute allowedDepartments={[2]}>
-              <Layout>
-                <EventOrgEvents />
-              </Layout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route path="/event-organization/performances" 
-          element={
-            <ProtectedRoute allowedDepartments={[2]}>
-              <Layout>
-                <EventOrgPerformances />
-              </Layout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route path="/event-organization/work-tasks" 
-          element={
-            <ProtectedRoute allowedDepartments={[2]}>
-              <Layout>
-                <EventOrgWorkTasks />
-              </Layout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route path="/event-organization/calendar" 
-          element={
-            <ProtectedRoute allowedDepartments={[2]}>
-              <Layout>
-                <EventOrgCalendar />
-              </Layout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route path="/event-organization/resources" 
-          element={
-            <ProtectedRoute allowedDepartments={[2]}>
-              <Layout>
-                <EventOrgResources />
-              </Layout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route path="/event-organization/analytics" 
-          element={
-            <ProtectedRoute allowedDepartments={[2]}>
-              <Layout>
-                <EventOrgAnalytics />
               </Layout>
             </ProtectedRoute>
           } 
