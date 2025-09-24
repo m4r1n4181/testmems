@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
 
 namespace MusicEventManagementSystem.API.Services.IService
 {
@@ -9,5 +10,10 @@ namespace MusicEventManagementSystem.API.Services.IService
         Task<Segment> CreateSegmentAsync(Segment segment);
         Task<Segment?> UpdateSegmentAsync(int id, Segment segment);
         Task<bool> DeleteSegmentAsync(int id);
+
+        Task<IEnumerable<Segment>> GetByVenueIdAsync(int venueId);
+        Task<IEnumerable<Segment>> GetBySegmentTypeAsync(SegmentType segmentType);
+        Task<IEnumerable<Zone>> GetZonesAsync(int segmentId);
+        Task<int> CalculateTotalCapacityAsync(int segmentId);
     }
 }

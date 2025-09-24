@@ -69,5 +69,25 @@ namespace MusicEventManagementSystem.API.Services
             await _pricingRuleRepository.SaveChangesAsync();
             return true;
         }
+
+        public async Task<IEnumerable<PricingRule>> GetActivePricingRulesAsync()
+        {
+            return await _pricingRuleRepository.GetActivePricingRulesAsync();
+        }
+
+        public async Task<IEnumerable<PricingRule>> GetPricingRulesByEventAsync(int eventId)
+        {
+            return await _pricingRuleRepository.GetPricingRulesByEventAsync(eventId);
+        }
+
+        public async Task<IEnumerable<PricingRule>> GetPricingRulesByTicketTypeAsync(int ticketTypeId)
+        {
+            return await _pricingRuleRepository.GetPricingRulesByTicketTypeAsync(ticketTypeId);
+        }
+
+        public async Task<decimal> CalculatePriceAsync(int pricingRuleId, decimal basePrice, decimal occupancyRate, bool isEarlyBird = false)
+        {
+            return await _pricingRuleRepository.CalculatePriceAsync(pricingRuleId, basePrice, occupancyRate, isEarlyBird);
+        }
     }
 }

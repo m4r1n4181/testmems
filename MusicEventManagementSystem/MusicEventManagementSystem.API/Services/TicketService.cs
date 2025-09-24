@@ -1,4 +1,6 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
 
@@ -60,6 +62,161 @@ namespace MusicEventManagementSystem.API.Services
             _ticketRepository.Delete(ticket);
             await _ticketRepository.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<Ticket>> GetTicketsByStatusAsync(TicketStatus status)
+        {
+            return await _ticketRepository.GetTicketsByStatusAsync(status);
+        }
+
+        public async Task<Ticket?> GetTicketByUniqueCodeAsync(string uniqueCode)
+        {
+            return await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
+        }
+
+        public async Task<Ticket?> GetTicketByQrCodeAsync(string qrCode)
+        {
+            return await _ticketRepository.GetTicketByQrCodeAsync(qrCode);
+        }
+
+        public async Task<int> GetTicketsCountByStatusAsync(TicketStatus status)
+        {
+            return await _ticketRepository.GetTicketsCountByStatusAsync(status);
+        }
+
+        public async Task<decimal> GetTotalRevenueAsync()
+        {
+            return await _ticketRepository.GetTotalRevenueAsync();
+        }
+
+        public async Task<decimal> GetRevenueByDateRangeAsync(DateTime from, DateTime to)
+        {
+            return await _ticketRepository.GetRevenueByDateRangeAsync(from, to);
+        }
+
+        public async Task<decimal> GetRevenueByStatusAsync(TicketStatus status)
+        {
+            return await _ticketRepository.GetRevenueByStatusAsync(status);
+        }
+
+        public async Task<IEnumerable<Ticket>> GetSoldTicketsAsync()
+        {
+            return await _ticketRepository.GetSoldTicketsAsync();
+        }
+
+        public async Task<IEnumerable<Ticket>> GetTodaysTicketsAsync()
+        {
+            return await _ticketRepository.GetTodaysTicketsAsync();
+        }
+
+        public async Task<Ticket?> SellTicketAsync(int ticketId)
+        {
+            var ticket = await _ticketRepository.GetByIdAsync(ticketId);
+
+            if (ticket == null || ticket.Status != TicketStatus.Available)
+            {
+                return null;
+            }
+
+            ticket.Status = TicketStatus.Sold;
+
+            _ticketRepository.Update(ticket);
+            await _ticketRepository.SaveChangesAsync();
+            return ticket;
+        }
+
+        public async Task<Ticket?> UseTicketAsync(string uniqueCode)
+        {
+            var ticket = await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
+
+            if (ticket == null || ticket.Status != TicketStatus.Used)
+            {
+                return null;
+            }
+
+            ticket.Status = TicketStatus.Used;
+
+            _ticketRepository.Update(ticket);
+            await _ticketRepository.SaveChangesAsync();
+            return ticket;
+        }
+
+        public async Task<Ticket?> CancelTicketAsync(int ticketId)
+        {
+            var ticket = await _ticketRepository.GetByIdAsync(ticketId);
+
+            if (ticket == null)
+            {
+                return null;
+            }
+
+            ticket.Status = TicketStatus.Cancelled;
+
+            _ticketRepository.Update(ticket);
+            await _ticketRepository.SaveChangesAsync();
+            return ticket;
+        }
+
+        public async Task<bool> IsUniqueCodeValidAsync(string uniqueCode)
+        {
+            var ticket = await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
+            return IsTicketValid(ticket);
+        }
+
+        public async Task<bool> IsQrCodeValidAsync(string qrCode)
+        {
+            var ticket = await _ticketRepository.GetTicketByQrCodeAsync(qrCode);
+            return IsTicketValid(ticket);
+        }
+
+        public async Task<bool> CanTicketBeUsedAsync(string uniqueCode)
+        {
+            var ticket = await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
+            return IsTicketValid(ticket);
+        }
+
+        // Helper methods
+        private bool IsTicketValid(Ticket ticket)
+        {
+            if (ticket != null && ticket.Status == TicketStatus.Sold)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private async Task<string> GenerateUniqueCodeAsync()
+        {
+            string uniqueCode;
+            bool isCodeUnique;
+
+            do
+            {
+                uniqueCode = GenerateRandomCode();
+                var existingTicket = await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
+                isCodeUnique = existingTicket == null;
+            }
+            while(!isCodeUnique);
+
+            return uniqueCode;
+        }
+
+        private static string GenerateRandomCode()
+        {
+            var random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            const int codeLength = 10;
+
+            return new string(Enumerable.Repeat(chars, codeLength).Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        private static string GenerateQrCode(string uniqueCode)
+        {
+            // Method for generating QR code from unique code
+            // Until implemented, return a base64 representation of the unique code
+            byte[] encodedBytes = System.Text.Encoding.UTF8.GetBytes(uniqueCode);
+            return Convert.ToBase64String(encodedBytes);
         }
     }
 }

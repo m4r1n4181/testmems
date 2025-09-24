@@ -18,6 +18,7 @@ namespace MusicEventManagementSystem.API.Controllers
             _pricingRuleService = pricingRuleService;
         }
 
+        // GET: api/pricingrule
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PricingRule>>> GetAllPricingRules()
         {
@@ -32,6 +33,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // GET: api/pricingrule/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<PricingRule>> GetPricingRuleById(int id)
         {
@@ -52,6 +54,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // POST: api/pricingrule
         [HttpPost]
         public async Task<ActionResult<PricingRule>> CreatePricingRule([FromBody] PricingRule pricingRule)
         {
@@ -72,6 +75,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // PUT: api/pricingrule/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult<PricingRule>> UpdatePricingRule(int id, [FromBody] PricingRule pricingRule)
         {
@@ -97,6 +101,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // DELETE: api/pricingrule/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeletePricingRule(int id)
         {
@@ -110,6 +115,67 @@ namespace MusicEventManagementSystem.API.Controllers
                 }
 
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/pricingrule/{id}/calculate-price
+        [HttpPost("{id}/calculate-price")]
+        public async Task<ActionResult<decimal>> CalculatePrice(int id, decimal BasePrice, decimal OccupancyRate, bool IsEarlyBird)
+        {
+            try
+            {
+                var calculatedPrice = await _pricingRuleService.CalculatePriceAsync(id, BasePrice, OccupancyRate, IsEarlyBird);
+
+                return Ok(calculatedPrice);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/pricingrule/active
+        [HttpGet("active")]
+        public async Task<ActionResult<IEnumerable<PricingRule>>> GetActivePricingRules()
+        {
+            try
+            {
+                var activePricingRules = await _pricingRuleService.GetActivePricingRulesAsync();
+                return Ok(activePricingRules);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/pricingrule/event/{eventId}
+        [HttpGet("event/{eventId}")]
+        public async Task<ActionResult<IEnumerable<PricingRule>>> GetPricingRulesByEvent(int eventId)
+        {
+            try
+            {
+                var pricingRules = await _pricingRuleService.GetPricingRulesByEventAsync(eventId);
+                return Ok(pricingRules);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/pricingrule/ticket-type/{ticketTypeId}
+        [HttpGet("ticket-type/{ticketTypeId}")]
+        public async Task<ActionResult<IEnumerable<PricingRule>>> GetPricingRulesByTicketType(int ticketTypeId)
+        {
+            try
+            {
+                var pricingRules = await _pricingRuleService.GetPricingRulesByTicketTypeAsync(ticketTypeId);
+                return Ok(pricingRules);
             }
             catch (Exception ex)
             {

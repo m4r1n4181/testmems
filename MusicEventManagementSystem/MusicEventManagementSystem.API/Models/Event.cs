@@ -15,9 +15,15 @@ namespace MusicEventManagementSystem.API.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
-
-        // Navigation Property for One-to-One relationship with Negotiation
+        
+       // Navigation Property for One-to-One relationship with Negotiation
         public Negotiation? Negotiation { get; set; }
+        // Navigation property - Event - (1,N) -> TicketType
+        public ICollection<TicketType> TicketTypes { get; set; } = new List<TicketType>();
+
+        // Navigation property - Event - (1,N) -> PricingRule
+        public ICollection<PricingRule> PricingRules { get; set; } = new List<PricingRule>();
+
     }
 
 }

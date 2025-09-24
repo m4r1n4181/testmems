@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
 
@@ -59,6 +60,26 @@ namespace MusicEventManagementSystem.API.Services
             _segmentRepository.Delete(segment);
             await _segmentRepository.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<Segment>> GetByVenueIdAsync(int venueId)
+        {
+            return await _segmentRepository.GetByVenueIdAsync(venueId);
+        }
+
+        public async Task<IEnumerable<Segment>> GetBySegmentTypeAsync(SegmentType segmentType)
+        {
+            return await _segmentRepository.GetBySegmentTypeAsync(segmentType);
+        }
+
+        public async Task<IEnumerable<Zone>> GetZonesAsync(int segmentId)
+        {
+            return await _segmentRepository.GetZonesAsync(segmentId);
+        }
+
+        public async Task<int> CalculateTotalCapacityAsync(int segmentId)
+        {
+            return await _segmentRepository.CalculateTotalCapacityAsync(segmentId);
         }
     }
 }

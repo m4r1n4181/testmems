@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.Models.Auth;
+using System.Reflection.Emit;
 
 namespace MusicEventManagementSystem.Data
 {
@@ -44,7 +45,44 @@ namespace MusicEventManagementSystem.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(builder);
+            // Ticket-Sales Subsystem configurations
+            // Configuring enum fields to be stored as integers
+            builder.Entity<Venue>()
+                .Property(v => v.VenueType)
+                .HasConversion<int>();
+
+            builder.Entity<Segment>()
+                .Property(s => s.SegmentType)
+                .HasConversion<int>();
+
+            builder.Entity<Zone>()
+                .Property(z => z.Position)
+                .HasConversion<int>();
+
+            builder.Entity<Ticket>()
+                .Property(t => t.Status)
+                .HasConversion<int>();
+
+            builder.Entity<TicketType>()
+                .Property(tt =>tt.Status)
+                .HasConversion<int>();
+
+            builder.Entity<SpecialOffer>()
+                .Property(so => so.OfferType)
+                .HasConversion<int>();
+
+            builder.Entity<PricingRule>()
+                .Property(pr => pr.PricingCondition)
+                .HasConversion<int>();
+
+            builder.Entity<RecordedSale>()
+                .Property(rs => rs.PaymentMethod)
+                .HasConversion<int>();
+
+            builder.Entity<RecordedSale>()
+                .Property(rs => rs.TransactionStatus)
+                .HasConversion<int>();
+
 
             // Configure Negotiation relationships
             
@@ -119,6 +157,39 @@ namespace MusicEventManagementSystem.Data
                 .WithMany(p => p.Requirements)
                 .HasForeignKey(r => r.PhaseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // One-To-Many relationships for Ticket-Sales Subsystem
+
+            builder.Entity<Ticket>()
+                .HasOne(t => t.RecordedSale)
+                .WithMany(rs => rs.Tickets)
+                .HasForeignKey(t => t.RecordedSaleId)
+                .IsRequired(false);
+
+            // Many-To-Many relationships for Ticket-Sales Subsystem
+
+            builder.Entity<TicketType>()
+                .HasMany(tt => tt.SpecialOffers)
+                .WithMany(so => so.TicketTypes)
+                .UsingEntity(j => j.ToTable("TicketTypeSpecialOffers"));
+
+            builder.Entity<TicketType>()
+                .HasMany(tt => tt.PricingRules)
+                .WithMany(pr => pr.TicketTypes)
+                .UsingEntity(j => j.ToTable("TicketTypePricingRules"));
+
+            builder.Entity<Event>()
+                .HasMany(d => d.PricingRules)
+                .WithMany(pr => pr.Events)
+                .UsingEntity(j => j.ToTable("EventPricingRules"));
+
+            builder.Entity<RecordedSale>()
+                .HasMany(rs => rs.SpecialOffers)
+                .WithMany(so => so.RecordedSales)
+                .UsingEntity(j => j.ToTable("RecordedSaleSpecialOffers"));
+
+            base.OnModelCreating(builder);
+
         }
     }
 }
