@@ -11,27 +11,39 @@ namespace MusicEventManagementSystem.API.Repositories
         {
         }
 
+        public override async Task<IEnumerable<PricingRule>> GetAllAsync()
+        {
+            return await _context.PricingRules.Include(pr => pr.TicketTypes).Include(pr => pr.Events).ToListAsync();
+        }
+
+        public override async Task<PricingRule?> GetByIdAsync(int id)
+        {
+            return await _context.PricingRules.Include(pr => pr.TicketTypes).Include(pr => pr.Events).FirstOrDefaultAsync(pr => pr.PricingRuleId == id);
+        }
+
         public async Task<IEnumerable<PricingRule>> GetActivePricingRulesAsync()
         {
             // Need to define what "active" means in this context - add missing field in PricingRule
-            return await _context.PricingRules.Where(pr => pr.MinimumPrice >= 0 && pr.MaximumPrice > pr.MinimumPrice).ToListAsync();
+            return await _context.PricingRules.Include(pr => pr.TicketTypes).Include(pr => pr.Events).Where(pr => pr.MinimumPrice >= 0 && pr.MaximumPrice > pr.MinimumPrice).ToListAsync();
         }
 
         public async Task<IEnumerable<PricingRule>> GetPricingRulesByEventAsync(int eventId)
         {
-            return await _context.PricingRules.Where(pr => pr.Events.Any(e => e.Id == eventId)).ToListAsync();
+            return await _context.PricingRules.Include(pr => pr.TicketTypes).Include(pr => pr.Events).Where(pr => pr.Events.Any(e => e.Id == eventId)).ToListAsync();
         }
 
         public async Task<IEnumerable<PricingRule>> GetPricingRulesByTicketTypeAsync(int ticketTypeId)
         {
-            return await _context.PricingRules.Where(pr => pr.TicketTypes.Any(tt => tt.TicketTypeId == ticketTypeId)).ToListAsync();
+            return await _context.PricingRules.Include(pr => pr.TicketTypes).Include(pr => pr.Events).Where(pr => pr.TicketTypes.Any(tt => tt.TicketTypeId == ticketTypeId)).ToListAsync();
         }
 
         public async Task<decimal> CalculatePriceAsync(int pricingRuleId, decimal basePrice, decimal occupancyRate, bool isEarlyBird = false)
         {
             var pricingRule = await GetByIdAsync(pricingRuleId);
             if (pricingRule == null)
+            {
                 return basePrice;
+            }
 
             decimal calculatedPrice = basePrice;
 

@@ -12,6 +12,16 @@ namespace MusicEventManagementSystem.API.Repositories
         {
         }
 
+        public override async Task<IEnumerable<SpecialOffer>> GetAllAsync()
+        {
+            return await _context.SpecialOffers.Include(so => so.TicketTypes).Include(so => so.RecordedSales).ToListAsync();
+        }
+
+        public override async Task<SpecialOffer?> GetByIdAsync(int id)
+        {
+            return await _context.SpecialOffers.Include(so => so.TicketTypes).Include(so => so.RecordedSales).FirstOrDefaultAsync(so => so.SpecialOfferId == id);
+        }
+
         public async Task<IEnumerable<SpecialOffer>> GetActiveOffersAsync(DateTime currentDate)
         {
             return await _context.SpecialOffers.Include(so => so.TicketTypes).Include(so => so.RecordedSales).Where(so => so.StartDate <= currentDate && so.EndDate >= currentDate).OrderBy(so => so.EndDate).ToListAsync();
@@ -34,7 +44,7 @@ namespace MusicEventManagementSystem.API.Repositories
 
         public async Task<bool> IsOfferValidAsync(int specialOfferId, DateTime checkDate)
         {
-            return await _context.SpecialOffers.AnyAsync(so => so.SpecialOfferId == specialOfferId && so.StartDate <= checkDate && so.EndDate >= checkDate);
+            return await _context.SpecialOffers.AnyAsync(so => so.SpecialOfferId == specialOfferId &&so.StartDate <= checkDate && so.EndDate >= checkDate);
         }
 
         public async Task<bool> HasActiveOfferForTicketTypeAsync(int ticketTypeId, DateTime currentDate)
