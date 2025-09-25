@@ -7,6 +7,10 @@ namespace MusicEventManagementSystem.API.DTOs
         public string Description { get; set; } = string.Empty;
         public bool Fulfilled { get; set; }
         public DateTime CreatedAt { get; set; }
+        
+        // Related entity
+        public int PhaseId { get; set; }
+        public string? PhaseName { get; set; }
     }
 
     public class CreateRequirementDto
@@ -14,6 +18,9 @@ namespace MusicEventManagementSystem.API.DTOs
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public bool Fulfilled { get; set; }
+        
+        // Required foreign key
+        public int PhaseId { get; set; }
     }
 
     public class UpdateRequirementDto
@@ -21,5 +28,8 @@ namespace MusicEventManagementSystem.API.DTOs
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public bool Fulfilled { get; set; }
+        
+        // Allow updating foreign key
+        public int PhaseId { get; set; }
     }
 }

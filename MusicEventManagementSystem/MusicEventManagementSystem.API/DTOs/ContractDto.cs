@@ -10,6 +10,10 @@ namespace MusicEventManagementSystem.API.DTOs
         public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime? SignedAt { get; set; }
+        
+        // Related entity
+        public int PerformerId { get; set; }
+        public string? PerformerName { get; set; }
     }
 
     public class CreateContractDto
@@ -19,6 +23,9 @@ namespace MusicEventManagementSystem.API.DTOs
         public decimal Price { get; set; }
         public string Version { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
+        
+        // Required foreign key
+        public int PerformerId { get; set; }
     }
 
     public class UpdateContractDto
@@ -28,5 +35,15 @@ namespace MusicEventManagementSystem.API.DTOs
         public decimal Price { get; set; }
         public string Version { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
+        
+        // Allow updating foreign key
+        public int PerformerId { get; set; }
+    }
+
+    public class ContractWithDetailsDto : ContractDto
+    {
+        // Extended version with full related entity details
+        public PerformerDto? Performer { get; set; }
+        public PhaseDto? Phase { get; set; } // Optional one-to-one relationship
     }
 }

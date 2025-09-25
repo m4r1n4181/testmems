@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MusicEventManagementSystem.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicEventManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250923192204_AddRelationships")]
+    partial class AddRelationships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace MusicEventManagementSystem.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("EventPricingRule", b =>
-                {
-                    b.Property<int>("EventsId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("PricingRulesPricingRuleId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("EventsId", "PricingRulesPricingRuleId");
-
-                    b.HasIndex("PricingRulesPricingRuleId");
-
-                    b.ToTable("EventPricingRules", (string)null);
-                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -672,10 +660,6 @@ namespace MusicEventManagementSystem.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("RecordedSaleId"));
 
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("PaymentMethod")
                         .HasColumnType("text");
 
@@ -689,8 +673,6 @@ namespace MusicEventManagementSystem.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("RecordedSaleId");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("RecordedSales");
                 });
@@ -786,12 +768,7 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<string>("SegmentType")
                         .HasColumnType("text");
 
-                    b.Property<int>("VenueId")
-                        .HasColumnType("integer");
-
                     b.HasKey("SegmentId");
-
-                    b.HasIndex("VenueId");
 
                     b.ToTable("Segments");
                 });
@@ -902,23 +879,13 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<string>("QrCode")
                         .HasColumnType("text");
 
-                    b.Property<int?>("RecordedSaleId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Status")
                         .HasColumnType("text");
-
-                    b.Property<int>("TicketTypeId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("UniqueCode")
                         .HasColumnType("text");
 
                     b.HasKey("TicketId");
-
-                    b.HasIndex("RecordedSaleId");
-
-                    b.HasIndex("TicketTypeId");
 
                     b.ToTable("Tickets");
                 });
@@ -937,23 +904,13 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<int>("EventId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
                     b.Property<string>("Status")
                         .HasColumnType("text");
 
-                    b.Property<int>("ZoneId")
-                        .HasColumnType("integer");
-
                     b.HasKey("TicketTypeId");
-
-                    b.HasIndex("EventId");
-
-                    b.HasIndex("ZoneId");
 
                     b.ToTable("TicketTypes");
                 });
@@ -1086,12 +1043,7 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<string>("Position")
                         .HasColumnType("text");
 
-                    b.Property<int>("SegmentId")
-                        .HasColumnType("integer");
-
                     b.HasKey("ZoneId");
-
-                    b.HasIndex("SegmentId");
 
                     b.ToTable("Zones");
                 });
@@ -1175,66 +1127,6 @@ namespace MusicEventManagementSystem.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("PricingRuleTicketType", b =>
-                {
-                    b.Property<int>("PricingRulesPricingRuleId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TicketTypesTicketTypeId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("PricingRulesPricingRuleId", "TicketTypesTicketTypeId");
-
-                    b.HasIndex("TicketTypesTicketTypeId");
-
-                    b.ToTable("TicketTypePricingRules", (string)null);
-                });
-
-            modelBuilder.Entity("RecordedSaleSpecialOffer", b =>
-                {
-                    b.Property<int>("RecordedSalesRecordedSaleId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SpecialOffersSpecialOfferId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("RecordedSalesRecordedSaleId", "SpecialOffersSpecialOfferId");
-
-                    b.HasIndex("SpecialOffersSpecialOfferId");
-
-                    b.ToTable("RecordedSaleSpecialOffers", (string)null);
-                });
-
-            modelBuilder.Entity("SpecialOfferTicketType", b =>
-                {
-                    b.Property<int>("SpecialOffersSpecialOfferId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TicketTypesTicketTypeId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("SpecialOffersSpecialOfferId", "TicketTypesTicketTypeId");
-
-                    b.HasIndex("TicketTypesTicketTypeId");
-
-                    b.ToTable("TicketTypeSpecialOffers", (string)null);
-                });
-
-            modelBuilder.Entity("EventPricingRule", b =>
-                {
-                    b.HasOne("MusicEventManagementSystem.API.Models.Event", null)
-                        .WithMany()
-                        .HasForeignKey("EventsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MusicEventManagementSystem.API.Models.PricingRule", null)
-                        .WithMany()
-                        .HasForeignKey("PricingRulesPricingRuleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1333,58 +1225,6 @@ namespace MusicEventManagementSystem.Migrations
                         .WithOne("Negotiation")
                         .HasForeignKey("MusicEventManagementSystem.API.Models.Negotiation", "PerformerId")
                         .OnDelete(DeleteBehavior.Restrict)
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.RecordedSale", b =>
-                {
-                    b.HasOne("MusicEventManagementSystem.Models.Auth.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApplicationUser");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Segment", b =>
-                {
-                    b.HasOne("MusicEventManagementSystem.API.Models.Venue", "Venue")
-                        .WithMany("Segments")
-                        .HasForeignKey("VenueId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Venue");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Ticket", b =>
-                {
-                    b.HasOne("MusicEventManagementSystem.API.Models.RecordedSale", "RecordedSale")
-                        .WithMany("Tickets")
-                        .HasForeignKey("RecordedSaleId");
-
-                    b.HasOne("MusicEventManagementSystem.API.Models.TicketType", "TicketType")
-                        .WithMany("Tickets")
-                        .HasForeignKey("TicketTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RecordedSale");
-
-                    b.Navigation("TicketType");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.TicketType", b =>
-                {
-                    b.HasOne("MusicEventManagementSystem.API.Models.Event", "Event")
-                        .WithMany("TicketTypes")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MusicEventManagementSystem.API.Models.Zone", "Zone")
-                        .WithMany("TicketTypes")
-                        .HasForeignKey("ZoneId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Event");
@@ -1472,94 +1312,6 @@ namespace MusicEventManagementSystem.Migrations
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.Phase", b =>
                 {
                     b.Navigation("Requirements");
-
-                    b.Navigation("Zone");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Zone", b =>
-                {
-                    b.HasOne("MusicEventManagementSystem.API.Models.Segment", "Segment")
-                        .WithMany("Zones")
-                        .HasForeignKey("SegmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Segment");
-                });
-
-            modelBuilder.Entity("PricingRuleTicketType", b =>
-                {
-                    b.HasOne("MusicEventManagementSystem.API.Models.PricingRule", null)
-                        .WithMany()
-                        .HasForeignKey("PricingRulesPricingRuleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MusicEventManagementSystem.API.Models.TicketType", null)
-                        .WithMany()
-                        .HasForeignKey("TicketTypesTicketTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("RecordedSaleSpecialOffer", b =>
-                {
-                    b.HasOne("MusicEventManagementSystem.API.Models.RecordedSale", null)
-                        .WithMany()
-                        .HasForeignKey("RecordedSalesRecordedSaleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MusicEventManagementSystem.API.Models.SpecialOffer", null)
-                        .WithMany()
-                        .HasForeignKey("SpecialOffersSpecialOfferId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SpecialOfferTicketType", b =>
-                {
-                    b.HasOne("MusicEventManagementSystem.API.Models.SpecialOffer", null)
-                        .WithMany()
-                        .HasForeignKey("SpecialOffersSpecialOfferId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MusicEventManagementSystem.API.Models.TicketType", null)
-                        .WithMany()
-                        .HasForeignKey("TicketTypesTicketTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Event", b =>
-                {
-                    b.Navigation("TicketTypes");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.RecordedSale", b =>
-                {
-                    b.Navigation("Tickets");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Segment", b =>
-                {
-                    b.Navigation("Zones");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.TicketType", b =>
-                {
-                    b.Navigation("Tickets");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Venue", b =>
-                {
-                    b.Navigation("Segments");
-                });
-
-            modelBuilder.Entity("MusicEventManagementSystem.API.Models.Zone", b =>
-                {
-                    b.Navigation("TicketTypes");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,6 +8,9 @@ namespace MusicEventManagementSystem.API.DTOs
         public string Path { get; set; } = string.Empty;
         public string Version { get; set; } = string.Empty;
         public DateTime UpdatedAt { get; set; }
+        
+        // Related entity
+        public int NegotiationId { get; set; }
     }
 
     public class CreateDocumentDto
@@ -16,6 +19,9 @@ namespace MusicEventManagementSystem.API.DTOs
         public string Type { get; set; } = string.Empty;
         public string Path { get; set; } = string.Empty;
         public string Version { get; set; } = string.Empty;
+        
+        // Required foreign key
+        public int NegotiationId { get; set; }
     }
 
     public class UpdateDocumentDto
@@ -24,5 +30,8 @@ namespace MusicEventManagementSystem.API.DTOs
         public string Type { get; set; } = string.Empty;
         public string Path { get; set; } = string.Empty;
         public string Version { get; set; } = string.Empty;
+        
+        // Allow updating foreign key
+        public int NegotiationId { get; set; }
     }
 }

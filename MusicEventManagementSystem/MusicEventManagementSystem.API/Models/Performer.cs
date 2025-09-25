@@ -14,6 +14,10 @@ namespace MusicEventManagementSystem.API.Models
         public TimeSpan AverageResponseTime { get; set; }
         public string Status { get; set; } = string.Empty;
         public DateTime UpdatedAt { get; set; }
+
+        // Navigation Properties
+        public Negotiation? Negotiation { get; set; } // One-to-One relationship
+        public ICollection<Contract> Contracts { get; set; } = new List<Contract>();
     }
 
 }
