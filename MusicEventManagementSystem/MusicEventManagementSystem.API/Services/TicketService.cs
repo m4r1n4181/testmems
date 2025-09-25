@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.DTOs.TicketSales;
 using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
@@ -15,45 +16,81 @@ namespace MusicEventManagementSystem.API.Services
             _ticketRepository = ticketRepository;
         }
 
-        public async Task<IEnumerable<Ticket>> GetAllTicketsAsync()
+        public async Task<IEnumerable<TicketResponseDto>> GetAllTicketsAsync()
         {
-            return await _ticketRepository.GetAllAsync();
+            var tickets = await _ticketRepository.GetAllAsync();
+            return tickets.Select(MapToResponseDto);
         }
 
-        public async Task<Ticket?> GetTicketByIdAsync(int id)
+        public async Task<TicketResponseDto?> GetTicketByIdAsync(int id)
         {
-            return await _ticketRepository.GetByIdAsync(id);
+            var ticket = await _ticketRepository.GetByIdAsync(id);
+
+            if (ticket == null)
+            {
+                return null;
+            }
+
+            return MapToResponseDto(ticket);
         }
 
-        public async Task<Ticket> CreateTicketAsync(Ticket ticket)
+        public async Task<TicketResponseDto> CreateTicketAsync(TicketCreateDto createTicketDto)
         {
+            var ticket = MapToEntity(createTicketDto);
+
+            // Generate unique code if not provided
+            if (string.IsNullOrEmpty(ticket.UniqueCode))
+            {
+                ticket.UniqueCode = await GenerateUniqueCodeAsync();
+            }
+
+            // Generate QR code if not provided
+            if (string.IsNullOrEmpty(ticket.QrCode))
+            {
+                ticket.QrCode = GenerateQrCode(ticket.UniqueCode);
+            }
+
             await _ticketRepository.AddAsync(ticket);
             await _ticketRepository.SaveChangesAsync();
-            return ticket;
+            return MapToResponseDto(ticket);
         }
 
-        public async Task<Ticket?> UpdateTicketAsync(int id, Ticket ticket)
+        public async Task<TicketResponseDto?> UpdateTicketAsync(int id, TicketUpdateDto updateTicketDto)
         {
             var existingTicket = await _ticketRepository.GetByIdAsync(id);
+            
             if (existingTicket == null)
             {
                 return null;
             }
 
-            existingTicket.UniqueCode = ticket.UniqueCode;
-            existingTicket.QrCode = ticket.QrCode;
-            existingTicket.IssueDate = ticket.IssueDate;
-            existingTicket.FinalPrice = ticket.FinalPrice;
-            existingTicket.Status = ticket.Status;
+            if (!string.IsNullOrEmpty(updateTicketDto.UniqueCode))
+                existingTicket.UniqueCode = updateTicketDto.UniqueCode;
+
+            if (!string.IsNullOrEmpty(updateTicketDto.QrCode))
+                existingTicket.QrCode = updateTicketDto.QrCode;
+
+            if (updateTicketDto.IssueDate.HasValue)
+                existingTicket.IssueDate = updateTicketDto.IssueDate.Value;
+
+            if (updateTicketDto.FinalPrice.HasValue)
+                existingTicket.FinalPrice = updateTicketDto.FinalPrice.Value;
+
+            if (updateTicketDto.Status.HasValue)
+                existingTicket.Status = updateTicketDto.Status.Value;
+
+            if (updateTicketDto.RecordedSaleId.HasValue)
+                existingTicket.RecordedSaleId = updateTicketDto.RecordedSaleId.Value;
 
             _ticketRepository.Update(existingTicket);
             await _ticketRepository.SaveChangesAsync();
-            return existingTicket;
+            return MapToResponseDto(existingTicket);
         }
 
         public async Task<bool> DeleteTicketAsync(int id)
         {
             var ticket = await _ticketRepository.GetByIdAsync(id);
+
             if (ticket == null)
             {
                 return false;
@@ -64,19 +101,35 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
 
-        public async Task<IEnumerable<Ticket>> GetTicketsByStatusAsync(TicketStatus status)
+        // Filtered methods
+        public async Task<IEnumerable<TicketResponseDto>> GetTicketsByStatusAsync(TicketStatus status)
         {
-            return await _ticketRepository.GetTicketsByStatusAsync(status);
+            var tickets = await _ticketRepository.GetTicketsByStatusAsync(status);
+            return tickets.Select(MapToResponseDto);
         }
 
-        public async Task<Ticket?> GetTicketByUniqueCodeAsync(string uniqueCode)
+        public async Task<TicketResponseDto?> GetTicketByUniqueCodeAsync(string uniqueCode)
         {
-            return await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
+            var ticket = await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
+
+            if (ticket == null)
+            {
+                return null;
+            }
+
+            return MapToResponseDto(ticket);
         }
 
-        public async Task<Ticket?> GetTicketByQrCodeAsync(string qrCode)
+        public async Task<TicketResponseDto?> GetTicketByQrCodeAsync(string qrCode)
         {
-            return await _ticketRepository.GetTicketByQrCodeAsync(qrCode);
+            var ticket = await _ticketRepository.GetTicketByQrCodeAsync(qrCode);
+            
+            if (ticket == null)
+            {
+                return null;
+            }
+
+            return MapToResponseDto(ticket);
         }
 
         public async Task<int> GetTicketsCountByStatusAsync(TicketStatus status)
@@ -99,17 +152,20 @@ namespace MusicEventManagementSystem.API.Services
             return await _ticketRepository.GetRevenueByStatusAsync(status);
         }
 
-        public async Task<IEnumerable<Ticket>> GetSoldTicketsAsync()
+        public async Task<IEnumerable<TicketResponseDto>> GetSoldTicketsAsync()
         {
-            return await _ticketRepository.GetSoldTicketsAsync();
+            var tickets = await _ticketRepository.GetSoldTicketsAsync();
+            return tickets.Select(MapToResponseDto);
         }
 
-        public async Task<IEnumerable<Ticket>> GetTodaysTicketsAsync()
+        public async Task<IEnumerable<TicketResponseDto>> GetTodaysTicketsAsync()
         {
-            return await _ticketRepository.GetTodaysTicketsAsync();
+            var tickets = await _ticketRepository.GetTodaysTicketsAsync();
+            return tickets.Select(MapToResponseDto);
         }
 
-        public async Task<Ticket?> SellTicketAsync(int ticketId)
+        // Lifecycle methods
+        public async Task<TicketResponseDto?> SellTicketAsync(int ticketId)
         {
             var ticket = await _ticketRepository.GetByIdAsync(ticketId);
 
@@ -122,10 +178,10 @@ namespace MusicEventManagementSystem.API.Services
 
             _ticketRepository.Update(ticket);
             await _ticketRepository.SaveChangesAsync();
-            return ticket;
+            return MapToResponseDto(ticket);
         }
 
-        public async Task<Ticket?> UseTicketAsync(string uniqueCode)
+        public async Task<TicketResponseDto?> UseTicketAsync(string uniqueCode)
         {
             var ticket = await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
 
@@ -138,10 +194,10 @@ namespace MusicEventManagementSystem.API.Services
 
             _ticketRepository.Update(ticket);
             await _ticketRepository.SaveChangesAsync();
-            return ticket;
+            return MapToResponseDto(ticket);
         }
 
-        public async Task<Ticket?> CancelTicketAsync(int ticketId)
+        public async Task<TicketResponseDto?> CancelTicketAsync(int ticketId)
         {
             var ticket = await _ticketRepository.GetByIdAsync(ticketId);
 
@@ -151,39 +207,59 @@ namespace MusicEventManagementSystem.API.Services
             }
 
             ticket.Status = TicketStatus.Cancelled;
-
             _ticketRepository.Update(ticket);
             await _ticketRepository.SaveChangesAsync();
-            return ticket;
+
+            return MapToResponseDto(ticket);
         }
 
+        // Validation methods
         public async Task<bool> IsUniqueCodeValidAsync(string uniqueCode)
         {
             var ticket = await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
-            return IsTicketValid(ticket);
+            return ticket != null && ticket.Status == TicketStatus.Sold;
         }
 
         public async Task<bool> IsQrCodeValidAsync(string qrCode)
         {
             var ticket = await _ticketRepository.GetTicketByQrCodeAsync(qrCode);
-            return IsTicketValid(ticket);
+            return ticket != null && ticket.Status == TicketStatus.Sold;
         }
 
         public async Task<bool> CanTicketBeUsedAsync(string uniqueCode)
         {
             var ticket = await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
-            return IsTicketValid(ticket);
+            return ticket != null && ticket.Status == TicketStatus.Sold;
         }
 
         // Helper methods
-        private bool IsTicketValid(Ticket ticket)
+        private static TicketResponseDto MapToResponseDto(Ticket ticket)
         {
-            if (ticket != null && ticket.Status == TicketStatus.Sold)
+            return new TicketResponseDto
             {
-                return true;
-            }
+                TicketId = ticket.TicketId,
+                UniqueCode = ticket.UniqueCode,
+                QrCode = ticket.QrCode,
+                IssueDate = ticket.IssueDate,
+                FinalPrice = ticket.FinalPrice,
+                Status = ticket.Status,
+                TicketTypeId = ticket.TicketTypeId,
+                RecordedSaleId = ticket.RecordedSaleId
+            };
+        }
 
-            return false;
+        private static Ticket MapToEntity(TicketCreateDto dto)
+        {
+            return new Ticket
+            {
+                UniqueCode = dto.UniqueCode,
+                QrCode = dto.QrCode,
+                IssueDate = dto.IssueDate,
+                FinalPrice = dto.FinalPrice,
+                Status = dto.Status,
+                TicketTypeId = dto.TicketTypeId,
+                RecordedSaleId = dto.RecordedSaleId
+            };
         }
 
         private async Task<string> GenerateUniqueCodeAsync()
@@ -194,11 +270,11 @@ namespace MusicEventManagementSystem.API.Services
             do
             {
                 uniqueCode = GenerateRandomCode();
-                var existingTicket = await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
-                isCodeUnique = existingTicket == null;
-            }
-            while(!isCodeUnique);
-
+                var existing = await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
+                
+                isCodeUnique = existing == null;
+            } while (!isCodeUnique);
+            
             return uniqueCode;
         }
 
@@ -206,9 +282,9 @@ namespace MusicEventManagementSystem.API.Services
         {
             var random = new Random();
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            const int codeLength = 10;
+            const int length = 10;
 
-            return new string(Enumerable.Repeat(chars, codeLength).Select(s => s[random.Next(s.Length)]).ToArray());
+            return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
         private static string GenerateQrCode(string uniqueCode)
