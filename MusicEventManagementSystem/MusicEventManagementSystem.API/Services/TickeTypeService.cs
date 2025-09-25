@@ -1,4 +1,6 @@
-﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using MusicEventManagementSystem.API.DTOs.TicketSales;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
@@ -14,40 +16,58 @@ namespace MusicEventManagementSystem.API.Services
             _ticketTypeRepository = ticketTypeRepository;
         }
 
-        public async Task<IEnumerable<TicketType>> GetAllTicketTypesAsync()
+        public async Task<IEnumerable<TicketTypeResponseDto>> GetAllTicketTypesAsync()
         {
-            return await _ticketTypeRepository.GetAllAsync();
+            var types = await _ticketTypeRepository.GetAllAsync();
+            return types.Select(MapToResponseDto);
         }
 
-        public async Task<TicketType?> GetTicketTypeByIdAsync(int id)
-        {
-            return await _ticketTypeRepository.GetByIdAsync(id);
-        }
 
-        public async Task<TicketType> CreateTicketTypeAsync(TicketType ticketType)
+        public async Task<TicketTypeResponseDto?> GetTicketTypeByIdAsync(int id)
         {
-            await _ticketTypeRepository.AddAsync(ticketType);
-            await _ticketTypeRepository.SaveChangesAsync();
-            return ticketType;
-        }
-
-        public async Task<TicketType?> UpdateTicketTypeAsync(int id, TicketType ticketType)
-        {
-            var existingTicketType = await _ticketTypeRepository.GetByIdAsync(id);
+            var type = await _ticketTypeRepository.GetByIdAsync(id);
             
-            if (existingTicketType == null)
+            if (type == null)
             {
                 return null;
             }
 
-            existingTicketType.Name = ticketType.Name;
-            existingTicketType.Description = ticketType.Description;
-            existingTicketType.Status = ticketType.Status;
-            existingTicketType.AvailableQuantity = ticketType.AvailableQuantity;
+            return MapToResponseDto(type);
+        }
 
-            _ticketTypeRepository.Update(existingTicketType);
+        public async Task<TicketTypeResponseDto> CreateTicketTypeAsync(TicketTypeCreateDto createDto)
+        {
+            var ticketType = MapToEntity(createDto);
+
+            await _ticketTypeRepository.AddAsync(ticketType);
             await _ticketTypeRepository.SaveChangesAsync();
-            return existingTicketType;
+            return MapToResponseDto(ticketType);
+        }
+
+        public async Task<TicketTypeResponseDto?> UpdateTicketTypeAsync(int id, TicketTypeUpdateDto updateDto)
+        {
+            var existing = await _ticketTypeRepository.GetByIdAsync(id);
+            if (existing == null)
+            {
+                return null;
+            }
+
+            if (!string.IsNullOrEmpty(updateDto.Name))
+                existing.Name = updateDto.Name;
+            if (updateDto.Description != null)
+                existing.Description = updateDto.Description;
+            if (updateDto.Status.HasValue)
+                existing.Status = updateDto.Status.Value;
+            if (updateDto.AvailableQuantity.HasValue)
+                existing.AvailableQuantity = updateDto.AvailableQuantity.Value;
+            if (updateDto.ZoneId.HasValue)
+                existing.ZoneId = updateDto.ZoneId.Value;
+            if (updateDto.EventId.HasValue)
+                existing.EventId = updateDto.EventId.Value;
+
+            _ticketTypeRepository.Update(existing);
+            await _ticketTypeRepository.SaveChangesAsync();
+            return MapToResponseDto(existing);
         }
 
         public async Task<bool> DeleteTicketTypeAsync(int id)
@@ -64,24 +84,28 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
 
-        public async Task<IEnumerable<TicketType>> GetByZoneIdAsync(int zoneId)
+        public async Task<IEnumerable<TicketTypeResponseDto>> GetByZoneIdAsync(int zoneId)
         {
-            return await _ticketTypeRepository.GetByZoneIdAsync(zoneId);
+            var list = await _ticketTypeRepository.GetByZoneIdAsync(zoneId);
+            return list.Select(MapToResponseDto);
         }
 
-        public async Task<IEnumerable<TicketType>> GetByEventIdAsync(int eventId)
+        public async Task<IEnumerable<TicketTypeResponseDto>> GetByEventIdAsync(int eventId)
         {
-            return await _ticketTypeRepository.GetByEventIdAsync(eventId);
+            var list = await _ticketTypeRepository.GetByEventIdAsync(eventId);
+            return list.Select(MapToResponseDto);
         }
 
-        public async Task<IEnumerable<TicketType>> GetByStatusAsync(TicketTypeStatus status)
+        public async Task<IEnumerable<TicketTypeResponseDto>> GetByStatusAsync(TicketTypeStatus status)
         {
-            return await _ticketTypeRepository.GetByStatusAsync(status);
+            var list = await _ticketTypeRepository.GetByStatusAsync(status);
+            return list.Select(MapToResponseDto);
         }
 
-        public async Task<IEnumerable<TicketType>> GetAvailableTicketTypesAsync()
+        public async Task<IEnumerable<TicketTypeResponseDto>> GetAvailableTicketTypesAsync()
         {
-            return await _ticketTypeRepository.GetAvailableTicketTypesAsync();
+            var list = await _ticketTypeRepository.GetAvailableTicketTypesAsync();
+            return list.Select(MapToResponseDto);
         }
 
         public async Task<bool> UpdateAvailableQuantityAsync(int id, int quantity)
@@ -94,9 +118,10 @@ namespace MusicEventManagementSystem.API.Services
             return await _ticketTypeRepository.UpdateAvailableQuantityAsync(id, quantity);
         }
 
-        public async Task<IEnumerable<TicketType>> GetByZoneAndEventAsync(int zoneId, int eventId)
+        public async Task<IEnumerable<TicketTypeResponseDto>> GetByZoneAndEventAsync(int zoneId, int eventId)
         {
-            return await _ticketTypeRepository.GetByZoneAndEventAsync(zoneId, eventId);
+            var list = await _ticketTypeRepository.GetByZoneAndEventAsync(zoneId, eventId);
+            return list.Select(MapToResponseDto);
         }
 
         public async Task<int> GetTotalAvailableQuantityByEventAsync(int eventId)
@@ -138,6 +163,34 @@ namespace MusicEventManagementSystem.API.Services
 
             var newQuantity = existingTicketType.AvailableQuantity + quantity;
             return await _ticketTypeRepository.UpdateAvailableQuantityAsync(ticketTypeId, newQuantity);
+        }
+
+        // Helper methods for mapping
+        private static TicketTypeResponseDto MapToResponseDto(TicketType entity)
+        {
+            return new TicketTypeResponseDto
+            {
+                TicketTypeId = entity.TicketTypeId,
+                Name = entity.Name,
+                Description = entity.Description,
+                Status = entity.Status,
+                AvailableQuantity = entity.AvailableQuantity,
+                ZoneId = entity.ZoneId,
+                EventId = entity.EventId
+            };
+        }
+
+        private static TicketType MapToEntity(TicketTypeCreateDto dto)
+        {
+            return new TicketType
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Status = dto.Status,
+                AvailableQuantity = dto.AvailableQuantity,
+                ZoneId = dto.ZoneId,
+                EventId = dto.EventId
+            };
         }
     }
 }
