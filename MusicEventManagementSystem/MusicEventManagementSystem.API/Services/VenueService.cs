@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.DTOs.TicketSales;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
 
@@ -13,42 +14,62 @@ namespace MusicEventManagementSystem.API.Services
             _venueRepository = venueRepository;
         }
 
-        public async Task<IEnumerable<Venue>> GetAllVenuesAsync()
+        public async Task<IEnumerable<VenueResponseDto>> GetAllVenuesAsync()
         {
-            return await _venueRepository.GetAllAsync();
+            var venues = await _venueRepository.GetAllAsync();
+            return venues.Select(MapToResponseDto);
         }
 
-        public async Task<Venue?> GetVenueByIdAsync(int venueId)
+        public async Task<VenueResponseDto?> GetVenueByIdAsync(int id)
         {
-            return await _venueRepository.GetByIdAsync(venueId);
-        }
-
-        public async Task<Venue> CreateVenueAsync(Venue venue)
-        {
-            await _venueRepository.AddAsync(venue);
-            await _venueRepository.SaveChangesAsync();
-            return venue;
-        }
-
-        public async Task<Venue?> UpdateVenueAsync(int venueId, Venue venue)
-        {
-            var existingVenue = await _venueRepository.GetByIdAsync(venueId);
-
+            var existingVenue = await _venueRepository.GetByIdAsync(id);
+            
             if (existingVenue == null)
             {
                 return null;
             }
-            
-            existingVenue.Name = venue.Name;
-            existingVenue.Description = venue.Description;
-            existingVenue.City = venue.City;
-            existingVenue.Address = venue.Address;
-            existingVenue.Capacity = venue.Capacity;
-            existingVenue.VenueType = venue.VenueType;
+
+            return MapToResponseDto(existingVenue);
+        }
+
+        public async Task<VenueResponseDto> CreateVenueAsync(VenueCreateDto createVenueDto)
+        {
+            var venue = MapToEntity(createVenueDto);
+
+            await _venueRepository.AddAsync(venue);
+            await _venueRepository.SaveChangesAsync();
+            return MapToResponseDto(venue);
+        }
+
+        public async Task<VenueResponseDto?> UpdateVenueAsync(int id, VenueUpdateDto updateVenueDto)
+        {
+            var existingVenue = await _venueRepository.GetByIdAsync(id);
+            if (existingVenue == null)
+            {
+                return null;
+            }
+
+            if (!string.IsNullOrEmpty(updateVenueDto.Name))
+                existingVenue.Name = updateVenueDto.Name;
+
+            if (updateVenueDto.Description != null)
+                existingVenue.Description = updateVenueDto.Description;
+
+            if (!string.IsNullOrEmpty(updateVenueDto.City))
+                existingVenue.City = updateVenueDto.City;
+
+            if (!string.IsNullOrEmpty(updateVenueDto.Address))
+                existingVenue.Address = updateVenueDto.Address;
+
+            if (updateVenueDto.Capacity.HasValue)
+                existingVenue.Capacity = updateVenueDto.Capacity.Value;
+
+            if (updateVenueDto.VenueType.HasValue)
+                existingVenue.VenueType = updateVenueDto.VenueType.Value;
 
             _venueRepository.Update(existingVenue);
             await _venueRepository.SaveChangesAsync();
-            return existingVenue;
+            return MapToResponseDto(existingVenue);
         }
 
         public async Task<bool> DeleteVenueAsync(int venueId)
@@ -65,14 +86,16 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
 
-        public async Task<IEnumerable<Venue>> GetByCityAsync(string city)
+        public async Task<IEnumerable<VenueResponseDto>> GetByCityAsync(string city)
         {
-            return await _venueRepository.GetByCityAsync(city);
+            var venues = await _venueRepository.GetByCityAsync(city);
+            return venues.Select(MapToResponseDto);
         }
 
-        public Task<IEnumerable<Venue>> GetByCapacityRangeAsync(int min, int max)
+        public async Task<IEnumerable<VenueResponseDto>> GetByCapacityRangeAsync(int min, int max)
         {
-            return _venueRepository.GetByCapacityRangeAsync(min, max);
+            var venues = await _venueRepository.GetByCapacityRangeAsync(min, max);
+            return venues.Select(MapToResponseDto);
         }
 
         public async Task<IEnumerable<Segment>> GetSegmentsAsync(int venueId)
@@ -84,6 +107,38 @@ namespace MusicEventManagementSystem.API.Services
         {
             var segments = await _venueRepository.GetSegmentsAsync(venueId);
             return segments.Sum(s => s.Capacity);
+        }
+
+        // Helper methods for mapping
+        private static VenueResponseDto MapToResponseDto(Venue venue)
+        {
+            return new VenueResponseDto
+            {
+                VenueId = venue.VenueId,
+                Name = venue.Name,
+                Description = venue.Description,
+                City = venue.City,
+                Address = venue.Address,
+                Capacity = venue.Capacity,
+                VenueType = venue.VenueType ?? Enums.TicketSales.VenueType.Indoor,
+                Segments = venue.Segments?.Select(s => new SegmentResponseDto
+                {
+                    // Map segment properties here
+                }).ToList()
+            };
+        }
+
+        private static Venue MapToEntity(VenueCreateDto dto)
+        {
+            return new Venue
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                City = dto.City,
+                Address = dto.Address,
+                Capacity = dto.Capacity,
+                VenueType = dto.VenueType
+            };
         }
     }
 }

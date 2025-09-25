@@ -45,42 +45,6 @@ namespace MusicEventManagementSystem.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             // Ticket-Sales Subsystem configurations
-            // Configuring enum fields to be stored as integers
-            builder.Entity<Venue>()
-                .Property(v => v.VenueType)
-                .HasConversion<int>();
-
-            builder.Entity<Segment>()
-                .Property(s => s.SegmentType)
-                .HasConversion<int>();
-
-            builder.Entity<Zone>()
-                .Property(z => z.Position)
-                .HasConversion<int>();
-
-            builder.Entity<Ticket>()
-                .Property(t => t.Status)
-                .HasConversion<int>();
-
-            builder.Entity<TicketType>()
-                .Property(tt =>tt.Status)
-                .HasConversion<int>();
-
-            builder.Entity<SpecialOffer>()
-                .Property(so => so.OfferType)
-                .HasConversion<int>();
-
-            builder.Entity<PricingRule>()
-                .Property(pr => pr.PricingCondition)
-                .HasConversion<int>();
-
-            builder.Entity<RecordedSale>()
-                .Property(rs => rs.PaymentMethod)
-                .HasConversion<int>();
-
-            builder.Entity<RecordedSale>()
-                .Property(rs => rs.TransactionStatus)
-                .HasConversion<int>();
 
             // One-To-Many relationships for Ticket-Sales Subsystem
 

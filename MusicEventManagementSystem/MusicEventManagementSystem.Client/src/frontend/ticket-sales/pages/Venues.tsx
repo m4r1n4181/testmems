@@ -1,23 +1,23 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, X, AlertCircle, MapPin, Users, Building2 } from "lucide-react";
 import { venueService } from "../services/venueService";
-import type { Venue, CreateVenueDto } from "../services/venueService";
+import type { VenueResponseDto, VenueCreateDto, VenueUpdateDto } from "../services/venueService";
 
 
 const Venues = () => {
-  const [venues, setVenues] = useState<Venue[]>([]);
+  const [venues, setVenues] = useState<VenueResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [editingVenue, setEditingVenue] = useState<Venue | null>(null);
+  const [editingVenue, setEditingVenue] = useState<VenueResponseDto | null>(null);
   const [error, setError] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
-  const [formData, setFormData] = useState<CreateVenueDto>({
+  const [formData, setFormData] = useState<VenueCreateDto>({
     name: "",
     description: "",
     city: "",
     address: "",
     capacity: 0,
-    venueType: ""
+    venueType: 0
   });
 
   // Fetch all venues
@@ -58,7 +58,17 @@ const Venues = () => {
     try {
       setSubmitting(true);
       setError("");
-      await venueService.updateVenue(editingVenue.venueId, formData);
+      
+      const updateData: VenueUpdateDto = {
+        name: formData.name,
+        description: formData.description,
+        city: formData.city,
+        address: formData.address,
+        capacity: formData.capacity,
+        venueType: formData.venueType
+      };
+
+      await venueService.updateVenue(editingVenue.venueId, updateData);
       await fetchVenues();
       closeModal();
     } catch (error) {
@@ -83,7 +93,7 @@ const Venues = () => {
   };
 
   // Open modal for create/edit
-  const openModal = (venue?: Venue) => {
+  const openModal = (venue?: VenueResponseDto) => {
     setError("");
     if (venue) {
       setEditingVenue(venue);
@@ -93,7 +103,7 @@ const Venues = () => {
         city: venue.city || "",
         address: venue.address || "",
         capacity: venue.capacity,
-        venueType: venue.venueType || ""
+        venueType: venue.venueType || 0
       });
     } else {
       setEditingVenue(null);
@@ -103,7 +113,7 @@ const Venues = () => {
         city: "",
         address: "",
         capacity: 0,
-        venueType: ""
+        venueType: 0
       });
     }
     setShowModal(true);
@@ -124,7 +134,7 @@ const Venues = () => {
     }
   };
 
-  const handleInputChange = (field: keyof CreateVenueDto, value: string | number) => {
+  const handleInputChange = (field: keyof VenueCreateDto, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -238,7 +248,7 @@ const Venues = () => {
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-lime-500/20 rounded-lg">
-                  {getVenueTypeIcon(venue.venueType)}
+                  {getVenueTypeIcon(String(venue.venueType))}
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white group-hover:text-lime-400 transition-colors">

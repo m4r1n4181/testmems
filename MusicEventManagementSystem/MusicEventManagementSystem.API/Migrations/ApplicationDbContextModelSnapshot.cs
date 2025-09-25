@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace MusicEventManagementSystem.Migrations
+namespace MusicEventManagementSystem.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -321,7 +321,7 @@ namespace MusicEventManagementSystem.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Interval")
+                    b.Property<DateTime>("EventInterval")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("LocationId")
@@ -605,6 +605,9 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<decimal>("OccupancyThreshold2")
                         .HasColumnType("numeric");
 
+                    b.Property<int>("PricingCondition")
+                        .HasColumnType("integer");
+
                     b.HasKey("PricingRuleId");
 
                     b.ToTable("PricingRules");
@@ -622,8 +625,8 @@ namespace MusicEventManagementSystem.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("PaymentMethod")
-                        .HasColumnType("text");
+                    b.Property<int?>("PaymentMethod")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("SaleDate")
                         .HasColumnType("timestamp with time zone");
@@ -631,8 +634,8 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");
 
-                    b.Property<string>("TransactionStatus")
-                        .HasColumnType("text");
+                    b.Property<int?>("TransactionStatus")
+                        .HasColumnType("integer");
 
                     b.HasKey("RecordedSaleId");
 
@@ -724,8 +727,8 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<string>("SegmentType")
-                        .HasColumnType("text");
+                    b.Property<int?>("SegmentType")
+                        .HasColumnType("integer");
 
                     b.Property<int>("VenueId")
                         .HasColumnType("integer");
@@ -790,8 +793,8 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<string>("OfferType")
-                        .HasColumnType("text");
+                    b.Property<int?>("OfferType")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
@@ -846,8 +849,8 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<int?>("RecordedSaleId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
+                    b.Property<int?>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<int>("TicketTypeId")
                         .HasColumnType("integer");
@@ -884,8 +887,8 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
+                    b.Property<int?>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<int>("ZoneId")
                         .HasColumnType("integer");
@@ -954,8 +957,8 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<string>("VenueType")
-                        .HasColumnType("text");
+                    b.Property<int?>("VenueType")
+                        .HasColumnType("integer");
 
                     b.HasKey("VenueId");
 
@@ -1024,8 +1027,8 @@ namespace MusicEventManagementSystem.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<string>("Position")
-                        .HasColumnType("text");
+                    b.Property<int?>("Position")
+                        .HasColumnType("integer");
 
                     b.Property<int>("SegmentId")
                         .HasColumnType("integer");

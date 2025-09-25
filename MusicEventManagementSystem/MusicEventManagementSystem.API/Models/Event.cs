@@ -7,7 +7,7 @@ namespace MusicEventManagementSystem.API.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public DateTime Interval { get; set; }
+        public DateTime EventInterval { get; set; }
         public EventStatus Status { get; set; } 
         public Guid CreatedById { get; set; }
         public int LocationId { get; set; }

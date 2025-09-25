@@ -12,6 +12,15 @@ namespace MusicEventManagementSystem.API.Repositories
         {
         }
 
+        public override async Task<IEnumerable<RecordedSale>> GetAllAsync()
+        {
+            return await _context.RecordedSales
+                .Include(rs => rs.ApplicationUser)
+                .Include(rs => rs.Tickets)
+                .OrderByDescending(rs => rs.SaleDate)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<RecordedSale>> GetSalesByUserAsync(string userId)
         {
             return await _context.RecordedSales.Where(rs => rs.ApplicationUserId == userId).OrderByDescending(rs => rs.SaleDate).ToListAsync();
