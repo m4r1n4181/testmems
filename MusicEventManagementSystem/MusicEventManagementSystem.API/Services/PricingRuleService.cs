@@ -121,9 +121,14 @@ namespace MusicEventManagementSystem.API.Services
             return pricingRules.Select(MapToResponseDto);
         }
 
-        public async Task<decimal> CalculatePriceAsync(int pricingRuleId, decimal basePrice, decimal occupancyRate, bool isEarlyBird = false)
+        public async Task<decimal> CalculatePriceAsync(int pricingRuleId, CalculatePriceRequestDto priceRequestDto)
         {
-            return await _pricingRuleRepository.CalculatePriceAsync(pricingRuleId, basePrice, occupancyRate, isEarlyBird);
+            if (priceRequestDto.OccupancyRate < 0 || priceRequestDto.OccupancyRate > 100)
+                throw new ArgumentException("Occupancy rate must be between 0 and 100.");
+
+            return await _pricingRuleRepository.CalculatePriceAsync(
+                pricingRuleId, priceRequestDto.BasePrice, priceRequestDto.OccupancyRate, priceRequestDto.IsEarlyBird
+            );
         }
 
         // Helper methods for mapping
@@ -143,7 +148,9 @@ namespace MusicEventManagementSystem.API.Services
                 OccupancyThreshold2 = pricingRule.OccupancyThreshold2,
                 EarlyBirdPercentage = pricingRule.EarlyBirdPercentage,
                 DynamicCondition = pricingRule.DynamicCondition,
-                Modifier = pricingRule.Modifier
+                Modifier = pricingRule.Modifier,
+                EventIds = pricingRule.Events?.Select(e => e.Id).ToList(),
+                TicketTypesIds = pricingRule.TicketTypes?.Select(tt => tt.TicketTypeId).ToList()
             };
         }
 

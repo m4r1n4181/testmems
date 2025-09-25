@@ -1,4 +1,6 @@
-﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+﻿using MusicEventManagementSystem.API.DTOs;
+using MusicEventManagementSystem.API.DTOs.TicketSales;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
@@ -14,42 +16,59 @@ namespace MusicEventManagementSystem.API.Services
             _recordedSaleRepository = recordedSaleRepository;
         }
 
-        public async Task<IEnumerable<RecordedSale>> GetAllRecordedSalesAsync()
+        public async Task<IEnumerable<RecordedSaleResponseDto>> GetAllRecordedSalesAsync()
         {
-            return await _recordedSaleRepository.GetAllAsync();
+            var recordedSales = await _recordedSaleRepository.GetAllAsync();
+            return recordedSales.Select(MapToResponseDto);
         }
 
-        public async Task<RecordedSale?> GetRecordedSaleByIdAsync(int id)
+        public async Task<RecordedSaleResponseDto?> GetRecordedSaleByIdAsync(int id)
         {
-            return await _recordedSaleRepository.GetByIdAsync(id);
+            var recordedSale = await _recordedSaleRepository.GetByIdAsync(id);
+            
+            if (recordedSale == null)
+            {
+                return null;
+            }
+
+            return MapToResponseDto(recordedSale);
         }
 
-        public async Task<RecordedSale> CreateRecordedSaleAsync(RecordedSale recordedSale)
+        public async Task<RecordedSaleResponseDto> CreateRecordedSaleAsync(RecordedSaleCreateDto createRecordedSaleDto)
         {
+            var recordedSale = MapToEntity(createRecordedSaleDto);
+
             recordedSale.SaleDate = DateTime.UtcNow;
 
             await _recordedSaleRepository.AddAsync(recordedSale);
             await _recordedSaleRepository.SaveChangesAsync();
-            return recordedSale;
+            return MapToResponseDto(recordedSale);
         }
 
-        public async Task<RecordedSale?> UpdateRecordedSaleAsync(int id, RecordedSale recordedSale)
+        public async Task<RecordedSaleResponseDto?> UpdateRecordedSaleAsync(int id, RecordedSaleUpdateDto updateRecordedSaleDto)
         {
             var existingRecordedSale = await _recordedSaleRepository.GetByIdAsync(id);
-            
+
             if (existingRecordedSale == null)
             {
                 return null;
             }
 
-            existingRecordedSale.TotalAmount = recordedSale.TotalAmount;
-            existingRecordedSale.PaymentMethod = recordedSale.PaymentMethod;
-            existingRecordedSale.SaleDate = recordedSale.SaleDate;
-            existingRecordedSale.TransactionStatus = recordedSale.TransactionStatus;
+            if (updateRecordedSaleDto.TotalAmount.HasValue)
+                existingRecordedSale.TotalAmount = updateRecordedSaleDto.TotalAmount.Value;
+
+            if (updateRecordedSaleDto.PaymentMethod.HasValue)
+                existingRecordedSale.PaymentMethod = updateRecordedSaleDto.PaymentMethod.Value;
+
+            if (updateRecordedSaleDto.SaleDate.HasValue)
+                existingRecordedSale.SaleDate = updateRecordedSaleDto.SaleDate.Value;
+
+            if (updateRecordedSaleDto.TransactionStatus.HasValue)
+                existingRecordedSale.TransactionStatus = updateRecordedSaleDto.TransactionStatus.Value;
 
             _recordedSaleRepository.Update(existingRecordedSale);
             await _recordedSaleRepository.SaveChangesAsync();
-            return existingRecordedSale;
+            return MapToResponseDto(existingRecordedSale);
         }
 
         public async Task<bool> DeleteRecordedSaleAsync(int id)
@@ -66,24 +85,28 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
 
-        public async Task<IEnumerable<RecordedSale>> GetSalesByUserAsync(string userId)
+        public async Task<IEnumerable<RecordedSaleResponseDto>> GetSalesByUserAsync(string userId)
         {
-            return await _recordedSaleRepository.GetSalesByUserAsync(userId);
+            var sales = await _recordedSaleRepository.GetSalesByUserAsync(userId);
+            return sales.Select(MapToResponseDto);
         }
 
-        public async Task<IEnumerable<RecordedSale>> GetSalesByDateRangeAsync(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<RecordedSaleResponseDto>> GetSalesByDateRangeAsync(DateTime fromDate, DateTime toDate)
         {
-            return await _recordedSaleRepository.GetSalesByDateRangeAsync(fromDate, toDate);
+            var sales = await _recordedSaleRepository.GetSalesByDateRangeAsync(fromDate, toDate);
+            return sales.Select(MapToResponseDto);
         }
 
-        public async Task<IEnumerable<RecordedSale>> GetSalesByStatusAsync(TransactionStatus status)
+        public async Task<IEnumerable<RecordedSaleResponseDto>> GetSalesByStatusAsync(TransactionStatus status)
         {
-            return await _recordedSaleRepository.GetSalesByStatusAsync(status);
+            var sales = await _recordedSaleRepository.GetSalesByStatusAsync(status);
+            return sales.Select(MapToResponseDto);
         }
 
-        public async Task<IEnumerable<RecordedSale>> GetSalesByPaymentMethodAsync(PaymentMethod paymentMethod)
+        public async Task<IEnumerable<RecordedSaleResponseDto>> GetSalesByPaymentMethodAsync(PaymentMethod paymentMethod)
         {
-            return await _recordedSaleRepository.GetSalesByPaymentMethodAsync(paymentMethod);
+            var sales = await _recordedSaleRepository.GetSalesByPaymentMethodAsync(paymentMethod);
+            return sales.Select(MapToResponseDto);
         }
 
         public async Task<decimal> GetTotalRevenueAsync()
@@ -99,6 +122,35 @@ namespace MusicEventManagementSystem.API.Services
         public async Task<int> GetSalesCountByStatusAsync(TransactionStatus status)
         {
             return await _recordedSaleRepository.GetSalesCountByStatusAsync(status);
+        }
+
+        // Helper methods for mapping
+        
+        private static RecordedSaleResponseDto MapToResponseDto(RecordedSale recordedSale)
+        {
+            return new RecordedSaleResponseDto
+            {
+                RecordedSaleId = recordedSale.RecordedSaleId,
+                TotalAmount = recordedSale.TotalAmount,
+                PaymentMethod = recordedSale.PaymentMethod,
+                SaleDate = recordedSale.SaleDate,
+                TransactionStatus = recordedSale.TransactionStatus,
+                ApplicationUserId = recordedSale.ApplicationUserId,
+                TicketIds = recordedSale.Tickets?.Select(t => t.TicketId).ToList(),
+                SpecialOfferIds = recordedSale.SpecialOffers?.Select(so => so.SpecialOfferId).ToList()
+            };
+        }
+
+        private static RecordedSale MapToEntity(RecordedSaleCreateDto dto)
+        {
+            return new RecordedSale
+            {
+                TotalAmount = dto.TotalAmount,
+                PaymentMethod = dto.PaymentMethod,
+                SaleDate = dto.SaleDate,
+                TransactionStatus = dto.TransactionStatus,
+                ApplicationUserId = dto.ApplicationUserId
+            };
         }
     }
 }

@@ -14,6 +14,8 @@ namespace MusicEventManagementSystem.API.DTOs.TicketSales
         public string? ApplicationCondition { get; set; }
         public decimal DiscountValue { get; set; }
         public int TicketLimit { get; set; }
+        public List<int>? TicketTypeIds { get; set; }
+        public List<int>? RecordedSaleIds { get; set; }
     }
 
     public class SpecialOfferCreateDto

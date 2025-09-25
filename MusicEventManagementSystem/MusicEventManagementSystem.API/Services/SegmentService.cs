@@ -110,17 +110,7 @@ namespace MusicEventManagementSystem.API.Services
                 BasePrice = z.BasePrice,
                 Position = z.Position,
                 SegmentId = z.SegmentId,
-                Segment = z.Segment != null ? new SegmentResponseDto
-                {
-                    SegmentId = z.Segment.SegmentId,
-                    Name = z.Segment.Name,
-                    Description = z.Segment.Description,
-                    Capacity = z.Segment.Capacity,
-                    SegmentType = z.Segment.SegmentType,
-                    VenueId = z.Segment.VenueId
-                    // Avoid mapping Venue.Segments to prevent circular reference
-                } : null,
-                TicketTypes = z.TicketTypes?.Select(MapToTicketTypeResponseDto).ToList()
+                TicketTypeIds = z.TicketTypes?.Select(tt => tt.TicketTypeId).ToList()
             });
         }
 
@@ -141,63 +131,7 @@ namespace MusicEventManagementSystem.API.Services
                 Capacity = segment.Capacity,
                 SegmentType = segment.SegmentType,
                 VenueId = segment.VenueId,
-                Venue = segment.Venue != null ? new VenueResponseDto
-                {
-                    VenueId = segment.Venue.VenueId,
-                    Name = segment.Venue.Name,
-                    Description = segment.Venue.Description,
-                    City = segment.Venue.City,
-                    Address = segment.Venue.Address,
-                    Capacity = segment.Venue.Capacity,
-                    VenueType = segment.Venue.VenueType
-                    // Avoid mapping Venue.Segments to prevent circular reference
-                } : null,
-                Zones = segment.Zones?.Select(z => new ZoneResponseDto
-                {
-                    ZoneId = z.ZoneId,
-                    Name = z.Name,
-                    Description = z.Description,
-                    Capacity = z.Capacity,
-                    BasePrice = z.BasePrice,
-                    Position = z.Position,
-                    SegmentId = z.SegmentId,
-                    TicketTypes = z.TicketTypes?.Select(MapToTicketTypeResponseDto).ToList()
-                }).ToList()
-            };
-        }
-
-        private static TicketTypeResponseDto MapToTicketTypeResponseDto(TicketType ticketType)
-        {
-            return new TicketTypeResponseDto
-            {
-                TicketTypeId = ticketType.TicketTypeId,
-                Name = ticketType.Name,
-                Description = ticketType.Description,
-                Status = ticketType.Status,
-                AvailableQuantity = ticketType.AvailableQuantity,
-                ZoneId = ticketType.ZoneId,
-                EventId = ticketType.EventId,
-                // Avoid mapping Zone to prevent circular reference
-                // Zone = ticketType.Zone != null ? new ZoneResponseDto { ... } : null,
-                Event = ticketType.Event != null ? new EventResponseDto
-                {
-                    Id = ticketType.Event.Id,
-                    Name = ticketType.Event.Name,
-                    Description = ticketType.Event.Description
-                    // Add other Event properties as needed
-                } : null,
-                Tickets = ticketType.Tickets?.Select(t => new TicketResponseDto
-                {
-                    // Map Ticket properties if TicketResponseDto exists
-                }).ToList(),
-                SpecialOffers = ticketType.SpecialOffers?.Select(so => new SpecialOfferResponseDto
-                {
-                    // Map SpecialOffer properties if SpecialOfferResponseDto exists
-                }).ToList(),
-                PricingRules = ticketType.PricingRules?.Select(pr => new PricingRuleResponseDto
-                {
-                    // Map PricingRule properties if PricingRuleResponseDto exists
-                }).ToList()
+                Zones = segment.Zones?.Select(z => z.ZoneId).ToList()
             };
         }
 

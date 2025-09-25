@@ -163,7 +163,9 @@ namespace MusicEventManagementSystem.API.Services
                 EndDate = specialOffer.EndDate,
                 ApplicationCondition = specialOffer.ApplicationCondition,
                 DiscountValue = specialOffer.DiscountValue,
-                TicketLimit = specialOffer.TicketLimit
+                TicketLimit = specialOffer.TicketLimit,
+                TicketTypeIds = specialOffer.TicketTypes?.Select(tt => tt.TicketTypeId).ToList(),
+                RecordedSaleIds = specialOffer.RecordedSales?.Select(rs => rs.RecordedSaleId).ToList()
             };
         }
 

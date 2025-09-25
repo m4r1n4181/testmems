@@ -11,9 +11,8 @@ namespace MusicEventManagementSystem.API.DTOs.TicketSales
         public DateTime SaleDate { get; set; }
         public TransactionStatus TransactionStatus { get; set; }
         public string ApplicationUserId { get; set; }
-        public ApplicationUserResponseDto? ApplicationUser { get; set; }
-        public List<TicketResponseDto>? Tickets { get; set; }
-        public List<SpecialOfferResponseDto>? SpecialOffers { get; set; }
+        public List<int>? TicketIds { get; set; }
+        public List<int>? SpecialOfferIds { get; set; }
     }
 
     public class RecordedSaleCreateDto

@@ -176,7 +176,10 @@ namespace MusicEventManagementSystem.API.Services
                 Status = entity.Status,
                 AvailableQuantity = entity.AvailableQuantity,
                 ZoneId = entity.ZoneId,
-                EventId = entity.EventId
+                EventId = entity.EventId,
+                TicketIds = entity.Tickets?.Select(t => t.TicketId).ToList(),
+                SpecialOfferIds = entity.SpecialOffers?.Select(so => so.SpecialOfferId).ToList(),
+                PricingRuleIds = entity.PricingRules?.Select(pr => pr.PricingRuleId).ToList()
             };
         }
 

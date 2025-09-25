@@ -121,10 +121,7 @@ namespace MusicEventManagementSystem.API.Services
                 Address = venue.Address,
                 Capacity = venue.Capacity,
                 VenueType = venue.VenueType,
-                Segments = venue.Segments?.Select(s => new SegmentResponseDto
-                {
-                    // Map segment properties here
-                }).ToList()
+                Segments = venue.Segments?.Select(s => s.SegmentId).ToList()
             };
         }
 

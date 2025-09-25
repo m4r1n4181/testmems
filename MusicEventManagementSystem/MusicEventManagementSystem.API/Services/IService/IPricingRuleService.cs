@@ -14,6 +14,6 @@ namespace MusicEventManagementSystem.API.Services.IService
         Task<IEnumerable<PricingRuleResponseDto>> GetActivePricingRulesAsync();
         Task<IEnumerable<PricingRuleResponseDto>> GetPricingRulesByEventAsync(int eventId);
         Task<IEnumerable<PricingRuleResponseDto>> GetPricingRulesByTicketTypeAsync(int ticketTypeId);
-        Task<decimal> CalculatePriceAsync(int pricingRuleId, CalculatePriceRequestDto dto);
+        Task<decimal> CalculatePriceAsync(int pricingRuleId, CalculatePriceRequestDto priceRequestDto);
     }
 }

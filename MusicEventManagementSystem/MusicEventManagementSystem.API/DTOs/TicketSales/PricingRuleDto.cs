@@ -18,6 +18,8 @@ namespace MusicEventManagementSystem.API.DTOs.TicketSales
         public PricingCondition PricingCondition { get; set; }
         public string? DynamicCondition { get; set; }
         public decimal Modifier { get; set; }
+        public List<int>? EventIds { get; set; }
+        public List<int>? TicketTypesIds { get; set; }
     }
 
     public class PricingRuleCreateDto

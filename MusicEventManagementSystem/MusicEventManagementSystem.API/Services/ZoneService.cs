@@ -136,25 +136,7 @@ namespace MusicEventManagementSystem.API.Services
                 BasePrice = zone.BasePrice,
                 Position = zone.Position,
                 SegmentId = zone.SegmentId,
-                Segment = zone.Segment == null ? null : new SegmentResponseDto
-                {
-                    SegmentId = zone.Segment.SegmentId,
-                    Name = zone.Segment.Name,
-                    Description = zone.Segment.Description,
-                    Capacity = zone.Segment.Capacity,
-                    SegmentType = zone.Segment.SegmentType,
-                    VenueId = zone.Segment.VenueId
-                },
-                TicketTypes = zone.TicketTypes?.Select(tt => new TicketTypeResponseDto
-                {
-                    TicketTypeId = tt.TicketTypeId,
-                    Name = tt.Name,
-                    Description = tt.Description,
-                    AvailableQuantity = tt.AvailableQuantity,
-                    Status = tt.Status,
-                    ZoneId = tt.ZoneId,
-                    EventId = tt.EventId
-                }).ToList()
+                TicketTypeIds = zone.TicketTypes?.Select(tt => tt.TicketTypeId).ToList()
             };
         }
 

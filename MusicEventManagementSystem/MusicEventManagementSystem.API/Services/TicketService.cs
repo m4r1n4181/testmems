@@ -185,7 +185,7 @@ namespace MusicEventManagementSystem.API.Services
         {
             var ticket = await _ticketRepository.GetTicketByUniqueCodeAsync(uniqueCode);
 
-            if (ticket == null || ticket.Status != TicketStatus.Used)
+            if (ticket == null || ticket.Status != TicketStatus.Sold)
             {
                 return null;
             }
