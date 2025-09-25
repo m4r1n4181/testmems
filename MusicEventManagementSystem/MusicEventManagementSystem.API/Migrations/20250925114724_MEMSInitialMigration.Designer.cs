@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicEventManagementSystem.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250925092310_MEMSInitialMigration")]
+    [Migration("20250925114724_MEMSInitialMigration")]
     partial class MEMSInitialMigration
     {
         /// <inheritdoc />
@@ -628,7 +628,7 @@ namespace MusicEventManagementSystem.API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("PaymentMethod")
+                    b.Property<int>("PaymentMethod")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("SaleDate")
@@ -637,7 +637,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");
 
-                    b.Property<int?>("TransactionStatus")
+                    b.Property<int>("TransactionStatus")
                         .HasColumnType("integer");
 
                     b.HasKey("RecordedSaleId");
@@ -730,7 +730,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<int?>("SegmentType")
+                    b.Property<int>("SegmentType")
                         .HasColumnType("integer");
 
                     b.Property<int>("VenueId")
@@ -796,7 +796,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<int?>("OfferType")
+                    b.Property<int>("OfferType")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("StartDate")
@@ -852,7 +852,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<int?>("RecordedSaleId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("Status")
+                    b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.Property<int>("TicketTypeId")
@@ -890,7 +890,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<int?>("Status")
+                    b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.Property<int>("ZoneId")
@@ -960,7 +960,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<int?>("VenueType")
+                    b.Property<int>("VenueType")
                         .HasColumnType("integer");
 
                     b.HasKey("VenueId");
@@ -1030,7 +1030,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<int?>("Position")
+                    b.Property<int>("Position")
                         .HasColumnType("integer");
 
                     b.Property<int>("SegmentId")

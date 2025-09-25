@@ -120,7 +120,7 @@ namespace MusicEventManagementSystem.API.Services
                 City = venue.City,
                 Address = venue.Address,
                 Capacity = venue.Capacity,
-                VenueType = venue.VenueType ?? Enums.TicketSales.VenueType.Indoor,
+                VenueType = venue.VenueType,
                 Segments = venue.Segments?.Select(s => new SegmentResponseDto
                 {
                     // Map segment properties here

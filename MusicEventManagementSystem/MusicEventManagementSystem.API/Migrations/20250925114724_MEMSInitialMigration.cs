@@ -362,7 +362,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     ApplicationCondition = table.Column<string>(type: "text", nullable: true),
                     DiscountValue = table.Column<decimal>(type: "numeric", nullable: false),
                     TicketLimit = table.Column<int>(type: "integer", nullable: false),
-                    OfferType = table.Column<int>(type: "integer", nullable: true)
+                    OfferType = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -413,7 +413,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     City = table.Column<string>(type: "text", nullable: true),
                     Address = table.Column<string>(type: "text", nullable: true),
                     Capacity = table.Column<int>(type: "integer", nullable: false),
-                    VenueType = table.Column<int>(type: "integer", nullable: true)
+                    VenueType = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -555,8 +555,8 @@ namespace MusicEventManagementSystem.API.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TotalAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     SaleDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    TransactionStatus = table.Column<int>(type: "integer", nullable: true),
-                    PaymentMethod = table.Column<int>(type: "integer", nullable: true),
+                    TransactionStatus = table.Column<int>(type: "integer", nullable: false),
+                    PaymentMethod = table.Column<int>(type: "integer", nullable: false),
                     ApplicationUserId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -603,7 +603,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     Name = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Capacity = table.Column<int>(type: "integer", nullable: false),
-                    SegmentType = table.Column<int>(type: "integer", nullable: true),
+                    SegmentType = table.Column<int>(type: "integer", nullable: false),
                     VenueId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -651,7 +651,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     Description = table.Column<string>(type: "text", nullable: true),
                     Capacity = table.Column<int>(type: "integer", nullable: false),
                     BasePrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    Position = table.Column<int>(type: "integer", nullable: true),
+                    Position = table.Column<int>(type: "integer", nullable: false),
                     SegmentId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -674,7 +674,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     Name = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
                     AvailableQuantity = table.Column<int>(type: "integer", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
                     ZoneId = table.Column<int>(type: "integer", nullable: false),
                     EventId = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -705,7 +705,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     QrCode = table.Column<string>(type: "text", nullable: true),
                     IssueDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     FinalPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
                     TicketTypeId = table.Column<int>(type: "integer", nullable: false),
                     RecordedSaleId = table.Column<int>(type: "integer", nullable: true)
                 },
