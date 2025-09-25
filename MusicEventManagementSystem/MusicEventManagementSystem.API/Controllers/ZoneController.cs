@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicEventManagementSystem.API.DTOs.TicketSales;
 using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services;
@@ -21,7 +22,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/zone
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Zone>>> GetAllZones()
+        public async Task<ActionResult<IEnumerable<ZoneResponseDto>>> GetAllZones()
         {
             try
             {
@@ -36,7 +37,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/zone/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Zone>> GetZoneById(int id)
+        public async Task<ActionResult<ZoneResponseDto>> GetZoneById(int id)
         {
             try
             {
@@ -57,7 +58,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // POST: api/zone
         [HttpPost]
-        public async Task<ActionResult<Zone>> CreateZone([FromBody] Zone zone)
+        public async Task<ActionResult<ZoneResponseDto>> CreateZone([FromBody] ZoneCreateDto createZoneDto)
         {
             try
             {
@@ -66,7 +67,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var createdZone = await _zoneService.CreateZoneAsync(zone);
+                var createdZone = await _zoneService.CreateZoneAsync(createZoneDto);
 
                 return CreatedAtAction(nameof(GetZoneById), new { id = createdZone.ZoneId }, createdZone);
             }
@@ -78,7 +79,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // PUT: api/zone/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult<Zone>> UpdateZone(int id, [FromBody] Zone zone)
+        public async Task<ActionResult<ZoneResponseDto>> UpdateZone(int id, [FromBody] ZoneUpdateDto updateZoneDto)
         {
             try
             {
@@ -87,7 +88,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var updatedZone = await _zoneService.UpdateZoneAsync(id, zone);
+                var updatedZone = await _zoneService.UpdateZoneAsync(id, updateZoneDto);
 
                 if (updatedZone == null)
                 {
@@ -125,7 +126,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/zone/segment/{segmentId}
         [HttpGet("segment/{segmentId}")]
-        public async Task<ActionResult<IEnumerable<Zone>>> GetZonesBySegmentId(int segmentId)
+        public async Task<ActionResult<IEnumerable<ZoneResponseDto>>> GetZonesBySegmentId(int segmentId)
         {
             try
             {
@@ -140,7 +141,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/zone/price?min=&max=
         [HttpGet("price")]
-        public async Task<ActionResult<IEnumerable<Zone>>> GetZonesByPriceRange([FromQuery] decimal min, [FromQuery] decimal max)
+        public async Task<ActionResult<IEnumerable<ZoneResponseDto>>> GetZonesByPriceRange([FromQuery] decimal min, [FromQuery] decimal max)
         {
             try
             {
@@ -155,7 +156,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/zone/position/{position}
         [HttpGet("position/{position}")]
-        public async Task<ActionResult<IEnumerable<Zone>>> GetZonesByPosition(ZonePosition position)
+        public async Task<ActionResult<IEnumerable<ZoneResponseDto>>> GetZonesByPosition(ZonePosition position)
         {
             try
             {
@@ -170,7 +171,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/zone/{id}/tickettypes
         [HttpGet("{id}/tickettypes")]
-        public async Task<ActionResult<IEnumerable<TicketType>>> GetTicketTypesByZoneId(int id)
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetTicketTypesByZoneId(int id)
         {
             try
             {
