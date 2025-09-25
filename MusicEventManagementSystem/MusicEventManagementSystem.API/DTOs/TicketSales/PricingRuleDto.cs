@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+using System.ComponentModel.DataAnnotations;
 
 namespace MusicEventManagementSystem.API.DTOs.TicketSales
 {
@@ -14,6 +15,7 @@ namespace MusicEventManagementSystem.API.DTOs.TicketSales
         public decimal OccupancyThreshold1 { get; set; }
         public decimal OccupancyThreshold2 { get; set; }
         public decimal EarlyBirdPercentage { get; set; }
+        public PricingCondition PricingCondition { get; set; }
         public string? DynamicCondition { get; set; }
         public decimal Modifier { get; set; }
     }
@@ -54,6 +56,9 @@ namespace MusicEventManagementSystem.API.DTOs.TicketSales
         [Range(0, 100)]
         public decimal EarlyBirdPercentage { get; set; }
 
+        [Required]
+        public PricingCondition PricingCondition { get; set; }
+
         public string? DynamicCondition { get; set; }
 
         [Required]
@@ -89,7 +94,23 @@ namespace MusicEventManagementSystem.API.DTOs.TicketSales
         [Range(0, 100)]
         public decimal? EarlyBirdPercentage { get; set; }
 
+        [Required]
+        public PricingCondition PricingCondition { get; set; }
+
         public string? DynamicCondition { get; set; }
         public decimal? Modifier { get; set; }
+    }
+
+    public class CalculatePriceRequestDto
+    {
+        [Required]
+        [Range(0, double.MaxValue)]
+        public decimal BasePrice { get; set; }
+
+        [Required]
+        [Range(0, 100)]
+        public decimal OccupancyRate { get; set; }
+
+        public bool IsEarlyBird { get; set; }
     }
 }

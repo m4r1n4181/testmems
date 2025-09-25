@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.DTOs.TicketSales;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
@@ -14,46 +15,78 @@ namespace MusicEventManagementSystem.API.Services
             _pricingRuleRepository = pricingRuleRepository;
         }
 
-        public async Task<IEnumerable<PricingRule>> GetAllPricingRulesAsync()
+        public async Task<IEnumerable<PricingRuleResponseDto>> GetAllPricingRulesAsync()
         {
-            return await _pricingRuleRepository.GetAllAsync();
+            var pricingRules = await _pricingRuleRepository.GetAllAsync();
+            return pricingRules.Select(MapToResponseDto);
         }
 
-        public async Task<PricingRule?> GetPricingRuleByIdAsync(int id)
-        {
-            return await _pricingRuleRepository.GetByIdAsync(id);
-        }
-
-        public async Task<PricingRule> CreatePricingRuleAsync(PricingRule pricingRule)
-        {
-            await _pricingRuleRepository.AddAsync(pricingRule);
-            await _pricingRuleRepository.SaveChangesAsync();
-            return pricingRule;
-        }
-
-        public async Task<PricingRule?> UpdatePricingRuleAsync(int id, PricingRule pricingRule)
+        public async Task<PricingRuleResponseDto?> GetPricingRuleByIdAsync(int id)
         {
             var existingPricingRule = await _pricingRuleRepository.GetByIdAsync(id);
+
             if (existingPricingRule == null)
             {
                 return null;
             }
 
-            existingPricingRule.Name = pricingRule.Name;
-            existingPricingRule.Description = pricingRule.Description;
-            existingPricingRule.MinimumPrice = pricingRule.MinimumPrice;
-            existingPricingRule.MaximumPrice = pricingRule.MaximumPrice;
-            existingPricingRule.OccupancyPercentage1 = pricingRule.OccupancyPercentage1;
-            existingPricingRule.OccupancyPercentage2 = pricingRule.OccupancyPercentage2;
-            existingPricingRule.OccupancyThreshold1 = pricingRule.OccupancyThreshold1;
-            existingPricingRule.OccupancyThreshold2 = pricingRule.OccupancyThreshold2;
-            existingPricingRule.EarlyBirdPercentage = pricingRule.EarlyBirdPercentage;
-            existingPricingRule.DynamicCondition = pricingRule.DynamicCondition;
-            existingPricingRule.Modifier = pricingRule.Modifier;
+            return MapToResponseDto(existingPricingRule);
+        }
+
+        public async Task<PricingRuleResponseDto> CreatePricingRuleAsync(PricingRuleCreateDto createPricingRuleDto)
+        {
+            var pricingRule = MapToEntity(createPricingRuleDto);
+
+            await _pricingRuleRepository.AddAsync(pricingRule);
+            await _pricingRuleRepository.SaveChangesAsync();
+            return MapToResponseDto(pricingRule);
+        }
+
+        public async Task<PricingRuleResponseDto?> UpdatePricingRuleAsync(int id, PricingRuleUpdateDto updatePricingRuleDto)
+        {
+            var existingPricingRule = await _pricingRuleRepository.GetByIdAsync(id);
+            
+            if (existingPricingRule == null)
+            {
+                return null;
+            }
+
+            if (!string.IsNullOrEmpty(updatePricingRuleDto.Name))
+                existingPricingRule.Name = updatePricingRuleDto.Name;
+
+            if (updatePricingRuleDto.Description != null)
+                existingPricingRule.Description = updatePricingRuleDto.Description;
+
+            if (updatePricingRuleDto.MinimumPrice.HasValue)
+                existingPricingRule.MinimumPrice = updatePricingRuleDto.MinimumPrice.Value;
+
+            if (updatePricingRuleDto.MaximumPrice.HasValue)
+                existingPricingRule.MaximumPrice = updatePricingRuleDto.MaximumPrice.Value;
+
+            if (updatePricingRuleDto.OccupancyPercentage1.HasValue)
+                existingPricingRule.OccupancyPercentage1 = updatePricingRuleDto.OccupancyPercentage1.Value;
+
+            if (updatePricingRuleDto.OccupancyPercentage2.HasValue)
+                existingPricingRule.OccupancyPercentage2 = updatePricingRuleDto.OccupancyPercentage2.Value;
+
+            if (updatePricingRuleDto.OccupancyThreshold1.HasValue)
+                existingPricingRule.OccupancyThreshold1 = updatePricingRuleDto.OccupancyThreshold1.Value;
+
+            if (updatePricingRuleDto.OccupancyThreshold2.HasValue)
+                existingPricingRule.OccupancyThreshold2 = updatePricingRuleDto.OccupancyThreshold2.Value;
+
+            if (updatePricingRuleDto.EarlyBirdPercentage.HasValue)
+                existingPricingRule.EarlyBirdPercentage = updatePricingRuleDto.EarlyBirdPercentage.Value;
+
+            if (updatePricingRuleDto.DynamicCondition != null)
+                existingPricingRule.DynamicCondition = updatePricingRuleDto.DynamicCondition;
+
+            if (updatePricingRuleDto.Modifier.HasValue)
+                existingPricingRule.Modifier = updatePricingRuleDto.Modifier.Value;
 
             _pricingRuleRepository.Update(existingPricingRule);
             await _pricingRuleRepository.SaveChangesAsync();
-            return existingPricingRule;
+            return MapToResponseDto(existingPricingRule);
         }
 
         public async Task<bool> DeletePricingRuleAsync(int id)
@@ -70,24 +103,66 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
 
-        public async Task<IEnumerable<PricingRule>> GetActivePricingRulesAsync()
+        public async Task<IEnumerable<PricingRuleResponseDto>> GetActivePricingRulesAsync()
         {
-            return await _pricingRuleRepository.GetActivePricingRulesAsync();
+            var pricingRules = await _pricingRuleRepository.GetActivePricingRulesAsync();
+            return pricingRules.Select(MapToResponseDto);
         }
 
-        public async Task<IEnumerable<PricingRule>> GetPricingRulesByEventAsync(int eventId)
+        public async Task<IEnumerable<PricingRuleResponseDto>> GetPricingRulesByEventAsync(int eventId)
         {
-            return await _pricingRuleRepository.GetPricingRulesByEventAsync(eventId);
+            var pricingRules = await _pricingRuleRepository.GetPricingRulesByEventAsync(eventId);
+            return pricingRules.Select(MapToResponseDto);
         }
 
-        public async Task<IEnumerable<PricingRule>> GetPricingRulesByTicketTypeAsync(int ticketTypeId)
+        public async Task<IEnumerable<PricingRuleResponseDto>> GetPricingRulesByTicketTypeAsync(int ticketTypeId)
         {
-            return await _pricingRuleRepository.GetPricingRulesByTicketTypeAsync(ticketTypeId);
+            var pricingRules = await _pricingRuleRepository.GetPricingRulesByTicketTypeAsync(ticketTypeId);
+            return pricingRules.Select(MapToResponseDto);
         }
 
         public async Task<decimal> CalculatePriceAsync(int pricingRuleId, decimal basePrice, decimal occupancyRate, bool isEarlyBird = false)
         {
             return await _pricingRuleRepository.CalculatePriceAsync(pricingRuleId, basePrice, occupancyRate, isEarlyBird);
+        }
+
+        // Helper methods for mapping
+
+        private static PricingRuleResponseDto MapToResponseDto(PricingRule pricingRule)
+        {
+            return new PricingRuleResponseDto
+            {
+                PricingRuleId = pricingRule.PricingRuleId,
+                Name = pricingRule.Name,
+                Description = pricingRule.Description,
+                MinimumPrice = pricingRule.MinimumPrice,
+                MaximumPrice = pricingRule.MaximumPrice,
+                OccupancyPercentage1 = pricingRule.OccupancyPercentage1,
+                OccupancyPercentage2 = pricingRule.OccupancyPercentage2,
+                OccupancyThreshold1 = pricingRule.OccupancyThreshold1,
+                OccupancyThreshold2 = pricingRule.OccupancyThreshold2,
+                EarlyBirdPercentage = pricingRule.EarlyBirdPercentage,
+                DynamicCondition = pricingRule.DynamicCondition,
+                Modifier = pricingRule.Modifier
+            };
+        }
+
+        private static PricingRule MapToEntity(PricingRuleCreateDto dto)
+        {
+            return new PricingRule
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                MinimumPrice = dto.MinimumPrice,
+                MaximumPrice = dto.MaximumPrice,
+                OccupancyPercentage1 = dto.OccupancyPercentage1,
+                OccupancyPercentage2 = dto.OccupancyPercentage2,
+                OccupancyThreshold1 = dto.OccupancyThreshold1,
+                OccupancyThreshold2 = dto.OccupancyThreshold2,
+                EarlyBirdPercentage = dto.EarlyBirdPercentage,
+                DynamicCondition = dto.DynamicCondition,
+                Modifier = dto.Modifier
+            };
         }
     }
 }
