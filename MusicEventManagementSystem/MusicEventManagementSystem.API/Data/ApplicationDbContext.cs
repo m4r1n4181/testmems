@@ -52,11 +52,11 @@ namespace MusicEventManagementSystem.Data
             // Configure Negotiation relationships
             
             // One-to-One: Negotiation has one Event
-            builder.Entity<Negotiation>()
-                .HasOne(n => n.Event)
-                .WithOne(e => e.Negotiation)
-                .HasForeignKey<Negotiation>(n => n.EventId)
-                .OnDelete(DeleteBehavior.Restrict);
+            //builder.Entity<Negotiation>()
+            //    .HasOne(n => n.Event)
+            //    .WithOne(e => e.Negotiation)
+            //    .HasForeignKey<Negotiation>(n => n.EventId)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             // One-to-One: Negotiation has one Performer
             builder.Entity<Negotiation>()

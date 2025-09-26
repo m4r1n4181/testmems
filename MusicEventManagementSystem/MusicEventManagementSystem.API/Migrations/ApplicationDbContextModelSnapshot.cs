@@ -1335,7 +1335,8 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.HasOne("MusicEventManagementSystem.API.Models.Performer", "Performer")
                         .WithOne("Negotiation")
                         .HasForeignKey("MusicEventManagementSystem.API.Models.Negotiation", "PerformerId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
 
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.RecordedSale", b =>
                 {
