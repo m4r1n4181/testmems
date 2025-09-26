@@ -15,6 +15,9 @@ namespace MusicEventManagementSystem.API.DTOs
         public decimal MaxPrice { get; set; }
         public TimeSpan AverageResponseTime { get; set; }
         public string Status { get; set; } = string.Empty;
+        
+        // Related collections
+        public List<ContractDto>? Contracts { get; set; }
     }
 
     public class CreatePerformerDto
@@ -63,5 +66,11 @@ namespace MusicEventManagementSystem.API.DTOs
         public decimal MaxPrice { get; set; }
         public TimeSpan AverageResponseTime { get; set; }
         public string Status { get; set; } = string.Empty;
+    }
+
+    public class PerformerWithDetailsDto : PerformerDto
+    {
+        // Extended version with full related entity details
+        public NegotiationDto? Negotiation { get; set; } // One-to-One relationship
     }
 }

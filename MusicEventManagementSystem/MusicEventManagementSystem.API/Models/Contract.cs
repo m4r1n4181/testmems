@@ -10,5 +10,12 @@ namespace MusicEventManagementSystem.API.Models
         public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime? SignedAt { get; set; }
+
+        // Foreign Key
+        public int PerformerId { get; set; }
+
+        // Navigation Properties
+        public Performer Performer { get; set; } = null!;
+        public Phase? Phase { get; set; } // Optional - not every Contract has a Phase
     }
 }

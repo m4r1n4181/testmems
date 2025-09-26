@@ -8,5 +8,11 @@ namespace MusicEventManagementSystem.API.Models
         public string Path { get; set; } = string.Empty;
         public string Version { get; set; } = string.Empty;
         public DateTime UpdatedAt { get; set; }
+
+        // Foreign Key
+        public int NegotiationId { get; set; }
+
+        // Navigation Property
+        public Negotiation Negotiation { get; set; } = null!;
     }
 }

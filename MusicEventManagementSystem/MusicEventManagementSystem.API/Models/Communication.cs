@@ -8,5 +8,11 @@ namespace MusicEventManagementSystem.API.Models
         public string Content { get; set; } = string.Empty;
         public DateTime SentAt { get; set; }
         public DateTime? RepliedAt { get; set; }
+
+        // Foreign Key (Communication is dependent on Negotiation)
+        public int NegotiationId { get; set; }
+
+        // Navigation Property
+        public Negotiation Negotiation { get; set; } = null!;
     }
 }
