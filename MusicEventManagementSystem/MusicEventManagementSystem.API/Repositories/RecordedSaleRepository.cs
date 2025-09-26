@@ -6,7 +6,7 @@ using MusicEventManagementSystem.Data;
 
 namespace MusicEventManagementSystem.API.Repositories
 {
-    public class RecordedSaleRepository : Repository<RecordedSale>, IRecodedSaleRepository
+    public class RecordedSaleRepository : Repository<RecordedSale>, IRecordedSaleRepository
     {
         public RecordedSaleRepository(ApplicationDbContext context) : base(context)
         {
@@ -29,7 +29,10 @@ namespace MusicEventManagementSystem.API.Repositories
 
         public async Task<IEnumerable<RecordedSale>> GetSalesByDateRangeAsync(DateTime from, DateTime to)
         {
-            return await _context.RecordedSales.Include(rs => rs.ApplicationUser).Include(rs => rs.Tickets).Include(rs => rs.SpecialOffers).Where(rs => rs.SaleDate.Date >= from.Date && rs.SaleDate.Date <= to.Date).OrderByDescending(rs => rs.SaleDate).ToListAsync();
+            var fromUtc = DateTime.SpecifyKind(from.Date, DateTimeKind.Utc);
+            var toUtc = DateTime.SpecifyKind(to.Date, DateTimeKind.Utc);
+
+            return await _context.RecordedSales.Include(rs => rs.ApplicationUser).Include(rs => rs.Tickets).Include(rs => rs.SpecialOffers).Where(rs => rs.SaleDate.Date >= fromUtc && rs.SaleDate.Date <= toUtc).OrderByDescending(rs => rs.SaleDate).ToListAsync();
         }
 
         public async Task<IEnumerable<RecordedSale>> GetSalesByStatusAsync(TransactionStatus status)

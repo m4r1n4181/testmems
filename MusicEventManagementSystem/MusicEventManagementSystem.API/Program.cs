@@ -47,7 +47,7 @@ builder.Services.AddScoped<IZoneRepository, ZoneRepository>();
 builder.Services.AddScoped<ISpecialOfferRepository, SpecialOfferRepository>();
 builder.Services.AddScoped<ITicketTypeRepository, TicketTypeRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
-builder.Services.AddScoped<IRecodedSaleRepository, RecordedSaleRepository>();
+builder.Services.AddScoped<IRecordedSaleRepository, RecordedSaleRepository>();
 builder.Services.AddScoped<IPricingRuleRepository, PricingRuleRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();

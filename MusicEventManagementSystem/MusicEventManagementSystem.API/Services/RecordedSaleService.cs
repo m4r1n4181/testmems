@@ -9,9 +9,9 @@ namespace MusicEventManagementSystem.API.Services
 {
     public class RecordedSaleService : IRecordedSaleService
     {
-        private readonly IRecodedSaleRepository _recordedSaleRepository;
+        private readonly IRecordedSaleRepository _recordedSaleRepository;
 
-        public RecordedSaleService(IRecodedSaleRepository recordedSaleRepository)
+        public RecordedSaleService(IRecordedSaleRepository recordedSaleRepository)
         {
             _recordedSaleRepository = recordedSaleRepository;
         }

@@ -2,6 +2,7 @@
 using MusicEventManagementSystem.API.DTOs.TicketSales;
 using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
+using MusicEventManagementSystem.API.Repositories;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
 
@@ -10,10 +11,12 @@ namespace MusicEventManagementSystem.API.Services
     public class TicketService : ITicketService
     {
         private readonly ITicketRepository _ticketRepository;
+        private readonly IRecordedSaleRepository _recordedSaleRepository;
 
-        public TicketService(ITicketRepository ticketRepository)
+        public TicketService(ITicketRepository ticketRepository, IRecordedSaleRepository recordedSaleRepository)
         {
             _ticketRepository = ticketRepository;
+            _recordedSaleRepository = recordedSaleRepository;
         }
 
         public async Task<IEnumerable<TicketResponseDto>> GetAllTicketsAsync()
@@ -174,7 +177,22 @@ namespace MusicEventManagementSystem.API.Services
                 return null;
             }
 
+            var recordedSale = new RecordedSale
+            {
+                TotalAmount = ticket.FinalPrice,
+                SaleDate = DateTime.UtcNow,
+                TransactionStatus = TransactionStatus.Completed,
+                ApplicationUserId = "97e8219b-fb09-453e-b8ba-1b610d1eb255",
+                // Need to be done: set the actual user ID from the context
+                PaymentMethod = PaymentMethod.CreditCard,
+                Tickets = new List<Ticket> { ticket }
+            };
+
+            await _recordedSaleRepository.AddAsync(recordedSale);
+            await _recordedSaleRepository.SaveChangesAsync();
+
             ticket.Status = TicketStatus.Sold;
+            ticket.RecordedSaleId = recordedSale.RecordedSaleId;
 
             _ticketRepository.Update(ticket);
             await _ticketRepository.SaveChangesAsync();

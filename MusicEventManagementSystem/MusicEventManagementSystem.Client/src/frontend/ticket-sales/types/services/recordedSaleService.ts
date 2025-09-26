@@ -139,8 +139,12 @@ export class RecordedSaleService {
   // GET: api/recordedsale/date-range?fromDate={fromDate}&toDate={toDate}
   static async getSalesByDateRange(fromDate: Date, toDate: Date): Promise<RecordedSaleResponse[]> {
     try {
+      // Format dates as ISO strings without time for date-only comparison
+      const fromDateStr = fromDate.toISOString().split('T')[0];
+      const toDateStr = toDate.toISOString().split('T')[0];
+      
       const response = await fetch(
-        `${this.BASE_URL}/date-range?fromDate=${fromDate.toISOString()}&toDate=${toDate.toISOString()}`
+        `${this.BASE_URL}/date-range?fromDate=${fromDateStr}&toDate=${toDateStr}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

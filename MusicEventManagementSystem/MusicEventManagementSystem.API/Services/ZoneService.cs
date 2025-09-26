@@ -46,6 +46,7 @@ namespace MusicEventManagementSystem.API.Services
         public async Task<ZoneResponseDto?> UpdateZoneAsync(int id, ZoneUpdateDto updateZoneDto)
         {
             var existingZone = await _zoneRepository.GetByIdAsync(id);
+
             if (existingZone == null)
             {
                 return null;

@@ -44,8 +44,10 @@ namespace MusicEventManagementSystem.API.Repositories
 
         public async Task<IEnumerable<Ticket>> GetTodaysTicketsAsync()
         {
-            var today = DateTime.Today;
-            return await _context.Tickets.Include(t => t.TicketType).Include(t => t.RecordedSale).Where(t => t.IssueDate.Date == today).OrderByDescending(t => t.IssueDate).ToListAsync();
+            var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
+            var tomorrow = DateTime.SpecifyKind(today.AddDays(1), DateTimeKind.Utc);
+
+            return await _context.Tickets.Include(t => t.TicketType).Include(t => t.RecordedSale).Where(t => t.RecordedSale != null && t.RecordedSale.SaleDate >= today && t.RecordedSale.SaleDate < tomorrow).OrderByDescending(t => t.RecordedSale.SaleDate).ToListAsync();
         }
 
         public async Task<int> GetTicketsCountByStatusAsync(TicketStatus status)

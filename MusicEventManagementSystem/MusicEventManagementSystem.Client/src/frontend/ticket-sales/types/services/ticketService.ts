@@ -204,8 +204,12 @@ export class TicketService {
         throw new Error('From date cannot be greater than to date');
       }
 
+      // Convert to UTC
+      const fromUTC = from.toISOString();
+      const toUTC = to.toISOString();
+
       const response = await fetch(
-        `${this.BASE_URL}/statistics/revenue/date-range?from=${from.toISOString()}&to=${to.toISOString()}`
+        `${this.BASE_URL}/statistics/revenue/date-range?from=${fromUTC}&to=${toUTC}`
       );
       
       if (!response.ok) {
