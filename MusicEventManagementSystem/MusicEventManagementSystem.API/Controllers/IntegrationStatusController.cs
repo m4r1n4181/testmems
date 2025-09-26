@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MusicEventManagementSystem.API.Models;
+using MusicEventManagementSystem.API.DTOs.MediaCampaign;
 using MusicEventManagementSystem.API.Services.IService;
 
 namespace MusicEventManagementSystem.API.Controllers
@@ -16,12 +16,12 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<IntegrationStatus>>> GetAllIntegrationStatuses()
+        public async Task<ActionResult<IEnumerable<IntegrationStatusResponseDto>>> GetAllIntegrationStatuses()
         {
             try
             {
-                var integrationStatuses = await _integrationStatusService.GetAllIntegrationStatusesAsync();
-                return Ok(integrationStatuses);
+                var statuses = await _integrationStatusService.GetAllIntegrationStatusesAsync();
+                return Ok(statuses);
             }
             catch (Exception ex)
             {
@@ -30,16 +30,14 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<IntegrationStatus>> GetIntegrationStatusById(int id)
+        public async Task<ActionResult<IntegrationStatusResponseDto>> GetIntegrationStatusById(int id)
         {
             try
             {
-                var integrationStatus = await _integrationStatusService.GetIntegrationStatusByIdAsync(id);
-                if (integrationStatus == null)
-                {
+                var status = await _integrationStatusService.GetIntegrationStatusByIdAsync(id);
+                if (status == null)
                     return NotFound($"IntegrationStatus with ID {id} not found.");
-                }
-                return Ok(integrationStatus);
+                return Ok(status);
             }
             catch (Exception ex)
             {
@@ -48,17 +46,15 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<IntegrationStatus>> CreateIntegrationStatus([FromBody] IntegrationStatus integrationStatus)
+        public async Task<ActionResult<IntegrationStatusResponseDto>> CreateIntegrationStatus([FromBody] IntegrationStatusCreateDto createDto)
         {
             try
             {
                 if (!ModelState.IsValid)
-                {
                     return BadRequest(ModelState);
-                }
 
-                var createdIntegrationStatus = await _integrationStatusService.CreateIntegrationStatusAsync(integrationStatus);
-                return CreatedAtAction(nameof(GetIntegrationStatusById), new { id = createdIntegrationStatus.IntegrationStatusId }, createdIntegrationStatus);
+                var createdStatus = await _integrationStatusService.CreateIntegrationStatusAsync(createDto);
+                return CreatedAtAction(nameof(GetIntegrationStatusById), new { id = createdStatus.IntegrationStatusId }, createdStatus);
             }
             catch (Exception ex)
             {
@@ -67,22 +63,17 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<IntegrationStatus>> UpdateIntegrationStatus(int id, [FromBody] IntegrationStatus integrationStatus)
+        public async Task<ActionResult<IntegrationStatusResponseDto>> UpdateIntegrationStatus(int id, [FromBody] IntegrationStatusUpdateDto updateDto)
         {
             try
             {
                 if (!ModelState.IsValid)
-                {
                     return BadRequest(ModelState);
-                }
 
-                var updatedIntegrationStatus = await _integrationStatusService.UpdateIntegrationStatusAsync(id, integrationStatus);
-                if (updatedIntegrationStatus == null)
-                {
+                var updatedStatus = await _integrationStatusService.UpdateIntegrationStatusAsync(id, updateDto);
+                if (updatedStatus == null)
                     return NotFound($"IntegrationStatus with ID {id} not found.");
-                }
-
-                return Ok(updatedIntegrationStatus);
+                return Ok(updatedStatus);
             }
             catch (Exception ex)
             {
@@ -97,10 +88,7 @@ namespace MusicEventManagementSystem.API.Controllers
             {
                 var isDeleted = await _integrationStatusService.DeleteIntegrationStatusAsync(id);
                 if (!isDeleted)
-                {
                     return NotFound($"IntegrationStatus with ID {id} not found.");
-                }
-
                 return NoContent();
             }
             catch (Exception ex)

@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.DTOs.MediaCampaign;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
 
@@ -13,54 +14,71 @@ namespace MusicEventManagementSystem.API.Services
             _integrationStatusRepository = integrationStatusRepository;
         }
 
-        public async Task<IEnumerable<IntegrationStatus>> GetAllIntegrationStatusesAsync()
+        public async Task<IEnumerable<IntegrationStatusResponseDto>> GetAllIntegrationStatusesAsync()
         {
-            return await _integrationStatusRepository.GetAllAsync();
+            var statuses = await _integrationStatusRepository.GetAllAsync();
+            return statuses.Select(MapToResponseDto);
         }
 
-        public async Task<IntegrationStatus?> GetIntegrationStatusByIdAsync(int id)
+        public async Task<IntegrationStatusResponseDto?> GetIntegrationStatusByIdAsync(int id)
         {
-            return await _integrationStatusRepository.GetByIdAsync(id);
+            var status = await _integrationStatusRepository.GetByIdAsync(id);
+            return status == null ? null : MapToResponseDto(status);
         }
 
-        public async Task<IntegrationStatus> CreateIntegrationStatusAsync(IntegrationStatus integrationStatus)
+        public async Task<IntegrationStatusResponseDto> CreateIntegrationStatusAsync(IntegrationStatusCreateDto dto)
         {
-            await _integrationStatusRepository.AddAsync(integrationStatus);
+            var status = MapToEntity(dto);
+            await _integrationStatusRepository.AddAsync(status);
             await _integrationStatusRepository.SaveChangesAsync();
-            return integrationStatus;
+            return MapToResponseDto(status);
         }
 
-        public async Task<IntegrationStatus?> UpdateIntegrationStatusAsync(int id, IntegrationStatus integrationStatus)
+        public async Task<IntegrationStatusResponseDto?> UpdateIntegrationStatusAsync(int id, IntegrationStatusUpdateDto dto)
         {
-            var existingIntegrationStatus = await _integrationStatusRepository.GetByIdAsync(id);
-            if (existingIntegrationStatus == null)
-            {
-                return null;
-            }
+            var status = await _integrationStatusRepository.GetByIdAsync(id);
+            if (status == null) return null;
 
-            existingIntegrationStatus.AdId = integrationStatus.AdId;
-            existingIntegrationStatus.ChannelId = integrationStatus.ChannelId;
-            existingIntegrationStatus.Status = integrationStatus.Status;
-            existingIntegrationStatus.PublicationDate = integrationStatus.PublicationDate;
-            existingIntegrationStatus.Error = integrationStatus.Error;
-            existingIntegrationStatus.LastSynced = integrationStatus.LastSynced;
+            if (dto.AdId.HasValue) status.AdId = dto.AdId.Value;
+            if (dto.ChannelId.HasValue) status.ChannelId = dto.ChannelId.Value;
+            if (dto.Status.HasValue) status.Status = dto.Status.Value;
+            if (dto.PublicationDate.HasValue) status.PublicationDate = dto.PublicationDate.Value;
+            if (dto.Error != null) status.Error = dto.Error;
+            if (dto.LastSynced.HasValue) status.LastSynced = dto.LastSynced.Value;
 
-            _integrationStatusRepository.Update(existingIntegrationStatus);
+            _integrationStatusRepository.Update(status);
             await _integrationStatusRepository.SaveChangesAsync();
-            return existingIntegrationStatus;
+            return MapToResponseDto(status);
         }
 
         public async Task<bool> DeleteIntegrationStatusAsync(int id)
         {
-            var integrationStatus = await _integrationStatusRepository.GetByIdAsync(id);
-            if (integrationStatus == null)
-            {
-                return false;
-            }
-
-            _integrationStatusRepository.Delete(integrationStatus);
+            var status = await _integrationStatusRepository.GetByIdAsync(id);
+            if (status == null) return false;
+            _integrationStatusRepository.Delete(status);
             await _integrationStatusRepository.SaveChangesAsync();
             return true;
         }
+
+        private static IntegrationStatusResponseDto MapToResponseDto(IntegrationStatus status) => new()
+        {
+            IntegrationStatusId = status.IntegrationStatusId,
+            AdId = status.AdId,
+            ChannelId = status.ChannelId,
+            Status = status.Status,
+            PublicationDate = status.PublicationDate,
+            Error = status.Error,
+            LastSynced = status.LastSynced
+        };
+
+        private static IntegrationStatus MapToEntity(IntegrationStatusCreateDto dto) => new()
+        {
+            AdId = dto.AdId,
+            ChannelId = dto.ChannelId,
+            Status = dto.Status,
+            PublicationDate = dto.PublicationDate,
+            Error = dto.Error,
+            LastSynced = dto.LastSynced
+        };
     }
 }
