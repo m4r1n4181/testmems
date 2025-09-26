@@ -1,18 +1,57 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from "./frontend/shared/components/Layout";
-import Dashboard from "./frontend/ticket-sales/pages/Dashboard";
-import Venues from "./frontend/ticket-sales/pages/Venues";
 import Login from "./frontend/auth/pages/Login";
 import Register from "./frontend/auth/pages/Register";
 import ProtectedRoute from "./frontend/shared/components/ProtectedRoute";
-import Zones from './frontend/ticket-sales/pages/Zones';
-import Segments from './frontend/ticket-sales/pages/Segments';
-import TicketTypes from './frontend/ticket-sales/pages/TicketTypes';
-import Tickets from './frontend/ticket-sales/pages/Tickets';
-import RecordedSales from './frontend/ticket-sales/pages/RecordedSales';
-import PricingRules from './frontend/ticket-sales/pages/PricingRules';
-import { Speech } from 'lucide-react';
-import SpecialOffers from './frontend/ticket-sales/pages/SpecialOffer';
+
+// Ticket Sales imports
+import TicketSalesDashboard from "./frontend/ticket-sales/pages/Dashboard";
+import TicketSalesInfrastructure from "./frontend/ticket-sales/pages/Infrastructure";
+import TicketSalesVenues from "./frontend/ticket-sales/pages/Venues";
+import TicketSalesZones from './frontend/ticket-sales/pages/Zones';
+import TicketSalesSegments from './frontend/ticket-sales/pages/Segments';
+import TicketSalesTicketTypes from './frontend/ticket-sales/pages/TicketTypes';
+import TicketSalesTickets from './frontend/ticket-sales/pages/Tickets';
+import TicketSalesRecordedSales from './frontend/ticket-sales/pages/RecordedSales';
+import TicketSalesPricingRules from './frontend/ticket-sales/pages/PricingRules';
+import TicketSalesSpecialOffers from './frontend/ticket-sales/pages/SpecialOffer';
+
+// Event Organization imports
+// ...
+
+// Add these imports for react-toastify
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+// Helper function to get user's department
+const getUserDepartment = (): number | null => {
+  const userStr = localStorage.getItem('user');
+  if (!userStr) return null;
+  try {
+    const user = JSON.parse(userStr);
+    return user.department;
+  } catch {
+    return null;
+  }
+};
+
+// Component to redirect to appropriate dashboard based on department
+const DepartmentRedirect = () => {
+  const department = getUserDepartment();
+  
+  switch (department) {
+    case 1: // TicketSales
+      return <Navigate to="/ticket-sales/dashboard" replace />;
+    case 2: // EventOrganization
+      return <Navigate to="/event-organization/dashboard" replace />;
+    case 3: // ArtistCommunication
+      return <Navigate to="/artist-communication/dashboard" replace />;
+    case 4: // MediaCampaign
+      return <Navigate to="/media-campaign/dashboard" replace />;
+    default:
+      return <Navigate to="/login" replace />;
+  }
+};
 
 function App() {
   return (
@@ -22,111 +61,127 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
-        {/* Protected routes */}
-        <Route path="/dashboard" 
+        {/* Department redirect route */}
+        {/* <Route path="/dashboard" element={<DepartmentRedirect />} /> */}
+
+        {/* Protected routes - Ticket Sales*/}
+        <Route path="/ticket-sales/dashboard" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <Dashboard />
+                <TicketSalesDashboard />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route path="/ticket-sales/infrastructure" 
+          element={
+            <ProtectedRoute allowedDepartments={[1]}>
+              <Layout>
+                <TicketSalesInfrastructure />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/venues" 
+          path="/ticket-sales/venues" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <Venues />
+                <TicketSalesVenues />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/segments" 
+          path="/ticket-sales/segments" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <Segments />
+                <TicketSalesSegments />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/zones" 
+          path="/ticket-sales/zones" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <Zones />
+                <TicketSalesZones />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/ticket-types" 
+          path="/ticket-sales/ticket-types" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <TicketTypes />
+                <TicketSalesTicketTypes />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/tickets" 
+          path="/ticket-sales/tickets" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <Tickets />
+                <TicketSalesTickets />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/pricing-rules" 
+          path="/ticket-sales/pricing-rules" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <PricingRules />
+                <TicketSalesPricingRules />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/special-offers" 
+          path="/ticket-sales/special-offers" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <SpecialOffers />
+                <TicketSalesSpecialOffers />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         <Route 
-          path="/recorded-sales" 
+          path="/ticket-sales/recorded-sales" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
-                <RecordedSales />
+                <TicketSalesRecordedSales />
               </Layout>
             </ProtectedRoute>
           } 
         />
 
         {/* Redirect root to dashboard */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<DepartmentRedirect />} />
         
-        {/* Catch all - redirect to dashboard */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        {/* Catch all - redirect to appropriate dashboard */}
+        <Route path="*" element={<DepartmentRedirect />} />
       </Routes>
+
+      {/* Add ToastContainer here for global notifications */}
+      <ToastContainer />
     </Router>
   );
 }

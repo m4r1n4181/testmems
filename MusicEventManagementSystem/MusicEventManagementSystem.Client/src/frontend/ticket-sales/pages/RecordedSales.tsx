@@ -112,15 +112,31 @@ const RecordedSales = () => {
       .reduce((sum, sale) => sum + sale.totalAmount, 0);
   };
 
-  const getPaymentMethodIcon = (method: string | undefined) => {
-    switch (method?.toLowerCase()) {
-      case 'credit card':
+  const getPaymentMethodIcon = (method: string | number | undefined) => {
+    const methodStr = typeof method === 'string'
+      ? method
+      : method !== undefined
+        ? PaymentMethodMap[method]
+        : '';
+    switch (methodStr.toLowerCase()) {
+      case 'creditcard':
         return <CreditCard className="w-4 h-4" />;
       case 'cash':
         return <DollarSign className="w-4 h-4" />;
       default:
         return <CreditCard className="w-4 h-4" />;
     }
+  };
+
+  const PaymentMethodMap: Record<number, string> = {
+    0: 'CreditCard',
+    1: 'DebitCard',
+    2: 'Cash',
+    3: 'BankTransfer',
+    4: 'PayPal',
+    5: 'ApplePay',
+    6: 'GooglePay',
+    7: 'Cryptocurrency',
   };
 
   const stats = [
