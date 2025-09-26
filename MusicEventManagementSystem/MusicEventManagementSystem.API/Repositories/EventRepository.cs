@@ -24,7 +24,7 @@ namespace MusicEventManagementSystem.API.Repositories
 
         public async Task<IEnumerable<Event>> GetByDateRangeAsync(DateTime start, DateTime end)
         {
-            return await _dbSet.Where(e => e.Interval >= start && e.Interval <= end).ToListAsync();
+            return await _dbSet.Where(e => e.EventInterval >= start && e.EventInterval <= end).ToListAsync();
         }
 
         public async Task<IEnumerable<Event>> GetByCreatedByIdAsync(Guid createdById)

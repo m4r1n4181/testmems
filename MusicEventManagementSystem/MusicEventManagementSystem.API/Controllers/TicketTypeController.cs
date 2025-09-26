@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicEventManagementSystem.API.DTOs.TicketSales;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services;
 using MusicEventManagementSystem.API.Services.IService;
@@ -18,8 +20,9 @@ namespace MusicEventManagementSystem.API.Controllers
             _ticketTypeService = ticketTypeService;
         }
 
+        // GET: api/tickettype
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TicketType>>> GetAllTicketTypes()
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetAllTicketTypes()
         {
             try
             {
@@ -32,8 +35,9 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // GET: api/tickettype/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<TicketType>> GetTicketTypeById(int id)
+        public async Task<ActionResult<TicketTypeResponseDto>> GetTicketTypeById(int id)
         {
             try
             {
@@ -52,8 +56,9 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // POST: api/tickettype
         [HttpPost]
-        public async Task<ActionResult<TicketType>> CreateTicketType([FromBody] TicketType ticketType)
+        public async Task<ActionResult<TicketTypeResponseDto>> CreateTicketType([FromBody] TicketTypeCreateDto createTicketTypeDto)
         {
             try
             {
@@ -62,7 +67,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var createdTicketType = await _ticketTypeService.CreateTicketTypeAsync(ticketType);
+                var createdTicketType = await _ticketTypeService.CreateTicketTypeAsync(createTicketTypeDto);
 
                 return CreatedAtAction(nameof(GetTicketTypeById), new { id = createdTicketType.TicketTypeId }, createdTicketType);
             }
@@ -72,8 +77,9 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // PUT: api/tickettype/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult<TicketType>> UpdateTicketType(int id, [FromBody] TicketType ticketType)
+        public async Task<ActionResult<TicketTypeResponseDto>> UpdateTicketType(int id, [FromBody] TicketTypeUpdateDto updateTicketTypeDto)
         {
             try
             {
@@ -82,7 +88,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var updatedVenue = await _ticketTypeService.UpdateTicketTypeAsync(id, ticketType);
+                var updatedVenue = await _ticketTypeService.UpdateTicketTypeAsync(id, updateTicketTypeDto);
 
                 if (updatedVenue == null)
                 {
@@ -97,6 +103,7 @@ namespace MusicEventManagementSystem.API.Controllers
             }
         }
 
+        // DELETE: api/tickettype/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteTicketType(int id)
         {
@@ -110,6 +117,159 @@ namespace MusicEventManagementSystem.API.Controllers
                 }
 
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/tickettype/zone/{zoneId}
+        [HttpGet("zone/{zoneId}")]
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetByZoneId(int zoneId)
+        {
+            try
+            {
+                var ticketTypes = await _ticketTypeService.GetByZoneIdAsync(zoneId);
+                return Ok(ticketTypes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/tickettype/event/{eventId}
+        [HttpGet("event/{eventId}")]
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetByEventId(int eventId)
+        {
+            try
+            {
+                var ticketTypes = await _ticketTypeService.GetByEventIdAsync(eventId);
+                return Ok(ticketTypes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/tickettype/status/{status}
+        [HttpGet("status/{status}")]
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetByStatus(TicketTypeStatus status)
+        {
+            try
+            {
+                var ticketTypes = await _ticketTypeService.GetByStatusAsync(status);
+                return Ok(ticketTypes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/tickettype/available
+        [HttpGet("available")]
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetAvailable()
+        {
+            try
+            {
+                var ticketTypes = await _ticketTypeService.GetAvailableTicketTypesAsync();
+                return Ok(ticketTypes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // PUT: api/tickettype/{id}/quantity
+        [HttpPut("{id}/quantity")]
+        public async Task<ActionResult> UpdateAvailableQuantity(int id, [FromBody] int quantity)
+        {
+            try
+            {
+                var isUpdated = await _ticketTypeService.UpdateAvailableQuantityAsync(id, quantity);
+
+                if (!isUpdated)
+                {
+                    return NotFound($"Ticket Type with ID {id} not found or invalid quantity.");
+                }
+
+                return Ok($"Available quantity updated successfully for Ticket Type {id}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/tickettype/zone/{zoneId}/event/{eventId}
+        [HttpGet("zone/{zoneId}/event/{eventId}")]
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetByZoneAndEvent(int zoneId, int eventId)
+        {
+            try
+            {
+                var ticketTypes = await _ticketTypeService.GetByZoneAndEventAsync(zoneId, eventId);
+                return Ok(ticketTypes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/tickettype/event/{eventId}/totalquantity
+        [HttpGet("event/{eventId}/totalquantity")]
+        public async Task<ActionResult<int>> GetTotalAvailableQuantityByEvent(int eventId)
+        {
+            try
+            {
+                var totalQuantity = await _ticketTypeService.GetTotalAvailableQuantityByEventAsync(eventId);
+                return Ok(totalQuantity);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/tickettype/{id}/reserve
+        [HttpPost("{id}/reserve")]
+        public async Task<ActionResult> ReserveTickets(int id, [FromBody] int quantity)
+        {
+            try
+            {
+                var isReserved = await _ticketTypeService.ReserveTicketsAsync(id, quantity);
+
+                if (!isReserved)
+                {
+                    return BadRequest($"Unable to reserve {quantity} tickets for Ticket Type {id}. Insufficient quantity or invalid request.");
+                }
+
+                return Ok($"Successfully reserved {quantity} tickets for Ticket Type {id}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/tickettype/{id}/release
+        [HttpPost("{id}/release")]
+        public async Task<ActionResult> ReleaseTickets(int id, [FromBody] int quantity)
+        {
+            try
+            {
+                var isReleased = await _ticketTypeService.ReleaseTicketsAsync(id, quantity);
+
+                if (!isReleased)
+                {
+                    return BadRequest($"Unable to release {quantity} tickets for Ticket Type {id}. Invalid request.");
+                }
+
+                return Ok($"Successfully released {quantity} tickets for Ticket Type {id}");
             }
             catch (Exception ex)
             {

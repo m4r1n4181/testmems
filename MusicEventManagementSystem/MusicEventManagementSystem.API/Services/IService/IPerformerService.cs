@@ -1,3 +1,4 @@
+using MusicEventManagementSystem.API.DTOs;
 using MusicEventManagementSystem.API.Models;
 
 namespace MusicEventManagementSystem.API.Services.IService
@@ -6,8 +7,8 @@ namespace MusicEventManagementSystem.API.Services.IService
     {
         Task<IEnumerable<Performer>> GetAllPerformersAsync();
         Task<Performer?> GetPerformerByIdAsync(int id);
-        Task<Performer> CreatePerformerAsync(Performer performer);
-        Task<Performer?> UpdatePerformerAsync(int id, Performer performer);
+        Task<Performer> CreatePerformerAsync(PerformerDto performerDto);
+        Task<Performer?> UpdatePerformerAsync(int id, PerformerDto performerDto);
         Task<bool> DeletePerformerAsync(int id);
     }
 }

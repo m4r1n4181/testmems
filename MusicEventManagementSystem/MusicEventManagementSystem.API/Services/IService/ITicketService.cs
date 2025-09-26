@@ -1,13 +1,36 @@
-﻿using MusicEventManagementSystem.API.Models;
+﻿using MusicEventManagementSystem.API.DTOs.TicketSales;
+using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
 
 namespace MusicEventManagementSystem.API.Services.IService
 {
     public interface ITicketService
     {
-        Task<IEnumerable<Ticket>> GetAllTicketsAsync();
-        Task<Ticket?> GetTicketByIdAsync(int id);
-        Task<Ticket> CreateTicketAsync(Ticket ticket);
-        Task<Ticket?> UpdateTicketAsync(int id, Ticket ticket);
+        Task<IEnumerable<TicketResponseDto>> GetAllTicketsAsync();
+        Task<TicketResponseDto?> GetTicketByIdAsync(int id);
+        Task<TicketResponseDto> CreateTicketAsync(TicketCreateDto ticketDto);
+        Task<TicketResponseDto?> UpdateTicketAsync(int id, TicketUpdateDto ticketDto);
         Task<bool> DeleteTicketAsync(int id);
+
+        Task<IEnumerable<TicketResponseDto>> GetTicketsByStatusAsync(TicketStatus status);
+        Task<TicketResponseDto?> GetTicketByUniqueCodeAsync(string uniqueCode);
+        Task<TicketResponseDto?> GetTicketByQrCodeAsync(string qrCode);
+
+        Task<int> GetTicketsCountByStatusAsync(TicketStatus status);
+        Task<decimal> GetTotalRevenueAsync();
+        Task<decimal> GetRevenueByDateRangeAsync(DateTime from, DateTime to);
+        Task<decimal> GetRevenueByStatusAsync(TicketStatus status);
+        Task<IEnumerable<TicketResponseDto>> GetSoldTicketsAsync();
+        Task<IEnumerable<TicketResponseDto>> GetTodaysTicketsAsync();
+
+        // Ticket lifecycle methods
+        Task<TicketResponseDto?> SellTicketAsync(int ticketId);
+        Task<TicketResponseDto?> UseTicketAsync(string uniqueCode);
+        Task<TicketResponseDto?> CancelTicketAsync(int ticketId);
+
+        // Validation methods
+        Task<bool> IsUniqueCodeValidAsync(string uniqueCode);
+        Task<bool> IsQrCodeValidAsync(string qrCode);
+        Task<bool> CanTicketBeUsedAsync(string uniqueCode);
     }
 }

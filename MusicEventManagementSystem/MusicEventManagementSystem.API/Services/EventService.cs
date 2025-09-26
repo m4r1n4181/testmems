@@ -42,7 +42,7 @@ namespace MusicEventManagementSystem.API.Services
 
             existingEvent.Name = @event.Name;
             existingEvent.Description = @event.Description;
-            existingEvent.Interval = @event.Interval;
+            existingEvent.EventInterval = @event.EventInterval;
             existingEvent.Status = @event.Status;
             existingEvent.LocationId = @event.LocationId;
             existingEvent.CreatedById = @event.CreatedById;

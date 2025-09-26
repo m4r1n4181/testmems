@@ -1,4 +1,6 @@
-﻿namespace MusicEventManagementSystem.API.Models
+﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+
+namespace MusicEventManagementSystem.API.Models
 {
     public class Ticket
     {
@@ -7,6 +9,14 @@
         public string? QrCode { get; set; }
         public DateTime IssueDate { get; set; }
         public decimal FinalPrice { get; set; }
-        public string? Status { get; set; }
+        public TicketStatus Status { get; set; }
+
+        // Navigation property - Ticket - (1,1) -> TicketType
+        public int TicketTypeId { get; set; }
+        public TicketType? TicketType { get; set; }
+
+        // Navigation property - Ticket - (0,1) -> RecordedSale
+        public int? RecordedSaleId { get; set; }
+        public RecordedSale? RecordedSale { get; set; }
     }
 }
