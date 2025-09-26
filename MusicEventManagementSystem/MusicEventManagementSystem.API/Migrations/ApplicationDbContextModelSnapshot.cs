@@ -207,7 +207,7 @@ namespace MusicEventManagementSystem.API.Migrations
                         .IsUnique();
 
                     b.ToTable("Communications");
-                });
+                }));
 
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.Contract", b =>
                 {
@@ -1941,7 +1941,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Navigation("TicketTypes");
                 });
 #pragma warning restore 612, 618
-                });
+                
         }
     }
 }
