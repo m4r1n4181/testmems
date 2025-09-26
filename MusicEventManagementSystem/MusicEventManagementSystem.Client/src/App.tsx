@@ -6,6 +6,7 @@ import ProtectedRoute from "./frontend/shared/components/ProtectedRoute";
 
 // Ticket Sales imports
 import TicketSalesDashboard from "./frontend/ticket-sales/pages/Dashboard";
+import TicketSalesInfrastructure from "./frontend/ticket-sales/pages/Infrastructure";
 import TicketSalesVenues from "./frontend/ticket-sales/pages/Venues";
 import TicketSalesZones from './frontend/ticket-sales/pages/Zones';
 import TicketSalesSegments from './frontend/ticket-sales/pages/Segments';
@@ -17,6 +18,10 @@ import TicketSalesSpecialOffers from './frontend/ticket-sales/pages/SpecialOffer
 
 // Event Organization imports
 // ...
+
+// Add these imports for react-toastify
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Helper function to get user's department
 const getUserDepartment = (): number | null => {
@@ -65,6 +70,16 @@ function App() {
             <ProtectedRoute allowedDepartments={[1]}>
               <Layout>
                 <TicketSalesDashboard />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route path="/ticket-sales/infrastructure" 
+          element={
+            <ProtectedRoute allowedDepartments={[1]}>
+              <Layout>
+                <TicketSalesInfrastructure />
               </Layout>
             </ProtectedRoute>
           } 
@@ -164,6 +179,9 @@ function App() {
         {/* Catch all - redirect to appropriate dashboard */}
         <Route path="*" element={<DepartmentRedirect />} />
       </Routes>
+
+      {/* Add ToastContainer here for global notifications */}
+      <ToastContainer />
     </Router>
   );
 }

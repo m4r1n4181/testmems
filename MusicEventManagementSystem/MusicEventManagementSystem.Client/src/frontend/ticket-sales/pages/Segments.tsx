@@ -1,414 +1,541 @@
-import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, X, AlertCircle, Grid3x3, Users, BarChart3 } from "lucide-react";
-import { segmentService } from "../services/segmentService";
-import type { Segment, CreateSegmentDto } from "../services/segmentService";
+import React, { useState, useEffect } from 'react';
+import { 
+  ChevronDown, 
+  ChevronUp, 
+  Edit3, 
+  Trash2, 
+  Plus, 
+  Filter, 
+  Search,
+  MapPin,
+  Users,
+  Building,
+  X,
+  AlertCircle,
+  CheckCircle,
+  Loader
+} from 'lucide-react';
 
-const Segments = () => {
-  const [segments, setSegments] = useState<Segment[]>([]);
+import SegmentService from '../types/services/segmentService';
+import VenueService from '../types/services/venueService';
+import type { SegmentResponse } from '../types/api/segment';
+import type { VenueResponse } from '../types/api/venue';
+import type { SegmentCreateForm, SegmentUpdateForm } from '../types/forms/segment';
+import { SegmentType } from '../types/enums/TicketSales';
+import type { ZoneResponse } from '../types/api/zone';
+
+// Toast notification component
+const Toast = ({ message, type, onClose }: { message: string, type: 'success' | 'error', onClose: () => void }) => (
+  <div className={`fixed top-4 right-4 z-50 p-4 rounded-2xl border backdrop-blur-sm transition-all ${
+    type === 'success' 
+      ? 'bg-green-900/80 border-green-400/30 text-green-400' 
+      : 'bg-red-900/80 border-red-400/30 text-red-400'
+  }`}>
+    <div className="flex items-center gap-2">
+      {type === 'success' ? (
+        <CheckCircle className="w-5 h-5" />
+      ) : (
+        <AlertCircle className="w-5 h-5" />
+      )}
+      <span>{message}</span>
+      <button onClick={onClose} className="ml-2">
+        <X className="w-4 h-4" />
+      </button>
+    </div>
+  </div>
+);
+
+const SegmentsPage: React.FC = () => {
+  const [segments, setSegments] = useState<SegmentResponse[]>([]);
+  const [venues, setVenues] = useState<VenueResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editingSegment, setEditingSegment] = useState<Segment | null>(null);
-  const [error, setError] = useState<string>("");
-  const [submitting, setSubmitting] = useState(false);
-  const [formData, setFormData] = useState<CreateSegmentDto>({
-    name: "",
-    description: "",
+  const [error, setError] = useState<string | null>(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [currentSegment, setCurrentSegment] = useState<SegmentResponse | null>(null);
+  const [formData, setFormData] = useState<SegmentCreateForm | SegmentUpdateForm>({
+    name: '',
+    description: '',
     capacity: 0,
-    segmentType: ""
+    segmentType: SegmentType.Standard,
+    venueId: 0,
   });
+  const [expandedRows, setExpandedRows] = useState<number[]>([]);
+  const [zonesMap, setZonesMap] = useState<{ [key: number]: ZoneResponse[] }>({});
+  const [capacityMap, setCapacityMap] = useState<{ [key: number]: number }>({});
+  const [filterVenueId, setFilterVenueId] = useState<number | 'all'>('all');
+  const [filterType, setFilterType] = useState<SegmentType | 'all'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
-  // Fetch all segments
-  const fetchSegments = async () => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
     try {
       setLoading(true);
-      setError("");
-      const data = await segmentService.getAllSegments();
-      setSegments(data);
-    } catch (error) {
-      setError("Failed to fetch segments. Please try again.");
-      console.error("Error fetching segments:", error);
-    } finally {
+      const [segmentsData, venuesData] = await Promise.all([
+        SegmentService.getAllSegments(),
+        VenueService.getAllVenues(),
+      ]);
+      setSegments(segmentsData);
+      setVenues(venuesData);
+      setLoading(false);
+    } catch (err) {
+      setError('Failed to load data');
       setLoading(false);
     }
   };
 
-  // Create new segment
-  const createSegment = async () => {
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleOpenModal = (segment?: SegmentResponse) => {
+    setIsEdit(!!segment);
+    setCurrentSegment(segment || null);
+    setFormData({
+      name: segment?.name || '',
+      description: segment?.description || '',
+      capacity: segment?.capacity || 0,
+      segmentType: segment?.segmentType || SegmentType.Standard,
+      venueId: segment?.venueId || 0,
+    });
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => setOpenModal(false);
+
+  // For TextField
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // For Select
+  const handleSelectChange = (e: { target: { name: string; value: any } }) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
     try {
-      setSubmitting(true);
-      setError("");
-      await segmentService.createSegment(formData);
-      await fetchSegments();
-      closeModal();
-    } catch (error) {
-      setError("Failed to create segment. Please try again.");
-      console.error("Error creating segment:", error);
-    } finally {
-      setSubmitting(false);
+      if (isEdit && currentSegment) {
+        await SegmentService.updateSegment(currentSegment.segmentId, formData as SegmentUpdateForm);
+        showToast('Segment updated');
+      } else {
+        await SegmentService.createSegment(formData as SegmentCreateForm);
+        showToast('Segment created');
+      }
+      fetchData();
+      handleCloseModal();
+    } catch (err: any) {
+      showToast(err.message || 'Operation failed', 'error');
     }
   };
 
-  // Update segment
-  const updateSegment = async () => {
-    if (!editingSegment) return;
-
-    try {
-      setSubmitting(true);
-      setError("");
-      await segmentService.updateSegment(editingSegment.segmentId, formData);
-      await fetchSegments();
-      closeModal();
-    } catch (error) {
-      setError("Failed to update segment. Please try again.");
-      console.error("Error updating segment:", error);
-    } finally {
-      setSubmitting(false);
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Are you sure you want to delete this segment?')) {
+      try {
+        await SegmentService.deleteSegment(id);
+        showToast('Segment deleted');
+        fetchData();
+      } catch (err: any) {
+        showToast(err.message || 'Delete failed (may be linked to an event)', 'error');
+      }
     }
   };
 
-  // Delete segment
-  const deleteSegment = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this segment?")) return;
+  const toggleExpand = async (id: number) => {
+    const isExpanded = expandedRows.includes(id);
+    setExpandedRows(isExpanded ? expandedRows.filter((row) => row !== id) : [...expandedRows, id]);
 
-    try {
-      await segmentService.deleteSegment(id);
-      await fetchSegments();
-    } catch (error) {
-      setError("Failed to delete segment. Please try again.");
-      console.error("Error deleting segment:", error);
+    if (!isExpanded) {
+      if (!zonesMap[id]) {
+        const zones = await SegmentService.getZonesBySegmentId(id);
+        setZonesMap((prev) => ({ ...prev, [id]: zones }));
+      }
+      if (capacityMap[id] === undefined) {
+        const capacity = await SegmentService.calculateSegmentTotalCapacity(id);
+        setCapacityMap((prev) => ({ ...prev, [id]: capacity }));
+      }
     }
   };
 
-  // Open modal for create/edit
-  const openModal = (segment?: Segment) => {
-    setError("");
-    if (segment) {
-      setEditingSegment(segment);
-      setFormData({
-        name: segment.name || "",
-        description: segment.description || "",
-        capacity: segment.capacity,
-        segmentType: segment.segmentType || ""
-      });
-    } else {
-      setEditingSegment(null);
-      setFormData({
-        name: "",
-        description: "",
-        capacity: 0,
-        segmentType: ""
-      });
-    }
-    setShowModal(true);
-  };
+  const filteredSegments = segments.filter((seg) => {
+    const venueMatch = filterVenueId === 'all' || seg.venueId === filterVenueId;
+    const typeMatch = filterType === 'all' || seg.segmentType === filterType;
+    const searchMatch = searchTerm === '' || 
+      seg.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      seg.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      getVenueName(seg.venueId).toLowerCase().includes(searchTerm.toLowerCase());
+    return venueMatch && typeMatch && searchMatch;
+  });
 
-  const closeModal = () => {
-    setShowModal(false);
-    setEditingSegment(null);
-    setError("");
-  };
+  const getVenueName = (venueId: number) => venues.find((v) => v.venueId === venueId)?.name || `Venue ${venueId}`;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingSegment) {
-      updateSegment();
-    } else {
-      createSegment();
+  const getTypeLabel = (type: SegmentType) => {
+    switch (type) {
+      case SegmentType.VIP: return 'VIP';
+      case SegmentType.Standard: return 'Standard';
+      case SegmentType.Premium: return 'Premium';
+      case SegmentType.Standing: return 'Standing';
+      case SegmentType.Seated: return 'Seated';
+      default: return 'Unknown';
     }
   };
-
-  const handleInputChange = (field: keyof CreateSegmentDto, value: string | number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  // Get segment type icon and color
-  const getSegmentTypeIcon = (type: string) => {
-    switch (type?.toLowerCase()) {
-      case 'vip':
-        return { icon: <BarChart3 className="w-5 h-5" />, color: 'from-yellow-500 to-yellow-600' };
-      case 'general':
-        return { icon: <Users className="w-5 h-5" />, color: 'from-blue-500 to-blue-600' };
-      case 'premium':
-        return { icon: <Grid3x3 className="w-5 h-5" />, color: 'from-purple-500 to-purple-600' };
-      default:
-        return { icon: <Grid3x3 className="w-5 h-5" />, color: 'from-gray-500 to-gray-600' };
-    }
-  };
-
-  // Get stats
-  const totalCapacity = segments.reduce((sum, segment) => sum + segment.capacity, 0);
-  const totalSegments = segments.length;
-  const avgCapacity = totalSegments > 0 ? Math.round(totalCapacity / totalSegments) : 0;
-
-  useEffect(() => {
-    fetchSegments();
-  }, []);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-white text-lg">Loading segments...</div>
+      <div className="flex items-center justify-center h-96">
+        <Loader className="w-8 h-8 text-lime-400 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="flex items-center gap-2 text-red-400">
+          <AlertCircle className="w-5 h-5" />
+          <span>{error}</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
+      {/* Toast Notification */}
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
+
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Segments</h1>
-          <p className="text-gray-400">Manage venue segments and sections</p>
+          <h1 className="text-3xl font-bold text-white">Segments Management</h1>
+          <p className="text-neutral-400 mt-1">Manage venue segments and their configurations</p>
         </div>
         <button
-          onClick={() => openModal()}
-          className="bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-black px-4 py-2 rounded-xl flex items-center gap-2 transition-all duration-200 font-medium shadow-lg hover:shadow-lime-500/25"
+          onClick={() => handleOpenModal()}
+          className="flex items-center gap-2 px-6 py-3 bg-lime-400 hover:bg-lime-500 text-neutral-900 font-medium rounded-2xl transition-all duration-200 shadow-lg hover:shadow-lime-400/20"
         >
-          <Plus size={20} />
+          <Plus className="w-5 h-5" />
           Add Segment
         </button>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-900/20 border border-red-500/30 text-red-200 p-4 rounded-xl flex items-center gap-3 backdrop-blur-sm">
-          <div className="p-2 bg-red-500/20 rounded-lg">
-            <AlertCircle size={20} className="text-red-400" />
+      {/* Filters */}
+      <div className="bg-neutral-900/80 backdrop-blur-sm border border-neutral-800 rounded-2xl p-4 shadow-2xl">
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Search */}
+          <div className="relative min-w-64">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-500 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search segments..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent transition-all"
+            />
           </div>
-          <span>{error}</span>
-        </div>
-      )}
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-2xl p-6 shadow-xl">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-500/20 rounded-xl">
-              <Grid3x3 className="w-8 h-8 text-blue-400" />
-            </div>
-            <div>
-              <p className="text-gray-400 text-sm">Total Segments</p>
-              <h3 className="text-2xl font-bold text-white">{totalSegments}</h3>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-2xl p-6 shadow-xl">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-500/20 rounded-xl">
-              <Users className="w-8 h-8 text-green-400" />
-            </div>
-            <div>
-              <p className="text-gray-400 text-sm">Total Capacity</p>
-              <h3 className="text-2xl font-bold text-white">{totalCapacity.toLocaleString()}</h3>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-2xl p-6 shadow-xl">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-purple-500/20 rounded-xl">
-              <BarChart3 className="w-8 h-8 text-purple-400" />
-            </div>
-            <div>
-              <p className="text-gray-400 text-sm">Avg. Capacity</p>
-              <h3 className="text-2xl font-bold text-white">{avgCapacity.toLocaleString()}</h3>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Segments Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {segments.map((segment) => {
-          const { icon, color } = getSegmentTypeIcon(segment.segmentType);
-          return (
-            <div
-              key={segment.segmentId}
-              className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-2xl p-6 shadow-xl hover:border-neutral-700 transition-all duration-200 group"
+          {/* Venue Filter */}
+          <div className="relative">
+            <select
+              value={filterVenueId}
+              onChange={(e) => setFilterVenueId(e.target.value as number | 'all')}
+              className="appearance-none bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-2 pr-8 text-white focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent transition-all cursor-pointer"
             >
-              {/* Header */}
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 bg-gradient-to-r ${color} bg-opacity-20 rounded-lg`}>
-                    {icon}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white group-hover:text-lime-400 transition-colors">
-                      {segment.name || "Unnamed Segment"}
-                    </h3>
-                    <p className="text-sm text-gray-400 capitalize">{segment.segmentType || "N/A"}</p>
-                  </div>
-                </div>
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => openModal(segment)}
-                    className="p-2 bg-neutral-800 hover:bg-blue-600 rounded-lg transition-colors"
-                    title="Edit segment"
-                  >
-                    <Edit size={16} className="text-gray-400 hover:text-white" />
-                  </button>
-                  <button
-                    onClick={() => deleteSegment(segment.segmentId)}
-                    className="p-2 bg-neutral-800 hover:bg-red-600 rounded-lg transition-colors"
-                    title="Delete segment"
-                  >
-                    <Trash2 size={16} className="text-gray-400 hover:text-white" />
-                  </button>
-                </div>
-              </div>
-              
-              {/* Details */}
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Capacity:</span>
-                  <span className="text-lime-400 font-bold">{segment.capacity.toLocaleString()}</span>
-                </div>
-                {segment.description && (
-                  <div className="pt-2 border-t border-neutral-800">
-                    <p className="text-gray-300 text-xs">{segment.description}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+              <option value="all">All Venues</option>
+              {venues.map((venue) => (
+                <option key={venue.venueId} value={venue.venueId}>{venue.name}</option>
+              ))}
+            </select>
+            <Filter className="absolute right-2 top-1/2 transform -translate-y-1/2 text-neutral-500 w-4 h-4 pointer-events-none" />
+          </div>
+
+          {/* Type Filter */}
+          <div className="relative">
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value as SegmentType | 'all')}
+              className="appearance-none bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-2 pr-8 text-white focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent transition-all cursor-pointer"
+            >
+              <option value="all">All Types</option>
+              {Object.entries(SegmentType)
+                .filter(([key]) => isNaN(Number(key)))
+                .map(([key, value]) => (
+                  <option key={value} value={value}>{key}</option>
+                ))}
+            </select>
+            <Filter className="absolute right-2 top-1/2 transform -translate-y-1/2 text-neutral-500 w-4 h-4 pointer-events-none" />
+          </div>
+
+          <div className="text-sm text-neutral-400 ml-auto">
+            {filteredSegments.length} segments found
+          </div>
+        </div>
       </div>
 
-      {segments.length === 0 && !loading && (
-        <div className="text-center py-16 bg-neutral-900/30 rounded-2xl border border-neutral-800">
-          <div className="p-4 bg-neutral-800/50 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <Grid3x3 className="w-8 h-8 text-gray-400" />
-          </div>
-          <p className="text-gray-400 text-lg mb-2">No segments found</p>
-          <p className="text-gray-500 text-sm">Create your first segment to get started!</p>
+      {/* Segments Table */}
+      <div className="bg-neutral-900/80 backdrop-blur-sm border border-neutral-800 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-neutral-800/50">
+              <tr>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-300 w-12"></th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-300">ID</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-300">Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-300">Description</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-300">Capacity</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-300">Type</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-300">Venue</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-300">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-800">
+              {filteredSegments.map((segment) => (
+                <React.Fragment key={segment.segmentId}>
+                  <tr className="hover:bg-neutral-800/30 transition-colors group">
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => toggleExpand(segment.segmentId)}
+                        className="p-1 hover:bg-neutral-700 rounded-lg transition-colors"
+                      >
+                        {expandedRows.includes(segment.segmentId) ? (
+                          <ChevronUp className="w-4 h-4 text-neutral-400 group-hover:text-lime-400 transition-colors" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-neutral-400 group-hover:text-lime-400 transition-colors" />
+                        )}
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-lime-400">#{segment.segmentId}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-white">{segment.name}</td>
+                    <td className="px-6 py-4 text-sm text-neutral-300">{segment.description}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1 text-sm font-medium text-white">
+                        <Users className="w-4 h-4 text-neutral-400" />
+                        {segment.capacity}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                        segment.segmentType === SegmentType.VIP
+                          ? 'bg-purple-400/20 text-purple-400 border border-purple-400/30'
+                          : segment.segmentType === SegmentType.Premium
+                          ? 'bg-yellow-400/20 text-yellow-400 border border-yellow-400/30'
+                          : segment.segmentType === SegmentType.Standing
+                          ? 'bg-orange-400/20 text-orange-400 border border-orange-400/30'
+                          : segment.segmentType === SegmentType.Seated
+                          ? 'bg-blue-400/20 text-blue-400 border border-blue-400/30'
+                          : 'bg-gray-400/20 text-gray-400 border border-gray-400/30'
+                      }`}>
+                        {getTypeLabel(segment.segmentType)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1 text-sm text-neutral-300">
+                        <Building className="w-4 h-4 text-neutral-400" />
+                        {getVenueName(segment.venueId)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleOpenModal(segment)}
+                          className="p-2 hover:bg-neutral-700 rounded-lg transition-all duration-200 text-neutral-400 hover:text-lime-400 hover:scale-105"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(segment.segmentId)}
+                          className="p-2 hover:bg-neutral-700 rounded-lg transition-all duration-200 text-neutral-400 hover:text-red-400 hover:scale-105"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {expandedRows.includes(segment.segmentId) && (
+                    <tr>
+                      <td colSpan={8} className="px-6 py-4 bg-neutral-800/20 border-t border-neutral-700">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-2 text-lime-400">
+                              <Users className="w-4 h-4" />
+                              <span className="font-semibold">Total Capacity:</span>
+                              <span className="text-white">{capacityMap[segment.segmentId] ?? 'Loading...'}</span>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-lime-400" />
+                              Associated Zones
+                            </h4>
+                            {zonesMap[segment.segmentId]?.length ? (
+                              <div className="bg-neutral-900/50 rounded-xl overflow-hidden border border-neutral-700">
+                                <table className="w-full">
+                                  <thead className="bg-neutral-800/50">
+                                    <tr>
+                                      <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-300">ID</th>
+                                      <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-300">Name</th>
+                                      <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-300">Capacity</th>
+                                      <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-300">Base Price</th>
+                                      <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-300">Position</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-neutral-700">
+                                    {zonesMap[segment.segmentId].map((zone) => (
+                                      <tr key={zone.zoneId} className="hover:bg-neutral-800/30 transition-colors">
+                                        <td className="px-4 py-3 text-xs text-lime-400 font-medium">#{zone.zoneId}</td>
+                                        <td className="px-4 py-3 text-xs text-white">{zone.name}</td>
+                                        <td className="px-4 py-3 text-xs text-neutral-300">{zone.capacity}</td>
+                                        <td className="px-4 py-3 text-xs text-neutral-300">${zone.basePrice}</td>
+                                        <td className="px-4 py-3 text-xs text-neutral-300">{zone.position}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ) : (
+                              <div className="text-sm text-neutral-500 italic p-4 bg-neutral-800/30 rounded-xl border border-neutral-700">
+                                No zones associated with this segment
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
+
+        {filteredSegments.length === 0 && (
+          <div className="text-center py-16">
+            <MapPin className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
+            <h3 className="text-xl font-medium text-neutral-300 mb-2">No segments found</h3>
+            <p className="text-neutral-500 mb-6">Try adjusting your search criteria or create a new segment</p>
+            <button
+              onClick={() => handleOpenModal()}
+              className="px-6 py-3 bg-lime-400 hover:bg-lime-500 text-neutral-900 font-medium rounded-2xl transition-all duration-200"
+            >
+              Create First Segment
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-neutral-900/95 backdrop-blur-md border border-neutral-800 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-lime-500/20 rounded-lg">
-                  <Grid3x3 className="w-6 h-6 text-lime-400" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-white">
-                    {editingSegment ? "Edit Segment" : "Add New Segment"}
-                  </h2>
-                  <p className="text-sm text-gray-400">
-                    {editingSegment ? "Update segment information" : "Create a new venue segment"}
-                  </p>
-                </div>
-              </div>
+      {openModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-neutral-800">
+              <h2 className="text-xl font-bold text-white">
+                {isEdit ? 'Edit Segment' : 'Add Segment'}
+              </h2>
               <button
-                onClick={closeModal}
-                className="p-2 hover:bg-neutral-800 rounded-lg transition-colors"
+                onClick={handleCloseModal}
+                className="p-2 hover:bg-neutral-800 rounded-lg transition-colors text-neutral-400 hover:text-white"
               >
-                <X size={20} className="text-gray-400" />
+                <X className="w-5 h-5" />
               </button>
             </div>
-
-            {/* Modal Error Message */}
-            {error && (
-              <div className="bg-red-900/30 border border-red-500/30 text-red-200 p-3 rounded-xl flex items-center gap-3 mb-6">
-                <AlertCircle size={16} className="text-red-400" />
-                <span className="text-sm">{error}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
+            
+            <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Segment Name *
-                </label>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">Name *</label>
                 <input
                   type="text"
+                  name="name"
                   value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                  className="w-full p-3 bg-neutral-800/50 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-lime-500 border border-neutral-700 focus:border-lime-500 transition-colors"
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent transition-all"
                   placeholder="Enter segment name"
-                  required
-                  disabled={submitting}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Segment Type *
-                </label>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">Description</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={(e) => handleSelectChange({ target: { name: e.target.name, value: e.target.value } })}
+                  rows={3}
+                  className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent resize-none transition-all"
+                  placeholder="Enter segment description"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">Capacity *</label>
+                <input
+                  type="number"
+                  name="capacity"
+                  value={formData.capacity}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent transition-all"
+                  placeholder="Enter capacity"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">Type *</label>
                 <select
+                  name="segmentType"
                   value={formData.segmentType}
-                  onChange={(e) => handleInputChange("segmentType", e.target.value)}
-                  className="w-full p-3 bg-neutral-800/50 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-lime-500 border border-neutral-700 focus:border-lime-500 transition-colors"
-                  required
-                  disabled={submitting}
+                  onChange={(e) => handleSelectChange({ target: { name: e.target.name, value: e.target.value } })}
+                  className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent transition-all cursor-pointer"
                 >
-                  <option value="">Select segment type</option>
-                  <option value="VIP">VIP</option>
-                  <option value="Premium">Premium</option>
-                  <option value="General">General</option>
-                  <option value="Standing">Standing</option>
-                  <option value="Seating">Seating</option>
-                  <option value="Other">Other</option>
+                  {Object.entries(SegmentType)
+                    .filter(([key]) => isNaN(Number(key)))
+                    .map(([key, value]) => (
+                      <option key={value} value={value}>{key}</option>
+                    ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Capacity *
-                </label>
-                <input
-                  type="number"
-                  value={formData.capacity || ""}
-                  onChange={(e) => handleInputChange("capacity", parseInt(e.target.value) || 0)}
-                  className="w-full p-3 bg-neutral-800/50 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-lime-500 border border-neutral-700 focus:border-lime-500 transition-colors"
-                  placeholder="0"
-                  min="1"
-                  required
-                  disabled={submitting}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => handleInputChange("description", e.target.value)}
-                  className="w-full p-3 bg-neutral-800/50 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-lime-500 h-20 resize-none border border-neutral-700 focus:border-lime-500 transition-colors"
-                  placeholder="Segment description (optional)"
-                  disabled={submitting}
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="flex-1 bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 disabled:from-lime-700 disabled:to-lime-800 disabled:cursor-not-allowed text-black py-3 rounded-xl font-medium transition-all duration-200 shadow-lg"
+                <label className="block text-sm font-medium text-neutral-300 mb-2">Venue *</label>
+                <select
+                  name="venueId"
+                  value={formData.venueId}
+                  onChange={(e) => handleSelectChange({ target: { name: e.target.name, value: e.target.value } })}
+                  className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent transition-all cursor-pointer"
                 >
-                  {submitting 
-                    ? (editingSegment ? "Updating..." : "Creating...") 
-                    : (editingSegment ? "Update Segment" : "Create Segment")
-                  }
-                </button>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  disabled={submitting}
-                  className="flex-1 bg-neutral-800 hover:bg-neutral-700 disabled:bg-neutral-700 disabled:cursor-not-allowed text-white py-3 rounded-xl font-medium transition-colors border border-neutral-700"
-                >
-                  Cancel
-                </button>
+                  <option value={0}>Select a venue</option>
+                  {venues.map((venue) => (
+                    <option key={venue.venueId} value={venue.venueId}>{venue.name}</option>
+                  ))}
+                </select>
               </div>
-            </form>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-neutral-800">
+              <button
+                onClick={handleCloseModal}
+                className="px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-xl transition-all duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="px-6 py-3 bg-lime-400 hover:bg-lime-500 text-neutral-900 font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-lime-400/20"
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -416,4 +543,4 @@ const Segments = () => {
   );
 };
 
-export default Segments;
+export default SegmentsPage;
