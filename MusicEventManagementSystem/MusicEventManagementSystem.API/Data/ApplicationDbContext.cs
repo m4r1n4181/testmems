@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.Models.Auth;
 using System.Reflection.Emit;
@@ -46,42 +47,6 @@ namespace MusicEventManagementSystem.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             // Ticket-Sales Subsystem configurations
-            // Configuring enum fields to be stored as integers
-            builder.Entity<Venue>()
-                .Property(v => v.VenueType)
-                .HasConversion<int>();
-
-            builder.Entity<Segment>()
-                .Property(s => s.SegmentType)
-                .HasConversion<int>();
-
-            builder.Entity<Zone>()
-                .Property(z => z.Position)
-                .HasConversion<int>();
-
-            builder.Entity<Ticket>()
-                .Property(t => t.Status)
-                .HasConversion<int>();
-
-            builder.Entity<TicketType>()
-                .Property(tt =>tt.Status)
-                .HasConversion<int>();
-
-            builder.Entity<SpecialOffer>()
-                .Property(so => so.OfferType)
-                .HasConversion<int>();
-
-            builder.Entity<PricingRule>()
-                .Property(pr => pr.PricingCondition)
-                .HasConversion<int>();
-
-            builder.Entity<RecordedSale>()
-                .Property(rs => rs.PaymentMethod)
-                .HasConversion<int>();
-
-            builder.Entity<RecordedSale>()
-                .Property(rs => rs.TransactionStatus)
-                .HasConversion<int>();
 
 
             // Configure Negotiation relationships
@@ -187,6 +152,34 @@ namespace MusicEventManagementSystem.Data
                 .HasMany(rs => rs.SpecialOffers)
                 .WithMany(so => so.RecordedSales)
                 .UsingEntity(j => j.ToTable("RecordedSaleSpecialOffers"));
+
+            // Conversion DateTime to UTC
+            var dateTimeConverter = new ValueConverter<DateTime, DateTime>(
+                v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+            var nullableDateTimeConverter = new ValueConverter<DateTime?, DateTime?>(
+                v => v.HasValue ? (v.Value.Kind == DateTimeKind.Utc ? v.Value : v.Value.ToUniversalTime()) : v,
+                v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
+
+            foreach (var entityType in builder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(DateTime))
+                    {
+                        builder.Entity(entityType.Name)
+                            .Property(property.Name)
+                            .HasConversion(dateTimeConverter);
+                    }
+                    else if (property.ClrType == typeof(DateTime?))
+                    {
+                        builder.Entity(entityType.Name)
+                            .Property(property.Name)
+                            .HasConversion(nullableDateTimeConverter);
+                    }
+                }
+            }
 
             base.OnModelCreating(builder);
 

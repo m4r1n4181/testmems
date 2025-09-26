@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace MusicEventManagementSystem.Migrations
+namespace MusicEventManagementSystem.API.Migrations
 {
     /// <inheritdoc />
-    public partial class Fix_Performer_Schema : Migration
+    public partial class AddDateTimeUtcConversion : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

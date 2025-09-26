@@ -1,27 +1,36 @@
-export interface Venue {
+export interface VenueResponseDto {
   venueId: number;
   name: string;
   description: string;
   city: string;
   address: string;
   capacity: number;
-  venueType: string;
+  venueType: number;
 }
 
-export interface CreateVenueDto {
+export interface VenueCreateDto {
   name: string;
   description: string;
   city: string;
   address: string;
   capacity: number;
-  venueType: string;
+  venueType: number;
+}
+
+export interface VenueUpdateDto {
+  name?: string;
+  description?: string;
+  city?: string;
+  address?: string;
+  capacity?: number;
+  venueType?: number;
 }
 
 class VenueService {
   private readonly baseUrl = 'https://localhost:7050/api/venue'; // Adjust port as needed
 
   // Get all venues
-  async getAllVenues(): Promise<Venue[]> {
+  async getAllVenues(): Promise<VenueResponseDto[]> {
     try {
       const response = await fetch(this.baseUrl);
       if (!response.ok) {
@@ -35,7 +44,7 @@ class VenueService {
   }
 
   // Get venue by ID
-  async getVenueById(id: number): Promise<Venue> {
+  async getVenueById(id: number): Promise<VenueResponseDto> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}`);
       if (!response.ok) {
@@ -52,7 +61,7 @@ class VenueService {
   }
 
   // Create new venue
-  async createVenue(venue: CreateVenueDto): Promise<Venue> {
+  async createVenue(venue: VenueCreateDto): Promise<VenueResponseDto> {
     try {
       const response = await fetch(this.baseUrl, {
         method: 'POST',
@@ -74,7 +83,7 @@ class VenueService {
   }
 
   // Update venue
-  async updateVenue(id: number, venue: CreateVenueDto): Promise<Venue> {
+  async updateVenue(id: number, venue: VenueUpdateDto): Promise<VenueResponseDto> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}`, {
         method: 'PUT',

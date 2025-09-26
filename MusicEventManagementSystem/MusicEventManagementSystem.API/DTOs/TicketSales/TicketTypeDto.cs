@@ -11,12 +11,10 @@ namespace MusicEventManagementSystem.API.DTOs.TicketSales
         public TicketTypeStatus Status { get; set; }
         public int AvailableQuantity { get; set; }
         public int ZoneId { get; set; }
-        public ZoneResponseDto? Zone { get; set; }
         public int EventId { get; set; }
-        public EventResponseDto? Event { get; set; }
-        public List<TicketResponseDto>? Tickets { get; set; }
-        public List<SpecialOfferResponseDto>? SpecialOffers { get; set; }
-        public List<PricingRuleResponseDto>? PricingRules { get; set; }
+        public List<int>? TicketIds { get; set; }
+        public List<int>? SpecialOfferIds { get; set; }
+        public List<int>? PricingRuleIds { get; set; }
     }
 
     public class TicketTypeCreateDto

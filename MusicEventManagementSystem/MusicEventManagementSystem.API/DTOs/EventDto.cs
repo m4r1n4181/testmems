@@ -16,8 +16,8 @@ namespace MusicEventManagementSystem.API.DTOs
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
-        public List<TicketTypeResponseDto>? TicketTypes { get; set; }
-        public List<PricingRuleResponseDto>? PricingRules { get; set; }
+        public List<int>? TicketTypeIds { get; set; }
+        public List<int>? PricingRuleIds { get; set; }
     }
 
     public class EventCreateDto

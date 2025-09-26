@@ -12,7 +12,6 @@ namespace MusicEventManagementSystem.API.DTOs.TicketSales
         public decimal FinalPrice { get; set; }
         public TicketStatus Status { get; set; }
         public int TicketTypeId { get; set; }
-        public TicketTypeResponseDto? TicketType { get; set; }
         public int? RecordedSaleId { get; set; }
     }
 

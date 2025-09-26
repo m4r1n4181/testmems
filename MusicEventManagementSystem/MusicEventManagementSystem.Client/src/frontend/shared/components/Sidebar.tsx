@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   LogOut, CircleDollarSign, BarChart2, TrendingUp, Star, Bookmark, Clock, ChevronLeft, ChevronRight,
-  MapPin, Map, Ticket, Calendar, PieChart, PlaySquare, ListChecks, CalendarDays, Briefcase
+  MapPin, Map, Ticket, Calendar, PieChart, PlaySquare, ListChecks, CalendarDays, Briefcase, Building2
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -29,6 +29,7 @@ const Sidebar = () => {
       case 1: // TicketSales
         return [
           { icon: <BarChart2 />, label: "Dashboard", path: "/ticket-sales/dashboard" },
+          { icon: <Building2 />, label: "Infrastructure", path: "/ticket-sales/infrastructure" },
           { icon: <MapPin />, label: "Venues", path: "/ticket-sales/venues" },
           { icon: <Clock />, label: "Segments", path: "/ticket-sales/segments" },
           { icon: <Map />, label: "Zones", path: "/ticket-sales/zones" },

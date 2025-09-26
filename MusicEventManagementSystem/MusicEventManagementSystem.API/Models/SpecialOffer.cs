@@ -12,7 +12,7 @@ namespace MusicEventManagementSystem.API.Models
         public string? ApplicationCondition { get; set; }
         public decimal DiscountValue { get; set; }
         public int TicketLimit { get; set; }
-        public OfferType? OfferType { get; set; }
+        public OfferType OfferType { get; set; }
 
         // Navigation property - SpecialOffer - (0,N) -> TicketType
         public ICollection<TicketType> TicketTypes { get; set; } = new List<TicketType>();

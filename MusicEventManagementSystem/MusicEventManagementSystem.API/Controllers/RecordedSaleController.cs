@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicEventManagementSystem.API.DTOs.TicketSales;
 using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services;
@@ -21,7 +22,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/recordedsale
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetAllRecordedSales()
+        public async Task<ActionResult<IEnumerable<RecordedSaleResponseDto>>> GetAllRecordedSales()
         {
             try
             {
@@ -36,7 +37,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/recordedsale/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<RecordedSale>> GetRecordedSaleById(int id)
+        public async Task<ActionResult<RecordedSaleResponseDto>> GetRecordedSaleById(int id)
         {
             try
             {
@@ -57,7 +58,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // POST: api/recordedsale
         [HttpPost]
-        public async Task<ActionResult<RecordedSale>> CreateRecordedSale([FromBody] RecordedSale recordedSale)
+        public async Task<ActionResult<RecordedSaleResponseDto>> CreateRecordedSale([FromBody] RecordedSaleCreateDto createRecordedSaleDto)
         {
             try
             {
@@ -66,7 +67,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var createdRecordedSale = await _recordedSaleService.CreateRecordedSaleAsync(recordedSale);
+                var createdRecordedSale = await _recordedSaleService.CreateRecordedSaleAsync(createRecordedSaleDto);
 
                 return CreatedAtAction(nameof(GetRecordedSaleById), new { id = createdRecordedSale.RecordedSaleId }, createdRecordedSale);
             }
@@ -78,7 +79,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // PUT: api/recordedsale/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult<RecordedSale>> UpdateRecordedSale(int id, [FromBody] RecordedSale recordedSale)
+        public async Task<ActionResult<RecordedSaleResponseDto>> UpdateRecordedSale(int id, [FromBody] RecordedSaleUpdateDto updateRecordedSaleDto)
         {
             try
             {
@@ -87,7 +88,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var updatedRecordedSale = await _recordedSaleService.UpdateRecordedSaleAsync(id, recordedSale);
+                var updatedRecordedSale = await _recordedSaleService.UpdateRecordedSaleAsync(id, updateRecordedSaleDto);
 
                 if (updatedRecordedSale == null)
                 {
@@ -125,7 +126,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/recordedsale/user/{userId}
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetSalesByUser(string userId)
+        public async Task<ActionResult<IEnumerable<RecordedSaleResponseDto>>> GetSalesByUser(string userId)
         {
             try
             {
@@ -140,7 +141,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/recordedsale/date-range?fromDate=&toDate=
         [HttpGet("date-range")]
-        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetSalesByDateRange([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
+        public async Task<ActionResult<IEnumerable<RecordedSaleResponseDto>>> GetSalesByDateRange([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
         {
             try
             {
@@ -155,7 +156,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/recordedsale/status/{status}
         [HttpGet("status/{status}")]
-        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetSalesByStatus(TransactionStatus status)
+        public async Task<ActionResult<IEnumerable<RecordedSaleResponseDto>>> GetSalesByStatus(TransactionStatus status)
         {
             try
             {
@@ -170,7 +171,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/recordedsale/payment-method/{paymentMethod}
         [HttpGet("payment-method/{paymentMethod}")]
-        public async Task<ActionResult<IEnumerable<RecordedSale>>> GetSalesByPaymentMethod(PaymentMethod paymentMethod)
+        public async Task<ActionResult<IEnumerable<RecordedSaleResponseDto>>> GetSalesByPaymentMethod(PaymentMethod paymentMethod)
         {
             try
             {

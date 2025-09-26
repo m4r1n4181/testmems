@@ -1,22 +1,23 @@
-﻿using MusicEventManagementSystem.API.Models;
-using TransactionStatus = MusicEventManagementSystem.API.Enums.TicketSales.TransactionStatus;
-using System.Transactions;
+﻿using MusicEventManagementSystem.API.DTOs.TicketSales;
 using MusicEventManagementSystem.API.Enums.TicketSales;
+using MusicEventManagementSystem.API.Models;
+using System.Transactions;
+using TransactionStatus = MusicEventManagementSystem.API.Enums.TicketSales.TransactionStatus;
 
 namespace MusicEventManagementSystem.API.Services.IService
 {
     public interface IRecordedSaleService
     {
-        Task<IEnumerable<RecordedSale>> GetAllRecordedSalesAsync();
-        Task<RecordedSale?> GetRecordedSaleByIdAsync(int id);
-        Task<RecordedSale> CreateRecordedSaleAsync(RecordedSale recordedSale);
-        Task<RecordedSale?> UpdateRecordedSaleAsync(int id, RecordedSale recordedSale);
+        Task<IEnumerable<RecordedSaleResponseDto>> GetAllRecordedSalesAsync();
+        Task<RecordedSaleResponseDto?> GetRecordedSaleByIdAsync(int id);
+        Task<RecordedSaleResponseDto> CreateRecordedSaleAsync(RecordedSaleCreateDto createRecordedSaleDto);
+        Task<RecordedSaleResponseDto?> UpdateRecordedSaleAsync(int id, RecordedSaleUpdateDto updateRecordedSaleDto);
         Task<bool> DeleteRecordedSaleAsync(int id);
 
-        Task<IEnumerable<RecordedSale>> GetSalesByUserAsync(string userId);
-        Task<IEnumerable<RecordedSale>> GetSalesByDateRangeAsync(DateTime from, DateTime to);
-        Task<IEnumerable<RecordedSale>> GetSalesByStatusAsync(TransactionStatus status);
-        Task<IEnumerable<RecordedSale>> GetSalesByPaymentMethodAsync(PaymentMethod paymentMethod);
+        Task<IEnumerable<RecordedSaleResponseDto>> GetSalesByUserAsync(string userId);
+        Task<IEnumerable<RecordedSaleResponseDto>> GetSalesByDateRangeAsync(DateTime from, DateTime to);
+        Task<IEnumerable<RecordedSaleResponseDto>> GetSalesByStatusAsync(TransactionStatus status);
+        Task<IEnumerable<RecordedSaleResponseDto>> GetSalesByPaymentMethodAsync(PaymentMethod paymentMethod);
         Task<decimal> GetTotalRevenueAsync();
         Task<decimal> GetRevenueByDateRangeAsync(DateTime from, DateTime to);
         Task<int> GetSalesCountByStatusAsync(TransactionStatus status);

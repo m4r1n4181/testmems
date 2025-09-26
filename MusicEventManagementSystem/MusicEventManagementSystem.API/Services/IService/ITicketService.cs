@@ -1,31 +1,32 @@
-﻿using MusicEventManagementSystem.API.Enums.TicketSales;
+﻿using MusicEventManagementSystem.API.DTOs.TicketSales;
+using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 
 namespace MusicEventManagementSystem.API.Services.IService
 {
     public interface ITicketService
     {
-        Task<IEnumerable<Ticket>> GetAllTicketsAsync();
-        Task<Ticket?> GetTicketByIdAsync(int id);
-        Task<Ticket> CreateTicketAsync(Ticket ticket);
-        Task<Ticket?> UpdateTicketAsync(int id, Ticket ticket);
+        Task<IEnumerable<TicketResponseDto>> GetAllTicketsAsync();
+        Task<TicketResponseDto?> GetTicketByIdAsync(int id);
+        Task<TicketResponseDto> CreateTicketAsync(TicketCreateDto ticketDto);
+        Task<TicketResponseDto?> UpdateTicketAsync(int id, TicketUpdateDto ticketDto);
         Task<bool> DeleteTicketAsync(int id);
 
-        Task<IEnumerable<Ticket>> GetTicketsByStatusAsync(TicketStatus status);
-        Task<Ticket?> GetTicketByUniqueCodeAsync(string uniqueCode);
-        Task<Ticket?> GetTicketByQrCodeAsync(string qrCode);
+        Task<IEnumerable<TicketResponseDto>> GetTicketsByStatusAsync(TicketStatus status);
+        Task<TicketResponseDto?> GetTicketByUniqueCodeAsync(string uniqueCode);
+        Task<TicketResponseDto?> GetTicketByQrCodeAsync(string qrCode);
 
         Task<int> GetTicketsCountByStatusAsync(TicketStatus status);
         Task<decimal> GetTotalRevenueAsync();
         Task<decimal> GetRevenueByDateRangeAsync(DateTime from, DateTime to);
         Task<decimal> GetRevenueByStatusAsync(TicketStatus status);
-        Task<IEnumerable<Ticket>> GetSoldTicketsAsync();
-        Task<IEnumerable<Ticket>> GetTodaysTicketsAsync();
+        Task<IEnumerable<TicketResponseDto>> GetSoldTicketsAsync();
+        Task<IEnumerable<TicketResponseDto>> GetTodaysTicketsAsync();
 
         // Ticket lifecycle methods
-        Task<Ticket?> SellTicketAsync(int ticketId);
-        Task<Ticket?> UseTicketAsync(string uniqueCode);
-        Task<Ticket?> CancelTicketAsync(int ticketId);
+        Task<TicketResponseDto?> SellTicketAsync(int ticketId);
+        Task<TicketResponseDto?> UseTicketAsync(string uniqueCode);
+        Task<TicketResponseDto?> CancelTicketAsync(int ticketId);
 
         // Validation methods
         Task<bool> IsUniqueCodeValidAsync(string uniqueCode);

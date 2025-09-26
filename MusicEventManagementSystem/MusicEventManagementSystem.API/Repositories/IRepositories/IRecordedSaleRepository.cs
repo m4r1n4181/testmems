@@ -5,7 +5,7 @@ using System.Transactions;
 
 namespace MusicEventManagementSystem.API.Repositories.IRepositories
 {
-    public interface IRecodedSaleRepository : IRepository<RecordedSale>
+    public interface IRecordedSaleRepository : IRepository<RecordedSale>
     {
         Task<IEnumerable<RecordedSale>> GetSalesByUserAsync(string userId);
         Task<IEnumerable<RecordedSale>> GetSalesByDateRangeAsync(DateTime from, DateTime to);

@@ -12,28 +12,34 @@ namespace MusicEventManagementSystem.API.Repositories
         {
         }
 
+        public async override Task<IEnumerable<TicketType>> GetAllAsync()
+        {
+            return await _context.TicketTypes.Include(tt => tt.Zone).Include(tt => tt.Event).Include(tt => tt.Tickets).Include(tt => tt.SpecialOffers).Include(tt => tt.PricingRules).ToListAsync();
+        }
+
+        public async override Task<TicketType?> GetByIdAsync(int id)
+        {
+            return await _context.TicketTypes.Include(tt => tt.Zone).Include(tt => tt.Event).Include(tt => tt.Tickets).Include(tt => tt.SpecialOffers).Include(tt => tt.PricingRules).FirstOrDefaultAsync(tt => tt.TicketTypeId == id);
+        }
+
         public async Task<IEnumerable<TicketType>> GetByZoneIdAsync(int zoneId)
         {
-            return await _context.TicketTypes.Where(tt => tt.ZoneId == zoneId).ToListAsync();
+            return await _context.TicketTypes.Include(tt => tt.Zone).Include(tt => tt.Event).Include(tt => tt.Tickets).Include(tt => tt.SpecialOffers).Include(tt => tt.PricingRules).Where(tt => tt.ZoneId == zoneId).ToListAsync();
         }
 
         public async Task<IEnumerable<TicketType>> GetByEventIdAsync(int eventId)
         {
-            return await _context.TicketTypes
-                .Where(tt => tt.EventId == eventId)
-                .ToListAsync();
+            return await _context.TicketTypes.Include(tt => tt.Zone).Include(tt => tt.Event).Include(tt => tt.Tickets).Include(tt => tt.SpecialOffers).Include(tt => tt.PricingRules).Where(tt => tt.EventId == eventId).ToListAsync();
         }
 
         public async Task<IEnumerable<TicketType>> GetByStatusAsync(TicketTypeStatus status)
         {
-            return await _context.TicketTypes
-                .Where(tt => tt.Status != null && tt.Status == status)
-                .ToListAsync();
+            return await _context.TicketTypes.Include(tt => tt.Zone).Include(tt => tt.Event).Include(tt => tt.Tickets).Include(tt => tt.SpecialOffers).Include(tt => tt.PricingRules).Where(tt => tt.Status != null && tt.Status == status).ToListAsync();
         }
 
         public async Task<IEnumerable<TicketType>> GetAvailableTicketTypesAsync()
         {
-            return await _context.TicketTypes.Where(tt => tt.AvailableQuantity > 0 &&(tt.Status == null || tt.Status == TicketTypeStatus.Active)).ToListAsync();
+            return await _context.TicketTypes.Include(tt => tt.Zone).Include(tt => tt.Event).Include(tt => tt.Tickets).Include(tt => tt.SpecialOffers).Include(tt => tt.PricingRules).Where(tt => tt.AvailableQuantity > 0 &&(tt.Status == null || tt.Status == TicketTypeStatus.Active)).ToListAsync();
         }
 
         public async Task<bool> UpdateAvailableQuantityAsync(int id, int quantity)

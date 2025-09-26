@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicEventManagementSystem.API.DTOs.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services;
 using MusicEventManagementSystem.API.Services.IService;
@@ -20,7 +21,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/pricingrule
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PricingRule>>> GetAllPricingRules()
+        public async Task<ActionResult<IEnumerable<PricingRuleResponseDto>>> GetAllPricingRules()
         {
             try
             {
@@ -35,7 +36,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/pricingrule/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<PricingRule>> GetPricingRuleById(int id)
+        public async Task<ActionResult<PricingRuleResponseDto>> GetPricingRuleById(int id)
         {
             try
             {
@@ -56,7 +57,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // POST: api/pricingrule
         [HttpPost]
-        public async Task<ActionResult<PricingRule>> CreatePricingRule([FromBody] PricingRule pricingRule)
+        public async Task<ActionResult<PricingRuleResponseDto>> CreatePricingRule([FromBody] PricingRuleCreateDto createPricingRuleDto)
         {
             try
             {
@@ -65,7 +66,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var createdPricingRule = await _pricingRuleService.CreatePricingRuleAsync(pricingRule);
+                var createdPricingRule = await _pricingRuleService.CreatePricingRuleAsync(createPricingRuleDto);
 
                 return CreatedAtAction(nameof(GetPricingRuleById), new { id = createdPricingRule.PricingRuleId }, createdPricingRule);
             }
@@ -77,7 +78,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // PUT: api/pricingrule/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult<PricingRule>> UpdatePricingRule(int id, [FromBody] PricingRule pricingRule)
+        public async Task<ActionResult<PricingRuleResponseDto>> UpdatePricingRule(int id, [FromBody] PricingRuleUpdateDto updatePricingRuleDto)
         {
             try
             {
@@ -86,7 +87,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var updatedPricingRule = await _pricingRuleService.UpdatePricingRuleAsync(id, pricingRule);
+                var updatedPricingRule = await _pricingRuleService.UpdatePricingRuleAsync(id, updatePricingRuleDto);
 
                 if (updatedPricingRule == null)
                 {
@@ -124,11 +125,11 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // POST: api/pricingrule/{id}/calculate-price
         [HttpPost("{id}/calculate-price")]
-        public async Task<ActionResult<decimal>> CalculatePrice(int id, decimal BasePrice, decimal OccupancyRate, bool IsEarlyBird)
+        public async Task<ActionResult<decimal>> CalculatePrice(int id, [FromBody] CalculatePriceRequestDto priceRequestDto)
         {
             try
             {
-                var calculatedPrice = await _pricingRuleService.CalculatePriceAsync(id, BasePrice, OccupancyRate, IsEarlyBird);
+                var calculatedPrice = await _pricingRuleService.CalculatePriceAsync(id, priceRequestDto);
 
                 return Ok(calculatedPrice);
             }
@@ -140,7 +141,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/pricingrule/active
         [HttpGet("active")]
-        public async Task<ActionResult<IEnumerable<PricingRule>>> GetActivePricingRules()
+        public async Task<ActionResult<IEnumerable<PricingRuleResponseDto>>> GetActivePricingRules()
         {
             try
             {
@@ -155,7 +156,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/pricingrule/event/{eventId}
         [HttpGet("event/{eventId}")]
-        public async Task<ActionResult<IEnumerable<PricingRule>>> GetPricingRulesByEvent(int eventId)
+        public async Task<ActionResult<IEnumerable<PricingRuleResponseDto>>> GetPricingRulesByEvent(int eventId)
         {
             try
             {
@@ -170,7 +171,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/pricingrule/ticket-type/{ticketTypeId}
         [HttpGet("ticket-type/{ticketTypeId}")]
-        public async Task<ActionResult<IEnumerable<PricingRule>>> GetPricingRulesByTicketType(int ticketTypeId)
+        public async Task<ActionResult<IEnumerable<PricingRuleResponseDto>>> GetPricingRulesByTicketType(int ticketTypeId)
         {
             try
             {

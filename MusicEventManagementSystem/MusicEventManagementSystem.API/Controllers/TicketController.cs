@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicEventManagementSystem.API.DTOs.TicketSales;
 using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services;
@@ -21,7 +22,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/ticket
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Ticket>>> GetAllTickets()
+        public async Task<ActionResult<IEnumerable<TicketResponseDto>>> GetAllTickets()
         {
             try
             {
@@ -36,7 +37,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/ticket/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Ticket>> GetTicketById(int id)
+        public async Task<ActionResult<TicketResponseDto>> GetTicketById(int id)
         {
             try
             {
@@ -57,7 +58,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // POST: api/ticket
         [HttpPost]
-        public async Task<ActionResult<Ticket>> CreateTicket([FromBody] Ticket ticket)
+        public async Task<ActionResult<TicketResponseDto>> CreateTicket([FromBody] TicketCreateDto createTicketDto)
         {
             try
             {
@@ -66,7 +67,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var createdTicket = await _ticketService.CreateTicketAsync(ticket);
+                var createdTicket = await _ticketService.CreateTicketAsync(createTicketDto);
 
                 return CreatedAtAction(nameof(GetTicketById), new { id = createdTicket.TicketId }, createdTicket);
             }
@@ -78,7 +79,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // PUT: api/ticket/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult<Ticket>> UpdateTicket(int id, [FromBody] Ticket ticket)
+        public async Task<ActionResult<TicketResponseDto>> UpdateTicket(int id, [FromBody] TicketUpdateDto updateTicketDto)
         {
             try
             {
@@ -87,7 +88,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var updatedTicket = await _ticketService.UpdateTicketAsync(id, ticket);
+                var updatedTicket = await _ticketService.UpdateTicketAsync(id, updateTicketDto);
 
                 if (updatedTicket == null)
                 {
@@ -125,7 +126,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/ticket/status/{status}
         [HttpGet("status/{status}")]
-        public async Task<ActionResult<IEnumerable<Ticket>>> GetTicketsByStatus(TicketStatus status)
+        public async Task<ActionResult<IEnumerable<TicketResponseDto>>> GetTicketsByStatus(TicketStatus status)
         {
             try
             {
@@ -140,7 +141,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/ticket/unique-code/{uniqueCode}
         [HttpGet("unique-code/{uniqueCode}")]
-        public async Task<ActionResult<Ticket>> GetTicketByUniqueCode(string uniqueCode)
+        public async Task<ActionResult<TicketResponseDto>> GetTicketByUniqueCode(string uniqueCode)
         {
             try
             {
@@ -161,7 +162,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/ticket/qr-code/{qrCode}
         [HttpGet("qr-code/{qrCode}")]
-        public async Task<ActionResult<Ticket>> GetTicketByQrCode(string qrCode)
+        public async Task<ActionResult<TicketResponseDto>> GetTicketByQrCode(string qrCode)
         {
             try
             {
@@ -248,7 +249,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/ticket/sold
         [HttpGet("sold")]
-        public async Task<ActionResult<IEnumerable<Ticket>>> GetSoldTickets()
+        public async Task<ActionResult<IEnumerable<TicketResponseDto>>> GetSoldTickets()
         {
             try
             {
@@ -263,7 +264,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/ticket/today
         [HttpGet("today")]
-        public async Task<ActionResult<IEnumerable<Ticket>>> GetTodaysTickets()
+        public async Task<ActionResult<IEnumerable<TicketResponseDto>>> GetTodaysTickets()
         {
             try
             {
@@ -278,7 +279,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // POST: api/ticket/{id}/sell
         [HttpPost("{id}/sell")]
-        public async Task<ActionResult<Ticket>> SellTicket(int id)
+        public async Task<ActionResult<TicketResponseDto>> SellTicket(int id)
         {
             try
             {
@@ -299,7 +300,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // POST: api/ticket/use/{uniqueCode}
         [HttpPost("use/{uniqueCode}")]
-        public async Task<ActionResult<Ticket>> UseTicket(string uniqueCode)
+        public async Task<ActionResult<TicketResponseDto>> UseTicket(string uniqueCode)
         {
             try
             {
@@ -320,7 +321,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // POST: api/ticket/{id}/cancel
         [HttpPost("{id}/cancel")]
-        public async Task<ActionResult<Ticket>> CancelTicket(int id)
+        public async Task<ActionResult<TicketResponseDto>> CancelTicket(int id)
         {
             try
             {

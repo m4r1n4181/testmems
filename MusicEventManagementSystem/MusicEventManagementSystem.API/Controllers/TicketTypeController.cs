@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicEventManagementSystem.API.DTOs.TicketSales;
 using MusicEventManagementSystem.API.Enums.TicketSales;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services;
@@ -21,7 +22,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/tickettype
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TicketType>>> GetAllTicketTypes()
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetAllTicketTypes()
         {
             try
             {
@@ -36,7 +37,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/tickettype/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<TicketType>> GetTicketTypeById(int id)
+        public async Task<ActionResult<TicketTypeResponseDto>> GetTicketTypeById(int id)
         {
             try
             {
@@ -57,7 +58,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // POST: api/tickettype
         [HttpPost]
-        public async Task<ActionResult<TicketType>> CreateTicketType([FromBody] TicketType ticketType)
+        public async Task<ActionResult<TicketTypeResponseDto>> CreateTicketType([FromBody] TicketTypeCreateDto createTicketTypeDto)
         {
             try
             {
@@ -66,7 +67,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var createdTicketType = await _ticketTypeService.CreateTicketTypeAsync(ticketType);
+                var createdTicketType = await _ticketTypeService.CreateTicketTypeAsync(createTicketTypeDto);
 
                 return CreatedAtAction(nameof(GetTicketTypeById), new { id = createdTicketType.TicketTypeId }, createdTicketType);
             }
@@ -78,7 +79,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // PUT: api/tickettype/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult<TicketType>> UpdateTicketType(int id, [FromBody] TicketType ticketType)
+        public async Task<ActionResult<TicketTypeResponseDto>> UpdateTicketType(int id, [FromBody] TicketTypeUpdateDto updateTicketTypeDto)
         {
             try
             {
@@ -87,7 +88,7 @@ namespace MusicEventManagementSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var updatedVenue = await _ticketTypeService.UpdateTicketTypeAsync(id, ticketType);
+                var updatedVenue = await _ticketTypeService.UpdateTicketTypeAsync(id, updateTicketTypeDto);
 
                 if (updatedVenue == null)
                 {
@@ -125,7 +126,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/tickettype/zone/{zoneId}
         [HttpGet("zone/{zoneId}")]
-        public async Task<ActionResult<IEnumerable<TicketType>>> GetTicketTypesByZoneId(int zoneId)
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetByZoneId(int zoneId)
         {
             try
             {
@@ -140,7 +141,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/tickettype/event/{eventId}
         [HttpGet("event/{eventId}")]
-        public async Task<ActionResult<IEnumerable<TicketType>>> GetTicketTypesByEventId(int eventId)
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetByEventId(int eventId)
         {
             try
             {
@@ -155,7 +156,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/tickettype/status/{status}
         [HttpGet("status/{status}")]
-        public async Task<ActionResult<IEnumerable<TicketType>>> GetTicketTypesByStatus(TicketTypeStatus status)
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetByStatus(TicketTypeStatus status)
         {
             try
             {
@@ -170,7 +171,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/tickettype/available
         [HttpGet("available")]
-        public async Task<ActionResult<IEnumerable<TicketType>>> GetAvailableTicketTypes()
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetAvailable()
         {
             try
             {
@@ -206,7 +207,7 @@ namespace MusicEventManagementSystem.API.Controllers
 
         // GET: api/tickettype/zone/{zoneId}/event/{eventId}
         [HttpGet("zone/{zoneId}/event/{eventId}")]
-        public async Task<ActionResult<IEnumerable<TicketType>>> GetTicketTypesByZoneAndEvent(int zoneId, int eventId)
+        public async Task<ActionResult<IEnumerable<TicketTypeResponseDto>>> GetByZoneAndEvent(int zoneId, int eventId)
         {
             try
             {

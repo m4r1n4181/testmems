@@ -11,8 +11,7 @@ namespace MusicEventManagementSystem.API.DTOs.TicketSales
         public int Capacity { get; set; }
         public SegmentType SegmentType { get; set; }
         public int VenueId { get; set; }
-        public VenueResponseDto? Venue { get; set; }
-        public List<ZoneResponseDto>? Zones { get; set; }
+        public List<int>? Zones { get; set; }
     }
 
     public class SegmentCreateDto

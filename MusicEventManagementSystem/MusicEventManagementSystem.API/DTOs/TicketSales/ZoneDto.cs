@@ -12,8 +12,7 @@ namespace MusicEventManagementSystem.API.DTOs.TicketSales
         public decimal BasePrice { get; set; }
         public ZonePosition Position { get; set; }
         public int SegmentId { get; set; }
-        public SegmentResponseDto? Segment { get; set; }
-        public List<TicketTypeResponseDto>? TicketTypes { get; set; }
+        public List<int>? TicketTypeIds { get; set; }
     }
 
     public class ZoneCreateDto
