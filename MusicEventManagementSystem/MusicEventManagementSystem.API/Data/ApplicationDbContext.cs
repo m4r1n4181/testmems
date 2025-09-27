@@ -30,7 +30,7 @@ namespace MusicEventManagementSystem.Data
         public DbSet<AdType> AdTypes { get; set; }
         public DbSet<MediaVersion> MediaVersions { get; set; }
         public DbSet<MediaChannel> Channels { get; set; }
-        //public DbSet<IntegrationStatus> IntegrationStatuses { get; set; }
+        public DbSet<IntegrationStatus> IntegrationStatuses { get; set; }
         public DbSet<Approval> Approvals { get; set; }
 
         // DbSets for Performer Subsystem
@@ -55,7 +55,7 @@ namespace MusicEventManagementSystem.Data
         public DbSet<Staff> Staff { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Infrastructure> Infrastructures { get; set; }
-         
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             // Ticket-Sales Subsystem configurations
