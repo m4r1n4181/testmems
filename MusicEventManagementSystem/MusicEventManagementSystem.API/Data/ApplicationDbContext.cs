@@ -168,6 +168,7 @@ namespace MusicEventManagementSystem.Data
             // Media-Campaign Subsystem configurations
             // One-To-Many relationships for MediaCampaign subsystem
 
+            // Media-Campaign Subsystem configurations
             builder.Entity<Ad>()
                 .HasOne(a => a.Campaign)
                 .WithMany(c => c.Ads)
@@ -186,25 +187,19 @@ namespace MusicEventManagementSystem.Data
                 .HasForeignKey(a => a.AdTypeId)
                 .IsRequired();
 
-            builder.Entity<Ad>()
-                .HasMany(a => a.Versions)
-                .WithOne(v => v.Ad)
-                .HasForeignKey(v => v.AdId)
-                .IsRequired();
-
-            builder.Entity<Ad>()
-                .HasMany(a => a.IntegrationStatuses)
-                .WithOne(i => i.Ad)
-                .HasForeignKey(i => i.AdId)
-                .IsRequired();
-
             builder.Entity<MediaVersion>()
                 .HasOne(mv => mv.Ad)
                 .WithMany(a => a.Versions)
                 .HasForeignKey(mv => mv.AdId)
                 .IsRequired();
 
-            // One-To-Many: IntegrationStatus → MediaChannel
+            // Fixed: IntegrationStatus relationships
+            builder.Entity<IntegrationStatus>()
+                .HasOne(i => i.Ad)
+                .WithMany(a => a.IntegrationStatuses)
+                .HasForeignKey(i => i.AdId)
+                .IsRequired();
+
             builder.Entity<IntegrationStatus>()
                 .HasOne(i => i.MediaChannel)
                 .WithMany(mc => mc.IntegrationStatuses)
@@ -213,32 +208,22 @@ namespace MusicEventManagementSystem.Data
 
             builder.Entity<MediaWorkflow>()
                 .HasMany(mw => mw.Tasks)
-                .WithOne()
+                .WithOne(t => t.MediaWorkflow)
                 .HasForeignKey(t => t.WorkflowId)
                 .IsRequired();
 
-            // One-To-Many: Campaign → Ads
             builder.Entity<Campaign>()
                 .HasMany(c => c.Ads)
                 .WithOne(a => a.Campaign)
                 .HasForeignKey(a => a.CampaignId)
                 .IsRequired();
 
-            // One-To-Many: AdType → Ads
             builder.Entity<AdType>()
                 .HasOne(at => at.MediaWorkflow)
                 .WithMany(mw => mw.AdTypes)
                 .HasForeignKey(at => at.MediaWorkflowId)
                 .IsRequired();
 
-            // One-To-Many: MediaWorkflow → Ads
-            builder.Entity<MediaWorkflow>()
-                .HasMany(mw => mw.Ads)
-                .WithOne(a => a.MediaWorkflow)
-                .HasForeignKey(a => a.MediaWorkflowId)
-                .IsRequired();
-
-            // One-To-Many: MediaTask → Approvals
             builder.Entity<Approval>()
                 .HasOne<MediaTask>()
                 .WithMany()

@@ -48,8 +48,6 @@ namespace MusicEventManagementSystem.API.Services
             if (dto.MediaWorkflowId.HasValue) ad.MediaWorkflowId = dto.MediaWorkflowId.Value;
             if (dto.CampaignId.HasValue) ad.CampaignId = dto.CampaignId.Value;
             if (dto.AdTypeId.HasValue) ad.AdTypeId = dto.AdTypeId.Value;
-            if (dto.IntegrationStatusId.HasValue) ad.IntegrationStatusId = dto.IntegrationStatusId.Value;
-            if (dto.MediaVersionId.HasValue) ad.MediaVersionId = dto.MediaVersionId.Value;
 
             _adRepository.Update(ad);
             await _adRepository.SaveChangesAsync();

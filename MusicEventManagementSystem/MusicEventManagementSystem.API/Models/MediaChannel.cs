@@ -7,7 +7,6 @@
         public string? APIKey { get; set; }
         public string? APIURL { get; set; }
         public string? APIVersion { get; set; }
-        public int IntegrationStatusId { get; set; }
 
         // Navigation properties
         public virtual ICollection<IntegrationStatus> IntegrationStatuses { get; set; } = new List<IntegrationStatus>();

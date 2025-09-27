@@ -3,6 +3,7 @@
     public class MediaVersion
     {
         public int MediaVersionId { get; set; }
+        public int AdId { get; set; }
         public string? VersionFileName { get; set; }
         public string? FileType { get; set; }
         public string? FileURL { get; set; }

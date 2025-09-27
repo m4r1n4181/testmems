@@ -18,6 +18,6 @@ namespace MusicEventManagementSystem.API.Models
         public virtual MediaWorkflow MediaWorkflow { get; set; } = null!;
         public virtual AdType AdType { get; set; } = null!;
         public virtual ICollection<MediaVersion> Versions { get; set; } = new List<MediaVersion>();
-        public virtual IntegrationStatus IntegrationStatuses { get; set; }
+        public virtual ICollection<IntegrationStatus> IntegrationStatuses { get; set; } = new List<IntegrationStatus>();
     }
 }
