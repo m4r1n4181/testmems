@@ -5,4 +5,5 @@ export interface Campaign {
   startDate: string; // ISO date string
   endDate: string; // ISO date string
   totalBudget: number;
+  adIds?: number[];
 }

@@ -4,4 +4,5 @@ export interface MediaTask {
   order: number;
   taskStatus?: string;
   workflowId: number;
+  approvalId?: number;
 }

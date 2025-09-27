@@ -1,11 +1,11 @@
-export interface MediaChannelCreateForm {
+export interface CreateMediaChannelForm {
   platformType: string;
   apiKey?: string;
   apiURL?: string;
   apiVersion?: string;
 }
 
-export interface MediaChannelUpdateForm {
+export interface UpdateMediaChannelForm {
   platformType?: string;
   apiKey?: string;
   apiURL?: string;

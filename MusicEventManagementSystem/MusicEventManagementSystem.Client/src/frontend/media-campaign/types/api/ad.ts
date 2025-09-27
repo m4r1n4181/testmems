@@ -10,4 +10,6 @@ export interface Ad {
   mediaWorkflowId: number;
   campaignId: number;
   adTypeId: number;
+  mediaVersionIds?: number[];
+  integrationStatusIds?: number[];
 }

@@ -1,12 +1,14 @@
-export interface AdTypeCreateForm {
+export interface CreateAdTypeForm {
   typeName: string;
   typeDescription?: string;
   dimensions?: string;
   duration: number;
   fileFormat: string;
+  adIds?: number[];
+  mediaWorkflowId: number;
 }
 
-export interface AdTypeUpdateForm {
+export interface UpdateAdTypeForm {
   typeName?: string;
   typeDescription?: string;
   dimensions?: string;

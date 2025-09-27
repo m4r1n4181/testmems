@@ -5,4 +5,6 @@ export interface AdType {
   dimensions?: string;
   duration: number;
   fileFormat?: string;
+  adIds?: number[];
+  mediaWorkflowId: number;
 }

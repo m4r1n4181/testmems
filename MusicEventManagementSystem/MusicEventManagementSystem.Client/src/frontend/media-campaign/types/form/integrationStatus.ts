@@ -1,6 +1,6 @@
 import type { StatusIntegration } from '../enums/MediaChampaign';  
 
-export interface IntegrationStatusCreateForm {
+export interface CreateIntegrationStatusForm {
   adId: number;
   channelId: number;
   status?: StatusIntegration;
@@ -9,7 +9,7 @@ export interface IntegrationStatusCreateForm {
   lastSynced?: string; // ISO date string
 }
 
-export interface IntegrationStatusUpdateForm {
+export interface UpdateIntegrationStatusForm {
   adId?: number;
   channelId?: number;
   status?: StatusIntegration;

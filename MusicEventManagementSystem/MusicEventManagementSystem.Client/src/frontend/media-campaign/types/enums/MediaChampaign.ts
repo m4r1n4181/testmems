@@ -6,11 +6,8 @@ export const AdStatus = {
 } as const;
 
 export const StatusIntegration = {
-  Pending: 1,
-  InProgress: 2,
-  Success: 3,
-  Failed: 4,
-  Retry: 5
+  Published: 1,
+  Failed: 2
 } as const;
 
 export type AdStatus = typeof AdStatus[keyof typeof AdStatus];

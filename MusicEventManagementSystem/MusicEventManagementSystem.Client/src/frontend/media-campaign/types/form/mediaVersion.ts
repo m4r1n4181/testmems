@@ -1,4 +1,4 @@
-export interface MediaVersionCreateForm {
+export interface CreateMediaVersionForm {
   versionFileName: string;
   fileType?: string;
   fileURL?: string;
@@ -6,7 +6,7 @@ export interface MediaVersionCreateForm {
   adId: number;
 }
 
-export interface MediaVersionUpdateForm {
+export interface UpdateMediaVersionForm {
   versionFileName?: string;
   fileType?: string;
   fileURL?: string;
