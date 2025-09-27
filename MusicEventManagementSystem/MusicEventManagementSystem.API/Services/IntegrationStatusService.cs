@@ -2,6 +2,7 @@
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
+using MusicEventManagementSystem.API.Enums;
 
 namespace MusicEventManagementSystem.API.Services
 {
@@ -58,6 +59,42 @@ namespace MusicEventManagementSystem.API.Services
             _integrationStatusRepository.Delete(status);
             await _integrationStatusRepository.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<IntegrationStatusResponseDto>> GetByAdIdAsync(int adId)
+        {
+            var statuses = await _integrationStatusRepository.GetByAdIdAsync(adId);
+            return statuses.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<IntegrationStatusResponseDto>> GetByChannelIdAsync(int channelId)
+        {
+            var statuses = await _integrationStatusRepository.GetByChannelIdAsync(channelId);
+            return statuses.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<IntegrationStatusResponseDto>> GetByStatusAsync(StatusIntegration status)
+        {
+            var statuses = await _integrationStatusRepository.GetByStatusAsync(status);
+            return statuses.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<IntegrationStatusResponseDto>> GetByPublicationDateAsync(DateTime publicationDate)
+        {
+            var statuses = await _integrationStatusRepository.GetByPublicationDateAsync(publicationDate);
+            return statuses.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<IntegrationStatusResponseDto>> GetByErrorAsync(string error)
+        {
+            var statuses = await _integrationStatusRepository.GetByErrorAsync(error);
+            return statuses.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<IntegrationStatusResponseDto>> GetByLastSyncedAsync(DateTime lastSynced)
+        {
+            var statuses = await _integrationStatusRepository.GetByLastSyncedAsync(lastSynced);
+            return statuses.Select(MapToResponseDto);
         }
 
         private static IntegrationStatusResponseDto MapToResponseDto(IntegrationStatus status) => new()

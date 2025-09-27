@@ -18,83 +18,83 @@ namespace MusicEventManagementSystem.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CampaignResponseDto>>> GetAllCampaigns()
         {
-            try
-            {
-                var campaigns = await _campaignService.GetAllCampaignsAsync();
-                return Ok(campaigns);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var campaigns = await _campaignService.GetAllCampaignsAsync();
+            return Ok(campaigns);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CampaignResponseDto>> GetCampaignById(int id)
         {
-            try
-            {
-                var campaign = await _campaignService.GetCampaignByIdAsync(id);
-                if (campaign == null)
-                    return NotFound($"Campaign with ID {id} not found.");
-                return Ok(campaign);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var campaign = await _campaignService.GetCampaignByIdAsync(id);
+            if (campaign == null)
+                return NotFound($"Campaign with ID {id} not found.");
+            return Ok(campaign);
         }
 
         [HttpPost]
-        public async Task<ActionResult<CampaignResponseDto>> CreateCampaign([FromBody] CampaignCreateDto createDto)
+        public async Task<ActionResult<CampaignResponseDto>> CreateCampaign([FromBody] CampaignCreateDto dto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var createdCampaign = await _campaignService.CreateCampaignAsync(createDto);
-                return CreatedAtAction(nameof(GetCampaignById), new { id = createdCampaign.CampaignId }, createdCampaign);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var createdCampaign = await _campaignService.CreateCampaignAsync(dto);
+            return CreatedAtAction(nameof(GetCampaignById), new { id = createdCampaign.CampaignId }, createdCampaign);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<CampaignResponseDto>> UpdateCampaign(int id, [FromBody] CampaignUpdateDto updateDto)
+        public async Task<ActionResult<CampaignResponseDto>> UpdateCampaign(int id, [FromBody] CampaignUpdateDto dto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var updatedCampaign = await _campaignService.UpdateCampaignAsync(id, updateDto);
-                if (updatedCampaign == null)
-                    return NotFound($"Campaign with ID {id} not found.");
-                return Ok(updatedCampaign);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var updatedCampaign = await _campaignService.UpdateCampaignAsync(id, dto);
+            if (updatedCampaign == null)
+                return NotFound($"Campaign with ID {id} not found.");
+            return Ok(updatedCampaign);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCampaign(int id)
         {
-            try
-            {
-                var isDeleted = await _campaignService.DeleteCampaignAsync(id);
-                if (!isDeleted)
-                    return NotFound($"Campaign with ID {id} not found.");
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var isDeleted = await _campaignService.DeleteCampaignAsync(id);
+            if (!isDeleted)
+                return NotFound($"Campaign with ID {id} not found.");
+            return NoContent();
+        }
+
+        [HttpGet("eventId/{eventId}")]
+        public async Task<ActionResult<IEnumerable<CampaignResponseDto>>> GetByEventId(int eventId)
+        {
+            var campaigns = await _campaignService.GetByEventIdAsync(eventId);
+            return Ok(campaigns);
+        }
+
+        [HttpGet("name/{name}")]
+        public async Task<ActionResult<IEnumerable<CampaignResponseDto>>> GetByName(string name)
+        {
+            var campaigns = await _campaignService.GetByNameAsync(name);
+            return Ok(campaigns);
+        }
+
+        [HttpGet("startDate/{startDate}")]
+        public async Task<ActionResult<IEnumerable<CampaignResponseDto>>> GetByStartDate(DateTime startDate)
+        {
+            var campaigns = await _campaignService.GetByStartDateAsync(startDate);
+            return Ok(campaigns);
+        }
+
+        [HttpGet("endDate/{endDate}")]
+        public async Task<ActionResult<IEnumerable<CampaignResponseDto>>> GetByEndDate(DateTime endDate)
+        {
+            var campaigns = await _campaignService.GetByEndDateAsync(endDate);
+            return Ok(campaigns);
+        }
+
+        [HttpGet("totalBudget/{totalBudget}")]
+        public async Task<ActionResult<IEnumerable<CampaignResponseDto>>> GetByTotalBudget(decimal totalBudget)
+        {
+            var campaigns = await _campaignService.GetByTotalBudgetAsync(totalBudget);
+            return Ok(campaigns);
         }
     }
 }

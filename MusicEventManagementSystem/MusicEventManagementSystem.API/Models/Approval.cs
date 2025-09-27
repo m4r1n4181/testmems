@@ -8,5 +8,7 @@
         public DateTime ApprovalDate { get; set; }
         public int MediaTaskId { get; set; }
 
+        public virtual MediaTask MediaTask { get; set; }
+
     }
 }

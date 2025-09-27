@@ -58,6 +58,30 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
 
+        public async Task<IEnumerable<MediaChannelResponseDto>> GetByPlatformTypeAsync(string platformType)
+        {
+            var channels = await _mediaChannelRepository.GetByPlatformTypeAsync(platformType);
+            return channels.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<MediaChannelResponseDto>> GetByAPIKeyAsync(string apiKey)
+        {
+            var channels = await _mediaChannelRepository.GetByAPIKeyAsync(apiKey);
+            return channels.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<MediaChannelResponseDto>> GetByAPIURLAsync(string apiURL)
+        {
+            var channels = await _mediaChannelRepository.GetByAPIURLAsync(apiURL);
+            return channels.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<MediaChannelResponseDto>> GetByAPIVersionAsync(string apiVersion)
+        {
+            var channels = await _mediaChannelRepository.GetByAPIVersionAsync(apiVersion);
+            return channels.Select(MapToResponseDto);
+        }
+
         private static MediaChannelResponseDto MapToResponseDto(MediaChannel channel) => new()
         {
             MediaChannelId = channel.MediaChannelId,

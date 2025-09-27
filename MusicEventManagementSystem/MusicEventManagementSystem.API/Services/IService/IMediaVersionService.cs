@@ -9,5 +9,11 @@ namespace MusicEventManagementSystem.API.Services.IService
         Task<MediaVersionResponseDto> CreateMediaVersionAsync(MediaVersionCreateDto createDto);
         Task<MediaVersionResponseDto?> UpdateMediaVersionAsync(int id, MediaVersionUpdateDto updateDto);
         Task<bool> DeleteMediaVersionAsync(int id);
+
+        Task<IEnumerable<MediaVersionResponseDto>> GetByVersionFileNameAsync(string versionFileName);
+        Task<IEnumerable<MediaVersionResponseDto>> GetByFileTypeAsync(string fileType);
+        Task<IEnumerable<MediaVersionResponseDto>> GetByFileURLAsync(string fileURL);
+        Task<IEnumerable<MediaVersionResponseDto>> GetByIsFinalVersionAsync(bool isFinalVersion);
+        Task<IEnumerable<MediaVersionResponseDto>> GetByAdIdAsync(int adId);
     }
 }

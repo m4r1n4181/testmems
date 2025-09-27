@@ -59,6 +59,36 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
 
+        public async Task<IEnumerable<CampaignResponseDto>> GetByEventIdAsync(int eventId)
+        {
+            var campaigns = await _campaignRepository.GetByEventIdAsync(eventId);
+            return campaigns.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<CampaignResponseDto>> GetByNameAsync(string name)
+        {
+            var campaigns = await _campaignRepository.GetByNameAsync(name);
+            return campaigns.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<CampaignResponseDto>> GetByStartDateAsync(DateTime startDate)
+        {
+            var campaigns = await _campaignRepository.GetByStartDateAsync(startDate);
+            return campaigns.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<CampaignResponseDto>> GetByEndDateAsync(DateTime endDate)
+        {
+            var campaigns = await _campaignRepository.GetByEndDateAsync(endDate);
+            return campaigns.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<CampaignResponseDto>> GetByTotalBudgetAsync(decimal totalBudget)
+        {
+            var campaigns = await _campaignRepository.GetByTotalBudgetAsync(totalBudget);
+            return campaigns.Select(MapToResponseDto);
+        }
+
         private static CampaignResponseDto MapToResponseDto(Campaign campaign) => new()
         {
             CampaignId = campaign.CampaignId,

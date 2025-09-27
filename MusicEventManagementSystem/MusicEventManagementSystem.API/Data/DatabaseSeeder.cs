@@ -827,6 +827,130 @@ namespace MusicEventManagementSystem.API.Data
             }
             await context.SaveChangesAsync();
 
+            // 13. Seed AdTypes
+            var adTypes = new List<AdType>
+            {
+                new AdType { TypeName = "Instagram Story", TypeDescription = "Vertical image/video for Instagram stories", Dimensions = "1080x1920", Duration = 15, FileFormat = "mp4" },
+                new AdType { TypeName = "Facebook Post", TypeDescription = "Standard Facebook image post", Dimensions = "1200x628", Duration = 0, FileFormat = "jpg" },
+                new AdType { TypeName = "YouTube Video", TypeDescription = "Promotional video for YouTube", Dimensions = "1920x1080", Duration = 60, FileFormat = "mp4" },
+                new AdType { TypeName = "TikTok Short", TypeDescription = "Short vertical video for TikTok", Dimensions = "1080x1920", Duration = 30, FileFormat = "mp4" }
+            };
+            context.AdTypes.AddRange(adTypes);
+            await context.SaveChangesAsync();
+
+            // 14. Seed MediaChannels
+            var mediaChannels = new List<MediaChannel>
+            {
+                new MediaChannel { PlatformType = "Instagram", APIKey = "INSTAGRAM_API_KEY", APIURL = "https://api.instagram.com", APIVersion = "v12.0" },
+                new MediaChannel { PlatformType = "Facebook", APIKey = "FACEBOOK_API_KEY", APIURL = "https://graph.facebook.com", APIVersion = "v15.0" },
+                new MediaChannel { PlatformType = "YouTube", APIKey = "YOUTUBE_API_KEY", APIURL = "https://www.googleapis.com/youtube/v3", APIVersion = "v3" },
+                new MediaChannel { PlatformType = "TikTok", APIKey = "TIKTOK_API_KEY", APIURL = "https://open-api.tiktok.com", APIVersion = "v2" }
+            };
+            context.MediaChannels.AddRange(mediaChannels);
+            await context.SaveChangesAsync();
+
+            // 15. Seed Approvals
+            var approvals = new List<Approval>
+            {
+                new Approval { ApprovalStatus = "Approved", Comment = "Looks good for Instagram", ApprovalDate = DateTime.UtcNow.AddDays(-10), MediaTaskId = 1 },
+                new Approval { ApprovalStatus = "Pending", Comment = "Waiting for Facebook team", ApprovalDate = DateTime.UtcNow.AddDays(-8), MediaTaskId = 2 },
+                new Approval { ApprovalStatus = "Rejected", Comment = "Video needs revision", ApprovalDate = DateTime.UtcNow.AddDays(-5), MediaTaskId = 3 }
+            };
+            context.Approvals.AddRange(approvals);
+            await context.SaveChangesAsync();
+
+            // 16. Seed MediaWorkflows
+            var mediaWorkflows = new List<MediaWorkflow>
+            {
+                new MediaWorkflow { WorkflowDescription = "Instagram Story Workflow", AdTypeId = 1, ApprovalId = 1 },
+                new MediaWorkflow { WorkflowDescription = "Facebook Post Workflow", AdTypeId = 2, ApprovalId = 2 },
+                new MediaWorkflow { WorkflowDescription = "YouTube Video Workflow", AdTypeId = 3, ApprovalId = 3 }
+            };
+            context.MediaWorkflows.AddRange(mediaWorkflows);
+            await context.SaveChangesAsync();
+
+            // 17. Seed MediaTasks
+            var mediaTasks = new List<MediaTask>
+            {
+                new MediaTask { TaskName = "Design Creative", Order = 1, TaskStatus = "Completed", WorkflowId = 1, ApprovalId = 1 },
+                new MediaTask { TaskName = "Schedule Post", Order = 2, TaskStatus = "Pending", WorkflowId = 1, ApprovalId = null },
+                new MediaTask { TaskName = "Edit Video", Order = 1, TaskStatus = "Rejected", WorkflowId = 3, ApprovalId = 3 },
+                new MediaTask { TaskName = "Publish Ad", Order = 3, TaskStatus = "Scheduled", WorkflowId = 2, ApprovalId = 2 }
+            };
+            context.MediaTasks.AddRange(mediaTasks);
+            await context.SaveChangesAsync();
+
+            // 18. Seed Campaigns (link to existing events)
+            var campaigns = new List<Campaign>
+            {
+                new Campaign { EventId = 1, Name = "Rock Legends Instagram Blast", StartDate = DateTime.UtcNow.AddDays(-20), EndDate = DateTime.UtcNow.AddDays(10), TotalBudget = 5000 },
+                new Campaign { EventId = 2, Name = "Indie Night Facebook Push", StartDate = DateTime.UtcNow.AddDays(-15), EndDate = DateTime.UtcNow.AddDays(5), TotalBudget = 3000 },
+                new Campaign { EventId = 3, Name = "Electronic Waves YouTube Teaser", StartDate = DateTime.UtcNow.AddDays(-10), EndDate = DateTime.UtcNow.AddDays(20), TotalBudget = 7000 }
+            };
+            context.Campaigns.AddRange(campaigns);
+            await context.SaveChangesAsync();
+
+            // 19. Seed Ads
+            var ads = new List<Ad>
+            {
+                new Ad
+                {
+                    Title = "Rock Legends - Instagram Story",
+                    CreationDate = DateTime.UtcNow.AddDays(-18),
+                    Deadline = DateTime.UtcNow.AddDays(2),
+                    CurrentPhase = AdStatus.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(-2),
+                    CampaignId = 1,
+                    MediaWorkflowId = 1,
+                    AdTypeId = 1
+                },
+                new Ad
+                {
+                    Title = "Indie Night - Facebook Post",
+                    CreationDate = DateTime.UtcNow.AddDays(-12),
+                    Deadline = DateTime.UtcNow.AddDays(1),
+                    CurrentPhase = AdStatus.ScheduledPublication,
+                    PublicationDate = DateTime.UtcNow.AddDays(1),
+                    CampaignId = 2,
+                    MediaWorkflowId = 2,
+                    AdTypeId = 2
+                },
+                new Ad
+                {
+                    Title = "Electronic Waves - YouTube Teaser",
+                    CreationDate = DateTime.UtcNow.AddDays(-8),
+                    Deadline = DateTime.UtcNow.AddDays(5),
+                    CurrentPhase = AdStatus.PendingApproval,
+                    PublicationDate = null,
+                    CampaignId = 3,
+                    MediaWorkflowId = 3,
+                    AdTypeId = 3
+                }
+            };
+            context.Ads.AddRange(ads);
+            await context.SaveChangesAsync();
+
+            // 20. Seed MediaVersions
+            var mediaVersions = new List<MediaVersion>
+            {
+                new MediaVersion { VersionFileName = "rock_legends_story_v1.mp4", FileType = "mp4", FileURL = "https://cdn.mems.com/rock_legends_story_v1.mp4", IsFinalVersion = false, AdId = 1 },
+                new MediaVersion { VersionFileName = "rock_legends_story_final.mp4", FileType = "mp4", FileURL = "https://cdn.mems.com/rock_legends_story_final.mp4", IsFinalVersion = true, AdId = 1 },
+                new MediaVersion { VersionFileName = "indie_night_fb_post.jpg", FileType = "jpg", FileURL = "https://cdn.mems.com/indie_night_fb_post.jpg", IsFinalVersion = true, AdId = 2 },
+                new MediaVersion { VersionFileName = "electronic_waves_teaser_v1.mp4", FileType = "mp4", FileURL = "https://cdn.mems.com/electronic_waves_teaser_v1.mp4", IsFinalVersion = false, AdId = 3 }
+            };
+            context.MediaVersions.AddRange(mediaVersions);
+            await context.SaveChangesAsync();
+
+            // 21. Seed IntegrationStatuses
+            var integrationStatuses = new List<IntegrationStatus>
+            {
+                new IntegrationStatus { AdId = 1, ChannelId = 1, Status = Enums.StatusIntegration.Published, PublicationDate = DateTime.UtcNow.AddDays(-2), Error = null, LastSynced = DateTime.UtcNow.AddDays(-2) },
+                new IntegrationStatus { AdId = 2, ChannelId = 2, Status = Enums.StatusIntegration.Published, PublicationDate = DateTime.UtcNow, Error = null, LastSynced = DateTime.UtcNow },
+                new IntegrationStatus { AdId = 3, ChannelId = 3, Status = Enums.StatusIntegration.Failed, PublicationDate = null, Error = "Video format not supported", LastSynced = DateTime.UtcNow.AddDays(-1) }
+            };
+            context.IntegrationStatuses.AddRange(integrationStatuses);
+            await context.SaveChangesAsync();
+
             Console.WriteLine($"Database seeded successfully!");
             Console.WriteLine($"- {venues.Count} venues created");
             Console.WriteLine($"- {segments.Count} segments created");

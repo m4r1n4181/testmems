@@ -14,6 +14,9 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public int MediaWorkflowId { get; set; }
         public int CampaignId { get; set; }
         public int AdTypeId { get; set; }
+        public ICollection<int>? MediaVersionIds { get; set; }
+
+        public ICollection<int>? IntegrationStatusIds { get; set; }
     }
 
     public class AdCreateDto
@@ -41,6 +44,8 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
 
         [Required]
         public int AdTypeId { get; set; }
+        public ICollection<int>? MediaVersionIds { get; set; }
+        public ICollection<int>? IntegrationStatusIds { get; set; }
     }
 
     public class AdUpdateDto
@@ -61,5 +66,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public int? CampaignId { get; set; }
 
         public int? AdTypeId { get; set; }
+        public ICollection<int>? MediaVersionIds { get; set; }
+        public ICollection<int>? IntegrationStatusIds { get; set; }
     }
 }

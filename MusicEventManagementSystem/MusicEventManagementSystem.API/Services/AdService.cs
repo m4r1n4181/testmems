@@ -2,6 +2,7 @@
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
+using MusicEventManagementSystem.Enums;
 
 namespace MusicEventManagementSystem.API.Services
 {
@@ -47,6 +48,8 @@ namespace MusicEventManagementSystem.API.Services
             if (dto.MediaWorkflowId.HasValue) ad.MediaWorkflowId = dto.MediaWorkflowId.Value;
             if (dto.CampaignId.HasValue) ad.CampaignId = dto.CampaignId.Value;
             if (dto.AdTypeId.HasValue) ad.AdTypeId = dto.AdTypeId.Value;
+            if (dto.IntegrationStatusId.HasValue) ad.IntegrationStatusId = dto.IntegrationStatusId.Value;
+            if (dto.MediaVersionId.HasValue) ad.MediaVersionId = dto.MediaVersionId.Value;
 
             _adRepository.Update(ad);
             await _adRepository.SaveChangesAsync();
@@ -60,6 +63,54 @@ namespace MusicEventManagementSystem.API.Services
             _adRepository.Delete(ad);
             await _adRepository.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<AdResponseDto>> GetByDeadlineAsync(DateTime deadline)
+        {
+            var ads = await _adRepository.GetByDeadlineAsync(deadline);
+            return ads.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<AdResponseDto>> GetByTitleAsync(string title)
+        {
+            var ads = await _adRepository.GetByTitleAsync(title);
+            return ads.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<AdResponseDto>> GetByCreationDateAsync(DateTime creationDate)
+        {
+            var ads = await _adRepository.GetByCreationDateAsync(creationDate);
+            return ads.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<AdResponseDto>> GetByCurrentPhaseAsync(AdStatus currentPhase)
+        {
+            var ads = await _adRepository.GetByCurrentPhaseAsync(currentPhase);
+            return ads.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<AdResponseDto>> GetByPublicationDateAsync(DateTime publicationDate)
+        {
+            var ads = await _adRepository.GetByPublicationDateAsync(publicationDate);
+            return ads.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<AdResponseDto>> GetByMediaWorkflowIdAsync(int mediaWorkflowId)
+        {
+            var ads = await _adRepository.GetByMediaWorkflowIdAsync(mediaWorkflowId);
+            return ads.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<AdResponseDto>> GetByCampaignIdAsync(int campaignId)
+        {
+            var ads = await _adRepository.GetByCampaignIdAsync(campaignId);
+            return ads.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<AdResponseDto>> GetByAdTypeIdAsync(int adTypeId)
+        {
+            var ads = await _adRepository.GetByAdTypeIdAsync(adTypeId);
+            return ads.Select(MapToResponseDto);
         }
 
         private static AdResponseDto MapToResponseDto(Ad ad) => new()

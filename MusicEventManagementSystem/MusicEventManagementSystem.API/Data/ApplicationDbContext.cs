@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MusicEventManagementSystem.API.Models;
@@ -29,8 +29,8 @@ namespace MusicEventManagementSystem.Data
         public DbSet<MediaWorkflow> MediaWorkflows { get; set; }
         public DbSet<AdType> AdTypes { get; set; }
         public DbSet<MediaVersion> MediaVersions { get; set; }
-        public DbSet<MediaChannel> Channels { get; set; }
-        //public DbSet<IntegrationStatus> IntegrationStatuses { get; set; }
+        public DbSet<MediaChannel> MediaChannels { get; set; }
+        public DbSet<IntegrationStatus> IntegrationStatuses { get; set; }
         public DbSet<Approval> Approvals { get; set; }
 
         // DbSets for Performer Subsystem
@@ -164,6 +164,87 @@ namespace MusicEventManagementSystem.Data
                 .HasMany(rs => rs.SpecialOffers)
                 .WithMany(so => so.RecordedSales)
                 .UsingEntity(j => j.ToTable("RecordedSaleSpecialOffers"));
+
+            // Media-Campaign Subsystem configurations
+            // One-To-Many relationships for MediaCampaign subsystem
+
+            builder.Entity<Ad>()
+                .HasOne(a => a.Campaign)
+                .WithMany(c => c.Ads)
+                .HasForeignKey(a => a.CampaignId)
+                .IsRequired();
+
+            builder.Entity<Ad>()
+                .HasOne(a => a.MediaWorkflow)
+                .WithMany(mw => mw.Ads)
+                .HasForeignKey(a => a.MediaWorkflowId)
+                .IsRequired();
+
+            builder.Entity<Ad>()
+                .HasOne(a => a.AdType)
+                .WithMany(at => at.Ads)
+                .HasForeignKey(a => a.AdTypeId)
+                .IsRequired();
+
+            builder.Entity<Ad>()
+                .HasMany(a => a.Versions)
+                .WithOne(v => v.Ad)
+                .HasForeignKey(v => v.AdId)
+                .IsRequired();
+
+            builder.Entity<Ad>()
+                .HasMany(a => a.IntegrationStatuses)
+                .WithOne(i => i.Ad)
+                .HasForeignKey(i => i.AdId)
+                .IsRequired();
+
+            builder.Entity<MediaVersion>()
+                .HasOne(mv => mv.Ad)
+                .WithMany(a => a.Versions)
+                .HasForeignKey(mv => mv.AdId)
+                .IsRequired();
+
+            // One-To-Many: IntegrationStatus → MediaChannel
+            builder.Entity<IntegrationStatus>()
+                .HasOne(i => i.MediaChannel)
+                .WithMany(mc => mc.IntegrationStatuses)
+                .HasForeignKey(i => i.ChannelId)
+                .IsRequired();
+
+            builder.Entity<MediaWorkflow>()
+                .HasMany(mw => mw.Tasks)
+                .WithOne()
+                .HasForeignKey(t => t.WorkflowId)
+                .IsRequired();
+
+            // One-To-Many: Campaign → Ads
+            builder.Entity<Campaign>()
+                .HasMany(c => c.Ads)
+                .WithOne(a => a.Campaign)
+                .HasForeignKey(a => a.CampaignId)
+                .IsRequired();
+
+            // One-To-Many: AdType → Ads
+            builder.Entity<AdType>()
+                .HasOne(at => at.MediaWorkflow)
+                .WithMany(mw => mw.AdTypes)
+                .HasForeignKey(at => at.MediaWorkflowId)
+                .IsRequired();
+
+            // One-To-Many: MediaWorkflow → Ads
+            builder.Entity<MediaWorkflow>()
+                .HasMany(mw => mw.Ads)
+                .WithOne(a => a.MediaWorkflow)
+                .HasForeignKey(a => a.MediaWorkflowId)
+                .IsRequired();
+
+            // One-To-Many: MediaTask → Approvals
+            builder.Entity<Approval>()
+                .HasOne<MediaTask>()
+                .WithMany()
+                .HasForeignKey(a => a.MediaTaskId)
+                .IsRequired(false);
+
 
             // Conversion DateTime to UTC
             var dateTimeConverter = new ValueConverter<DateTime, DateTime>(

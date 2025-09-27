@@ -9,5 +9,7 @@ namespace MusicEventManagementSystem.API.Services.IService
         Task<MediaWorkflowResponseDto> CreateMediaWorkflowAsync(MediaWorkflowCreateDto createDto);
         Task<MediaWorkflowResponseDto?> UpdateMediaWorkflowAsync(int id, MediaWorkflowUpdateDto updateDto);
         Task<bool> DeleteMediaWorkflowAsync(int id);
+
+        Task<IEnumerable<MediaWorkflowResponseDto>> GetByWorkflowDescriptionAsync(string workflowDescription);
     }
 }

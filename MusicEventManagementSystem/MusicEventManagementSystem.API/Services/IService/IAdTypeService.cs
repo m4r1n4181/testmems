@@ -1,6 +1,4 @@
 ﻿using MusicEventManagementSystem.API.DTOs.MediaCampaign;
-using MusicEventManagementSystem.API.Models;
-using MusicEventManagementSystem.API.Models;
 
 namespace MusicEventManagementSystem.API.Services.IService
 {
@@ -11,5 +9,11 @@ namespace MusicEventManagementSystem.API.Services.IService
         Task<AdTypeResponseDto> CreateAdTypeAsync(AdTypeCreateDto createDto);
         Task<AdTypeResponseDto?> UpdateAdTypeAsync(int id, AdTypeUpdateDto updateDto);
         Task<bool> DeleteAdTypeAsync(int id);
+
+        Task<IEnumerable<AdTypeResponseDto>> GetByTypeNameAsync(string typeName);
+        Task<IEnumerable<AdTypeResponseDto>> GetByTypeDescriptionAsync(string typeDescription);
+        Task<IEnumerable<AdTypeResponseDto>> GetByDimensionsAsync(string dimensions);
+        Task<IEnumerable<AdTypeResponseDto>> GetByDurationAsync(int duration);
+        Task<IEnumerable<AdTypeResponseDto>> GetByFileFormatAsync(string fileFormat);
     }
 }

@@ -58,6 +58,30 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
 
+        public async Task<IEnumerable<ApprovalResponseDto>> GetByApprovalStatusAsync(string approvalStatus)
+        {
+            var approvals = await _approvalRepository.GetByApprovalStatusAsync(approvalStatus);
+            return approvals.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<ApprovalResponseDto>> GetByCommentAsync(string comment)
+        {
+            var approvals = await _approvalRepository.GetByCommentAsync(comment);
+            return approvals.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<ApprovalResponseDto>> GetByApprovalDateAsync(DateTime approvalDate)
+        {
+            var approvals = await _approvalRepository.GetByApprovalDateAsync(approvalDate);
+            return approvals.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<ApprovalResponseDto>> GetByMediaTaskIdAsync(int mediaTaskId)
+        {
+            var approvals = await _approvalRepository.GetByMediaTaskIdAsync(mediaTaskId);
+            return approvals.Select(MapToResponseDto);
+        }
+
         private static ApprovalResponseDto MapToResponseDto(Approval approval) => new()
         {
             ApprovalId = approval.ApprovalId,
