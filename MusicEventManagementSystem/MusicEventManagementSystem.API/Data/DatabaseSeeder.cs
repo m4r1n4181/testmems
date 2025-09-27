@@ -827,6 +827,556 @@ namespace MusicEventManagementSystem.API.Data
             }
             await context.SaveChangesAsync();
 
+            // 13. Seed MediaChannels FIRST (no dependencies)
+            var mediaChannels = new List<MediaChannel>
+            {
+                new MediaChannel { PlatformType = "Instagram", APIKey = "INSTAGRAM_API_KEY", APIURL = "https://api.instagram.com", APIVersion = "v12.0" },
+                new MediaChannel { PlatformType = "Facebook", APIKey = "FACEBOOK_API_KEY", APIURL = "https://graph.facebook.com", APIVersion = "v15.0" },
+                new MediaChannel { PlatformType = "YouTube", APIKey = "YOUTUBE_API_KEY", APIURL = "https://www.googleapis.com/youtube/v3", APIVersion = "v3" },
+                new MediaChannel { PlatformType = "TikTok", APIKey = "TIKTOK_API_KEY", APIURL = "https://open-api.tiktok.com", APIVersion = "v2" }
+            };
+            context.MediaChannels.AddRange(mediaChannels);
+            await context.SaveChangesAsync();
+
+            // 14. Seed MediaWorkflows SECOND (minimal dependencies)
+            var mediaWorkflows = new List<MediaWorkflow>
+            {
+                new MediaWorkflow
+                {
+                    WorkflowDescription = "Instagram Story Workflow - Create, Review, Schedule, Publish",
+                    ApprovalId = null // Will be set later if needed
+                },
+                new MediaWorkflow
+                {
+                    WorkflowDescription = "Facebook Post Workflow - Design, Copy Review, Approval, Publish",
+                    ApprovalId = null
+                },
+                new MediaWorkflow
+                {
+                    WorkflowDescription = "YouTube Video Workflow - Edit, Audio Mix, Thumbnail, Upload",
+                    ApprovalId = null
+                },
+                new MediaWorkflow
+                {
+                    WorkflowDescription = "TikTok Short Workflow - Quick Edit, Hashtag Research, Publish",
+                    ApprovalId = null
+                },
+                new MediaWorkflow
+                {
+                    WorkflowDescription = "Multi-Platform Campaign Workflow - Cross-platform coordination",
+                    ApprovalId = null
+                }
+            };
+            context.MediaWorkflows.AddRange(mediaWorkflows);
+            await context.SaveChangesAsync();
+
+            // 15. Seed AdTypes (depends on MediaWorkflows)
+            var adTypes = new List<AdType>
+            {
+                new AdType
+                {
+                    TypeName = "Instagram Story",
+                    TypeDescription = "Vertical image/video for Instagram stories with interactive elements",
+                    Dimensions = "1080x1920",
+                    Duration = 15,
+                    FileFormat = "mp4",
+                    MediaWorkflowId = 1
+                },
+                new AdType
+                {
+                    TypeName = "Facebook Post",
+                    TypeDescription = "Standard Facebook image post with engaging copy",
+                    Dimensions = "1200x628",
+                    Duration = 0,
+                    FileFormat = "jpg",
+                    MediaWorkflowId = 2
+                },
+                new AdType
+                {
+                    TypeName = "YouTube Video",
+                    TypeDescription = "Promotional video for YouTube with custom thumbnail",
+                    Dimensions = "1920x1080",
+                    Duration = 60,
+                    FileFormat = "mp4",
+                    MediaWorkflowId = 3
+                },
+                new AdType
+                {
+                    TypeName = "TikTok Short",
+                    TypeDescription = "Short vertical video for TikTok with trending audio",
+                    Dimensions = "1080x1920",
+                    Duration = 30,
+                    FileFormat = "mp4",
+                    MediaWorkflowId = 4
+                },
+                new AdType
+                {
+                    TypeName = "Facebook Video",
+                    TypeDescription = "Square video format for Facebook feed",
+                    Dimensions = "1080x1080",
+                    Duration = 45,
+                    FileFormat = "mp4",
+                    MediaWorkflowId = 2
+                },
+                new AdType
+                {
+                    TypeName = "Instagram Reel",
+                    TypeDescription = "Vertical video for Instagram Reels with music",
+                    Dimensions = "1080x1920",
+                    Duration = 30,
+                    FileFormat = "mp4",
+                    MediaWorkflowId = 1
+                }
+            };
+            context.AdTypes.AddRange(adTypes);
+            await context.SaveChangesAsync();
+
+            // 16. Seed MediaTasks (depends on MediaWorkflows)
+            var mediaTasks = new List<MediaTask>
+            {
+                // Instagram Story Workflow Tasks
+                new MediaTask { TaskName = "Design Instagram Story Creative", Order = 1, TaskStatus = "Completed", WorkflowId = 1 },
+                new MediaTask { TaskName = "Add Interactive Elements", Order = 2, TaskStatus = "Completed", WorkflowId = 1 },
+                new MediaTask { TaskName = "Schedule Instagram Story Post", Order = 3, TaskStatus = "In Progress", WorkflowId = 1 },
+                
+                // Facebook Post Workflow Tasks
+                new MediaTask { TaskName = "Create Facebook Post Design", Order = 1, TaskStatus = "Completed", WorkflowId = 2 },
+                new MediaTask { TaskName = "Write Engaging Copy", Order = 2, TaskStatus = "Pending Review", WorkflowId = 2 },
+                new MediaTask { TaskName = "Schedule Facebook Post", Order = 3, TaskStatus = "Not Started", WorkflowId = 2 },
+                
+                // YouTube Video Workflow Tasks
+                new MediaTask { TaskName = "Edit Video Content", Order = 1, TaskStatus = "In Progress", WorkflowId = 3 },
+                new MediaTask { TaskName = "Create Custom Thumbnail", Order = 2, TaskStatus = "Not Started", WorkflowId = 3 },
+                new MediaTask { TaskName = "Upload to YouTube", Order = 3, TaskStatus = "Not Started", WorkflowId = 3 },
+                
+                // TikTok Short Workflow Tasks
+                new MediaTask { TaskName = "Edit TikTok Short", Order = 1, TaskStatus = "Completed", WorkflowId = 4 },
+                new MediaTask { TaskName = "Add Trending Audio", Order = 2, TaskStatus = "Completed", WorkflowId = 4 },
+                new MediaTask { TaskName = "Publish TikTok Short", Order = 3, TaskStatus = "Scheduled", WorkflowId = 4 }
+            };
+            context.MediaTasks.AddRange(mediaTasks);
+            await context.SaveChangesAsync();
+
+            // 17. Seed Approvals (depends on MediaTasks)
+            var approvals = new List<Approval>
+            {
+                new Approval
+                {
+                    ApprovalStatus = "Approved",
+                    Comment = "Instagram story looks engaging with good call-to-action",
+                    ApprovalDate = DateTime.UtcNow.AddDays(-2),
+                    MediaTaskId = 1
+                },
+                new Approval
+                {
+                    ApprovalStatus = "Pending",
+                    Comment = "Waiting for final review from marketing team",
+                    ApprovalDate = DateTime.UtcNow.AddDays(-1),
+                    MediaTaskId = 4
+                },
+                new Approval
+                {
+                    ApprovalStatus = "Rejected",
+                    Comment = "Video needs better audio quality and color correction",
+                    ApprovalDate = DateTime.UtcNow.AddHours(-6),
+                    MediaTaskId = 7
+                },
+                new Approval
+                {
+                    ApprovalStatus = "Approved",
+                    Comment = "TikTok content is perfect for target audience",
+                    ApprovalDate = DateTime.UtcNow.AddHours(-12),
+                    MediaTaskId = 10
+                },
+                new Approval
+                {
+                    ApprovalStatus = "Revision Required",
+                    Comment = "Facebook copy needs more compelling call-to-action",
+                    ApprovalDate = DateTime.UtcNow.AddHours(-4),
+                    MediaTaskId = 5
+                }
+            };
+            context.Approvals.AddRange(approvals);
+            await context.SaveChangesAsync();
+
+            // 18. Seed Campaigns (requires existing Events)
+            var campaigns = new List<Campaign>
+            {
+                new Campaign
+                {
+                    EventId = 1, // Rock Legends Live
+                    Name = "Rock Legends Multi-Platform Campaign",
+                    StartDate = DateTime.UtcNow.AddDays(-30),
+                    EndDate = DateTime.UtcNow.AddDays(15),
+                    TotalBudget = 15000
+                },
+                new Campaign
+                {
+                    EventId = 2, // Indie Discovery Night
+                    Name = "Indie Night Social Media Push",
+                    StartDate = DateTime.UtcNow.AddDays(-20),
+                    EndDate = DateTime.UtcNow.AddDays(8),
+                    TotalBudget = 8000
+                },
+                new Campaign
+                {
+                    EventId = 3, // Electronic Waves Festival
+                    Name = "Electronic Waves Digital Campaign",
+                    StartDate = DateTime.UtcNow.AddDays(-25),
+                    EndDate = DateTime.UtcNow.AddDays(35),
+                    TotalBudget = 25000
+                },
+                new Campaign
+                {
+                    EventId = 4, // Exit Festival 2025
+                    Name = "Exit Festival International Campaign",
+                    StartDate = DateTime.UtcNow.AddDays(-45),
+                    EndDate = DateTime.UtcNow.AddDays(60),
+                    TotalBudget = 50000
+                },
+                new Campaign
+                {
+                    EventId = 7, // Underground Electronic
+                    Name = "Underground Scene Viral Campaign",
+                    StartDate = DateTime.UtcNow.AddDays(-10),
+                    EndDate = DateTime.UtcNow.AddDays(5),
+                    TotalBudget = 3500
+                }
+            };
+            context.Campaigns.AddRange(campaigns);
+            await context.SaveChangesAsync();
+
+            // 19. Seed Ads (requires Campaigns, MediaWorkflows, AdTypes)
+            var ads = new List<Ad>
+            {
+                // Rock Legends Campaign Ads
+                new Ad
+                {
+                    Title = "Rock Legends - Instagram Story Countdown",
+                    CreationDate = DateTime.UtcNow.AddDays(-25),
+                    Deadline = DateTime.UtcNow.AddDays(5),
+                    CurrentPhase = AdStatus.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(-3),
+                    CampaignId = 1,
+                    MediaWorkflowId = 1,
+                    AdTypeId = 1
+                },
+                new Ad
+                {
+                    Title = "Rock Legends - Facebook Event Post",
+                    CreationDate = DateTime.UtcNow.AddDays(-28),
+                    Deadline = DateTime.UtcNow.AddDays(3),
+                    CurrentPhase = AdStatus.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(-5),
+                    CampaignId = 1,
+                    MediaWorkflowId = 2,
+                    AdTypeId = 2
+                },
+                new Ad
+                {
+                    Title = "Rock Legends - YouTube Trailer",
+                    CreationDate = DateTime.UtcNow.AddDays(-20),
+                    Deadline = DateTime.UtcNow.AddDays(10),
+                    CurrentPhase = AdStatus.PendingApproval,
+                    PublicationDate = null,
+                    CampaignId = 1,
+                    MediaWorkflowId = 3,
+                    AdTypeId = 3
+                },
+                
+                // Indie Night Campaign Ads
+                new Ad
+                {
+                    Title = "Indie Discovery - TikTok Behind Scenes",
+                    CreationDate = DateTime.UtcNow.AddDays(-15),
+                    Deadline = DateTime.UtcNow.AddDays(2),
+                    CurrentPhase = AdStatus.ScheduledPublication,
+                    PublicationDate = DateTime.UtcNow.AddDays(1),
+                    CampaignId = 2,
+                    MediaWorkflowId = 4,
+                    AdTypeId = 4
+                },
+                new Ad
+                {
+                    Title = "Indie Discovery - Instagram Reel Artist Spotlight",
+                    CreationDate = DateTime.UtcNow.AddDays(-12),
+                    Deadline = DateTime.UtcNow.AddDays(4),
+                    CurrentPhase = AdStatus.InPreparation,
+                    PublicationDate = null,
+                    CampaignId = 2,
+                    MediaWorkflowId = 1,
+                    AdTypeId = 6
+                },
+                
+                // Electronic Waves Campaign Ads
+                new Ad
+                {
+                    Title = "Electronic Waves - Festival Lineup Reveal",
+                    CreationDate = DateTime.UtcNow.AddDays(-22),
+                    Deadline = DateTime.UtcNow.AddDays(8),
+                    CurrentPhase = AdStatus.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(-7),
+                    CampaignId = 3,
+                    MediaWorkflowId = 2,
+                    AdTypeId = 5
+                },
+                new Ad
+                {
+                    Title = "Electronic Waves - DJ Mix Teaser",
+                    CreationDate = DateTime.UtcNow.AddDays(-18),
+                    Deadline = DateTime.UtcNow.AddDays(12),
+                    CurrentPhase = AdStatus.PendingApproval,
+                    PublicationDate = null,
+                    CampaignId = 3,
+                    MediaWorkflowId = 3,
+                    AdTypeId = 3
+                },
+                
+                // Exit Festival Campaign Ads
+                new Ad
+                {
+                    Title = "Exit 2025 - Early Bird Instagram Stories",
+                    CreationDate = DateTime.UtcNow.AddDays(-40),
+                    Deadline = DateTime.UtcNow.AddDays(20),
+                    CurrentPhase = AdStatus.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(-15),
+                    CampaignId = 4,
+                    MediaWorkflowId = 1,
+                    AdTypeId = 1
+                },
+                new Ad
+                {
+                    Title = "Exit 2025 - International YouTube Campaign",
+                    CreationDate = DateTime.UtcNow.AddDays(-35),
+                    Deadline = DateTime.UtcNow.AddDays(25),
+                    CurrentPhase = AdStatus.ScheduledPublication,
+                    PublicationDate = DateTime.UtcNow.AddDays(3),
+                    CampaignId = 4,
+                    MediaWorkflowId = 3,
+                    AdTypeId = 3
+                },
+                
+                // Underground Electronic Campaign Ads
+                new Ad
+                {
+                    Title = "Underground - TikTok Viral Challenge",
+                    CreationDate = DateTime.UtcNow.AddDays(-8),
+                    Deadline = DateTime.UtcNow.AddDays(2),
+                    CurrentPhase = AdStatus.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(-2),
+                    CampaignId = 5,
+                    MediaWorkflowId = 4,
+                    AdTypeId = 4
+                }
+            };
+            context.Ads.AddRange(ads);
+            await context.SaveChangesAsync();
+
+            // 20. Seed MediaVersions (requires Ads)
+            var mediaVersions = new List<MediaVersion>
+            {
+                // Rock Legends Instagram Story versions
+                new MediaVersion
+                {
+                    AdId = 1,
+                    VersionFileName = "rock_legends_story_v1.mp4",
+                    FileType = "mp4",
+                    FileURL = "https://cdn.mems.com/media/rock_legends_story_v1.mp4",
+                    IsFinalVersion = false
+                },
+                new MediaVersion
+                {
+                    AdId = 1,
+                    VersionFileName = "rock_legends_story_final.mp4",
+                    FileType = "mp4",
+                    FileURL = "https://cdn.mems.com/media/rock_legends_story_final.mp4",
+                    IsFinalVersion = true
+                },
+                
+                // Rock Legends Facebook Post versions
+                new MediaVersion
+                {
+                    AdId = 2,
+                    VersionFileName = "rock_legends_fb_post.jpg",
+                    FileType = "jpg",
+                    FileURL = "https://cdn.mems.com/media/rock_legends_fb_post.jpg",
+                    IsFinalVersion = true
+                },
+                
+                // Rock Legends YouTube Trailer versions
+                new MediaVersion
+                {
+                    AdId = 3,
+                    VersionFileName = "rock_legends_trailer_draft.mp4",
+                    FileType = "mp4",
+                    FileURL = "https://cdn.mems.com/media/rock_legends_trailer_draft.mp4",
+                    IsFinalVersion = false
+                },
+                new MediaVersion
+                {
+                    AdId = 3,
+                    VersionFileName = "rock_legends_trailer_v2.mp4",
+                    FileType = "mp4",
+                    FileURL = "https://cdn.mems.com/media/rock_legends_trailer_v2.mp4",
+                    IsFinalVersion = false
+                },
+                
+                // Indie Discovery TikTok versions
+                new MediaVersion
+                {
+                    AdId = 4,
+                    VersionFileName = "indie_tiktok_behind_scenes.mp4",
+                    FileType = "mp4",
+                    FileURL = "https://cdn.mems.com/media/indie_tiktok_behind_scenes.mp4",
+                    IsFinalVersion = true
+                },
+                
+                // Electronic Waves Facebook Video versions
+                new MediaVersion
+                {
+                    AdId = 6,
+                    VersionFileName = "electronic_waves_lineup_v1.mp4",
+                    FileType = "mp4",
+                    FileURL = "https://cdn.mems.com/media/electronic_waves_lineup_v1.mp4",
+                    IsFinalVersion = false
+                },
+                new MediaVersion
+                {
+                    AdId = 6,
+                    VersionFileName = "electronic_waves_lineup_final.mp4",
+                    FileType = "mp4",
+                    FileURL = "https://cdn.mems.com/media/electronic_waves_lineup_final.mp4",
+                    IsFinalVersion = true
+                },
+                
+                // Exit Festival versions
+                new MediaVersion
+                {
+                    AdId = 8,
+                    VersionFileName = "exit_early_bird_story.mp4",
+                    FileType = "mp4",
+                    FileURL = "https://cdn.mems.com/media/exit_early_bird_story.mp4",
+                    IsFinalVersion = true
+                },
+                
+                // Underground TikTok versions
+                new MediaVersion
+                {
+                    AdId = 10,
+                    VersionFileName = "underground_viral_challenge.mp4",
+                    FileType = "mp4",
+                    FileURL = "https://cdn.mems.com/media/underground_viral_challenge.mp4",
+                    IsFinalVersion = true
+                }
+            };
+            context.MediaVersions.AddRange(mediaVersions);
+            await context.SaveChangesAsync();
+
+            // 21. Seed IntegrationStatuses (requires Ads and MediaChannels)
+            var integrationStatuses = new List<IntegrationStatus>
+            {
+                // Rock Legends Instagram Story
+                new IntegrationStatus
+                {
+                    AdId = 1,
+                    ChannelId = 1, // Instagram
+                    Status = MusicEventManagementSystem.API.Enums.StatusIntegration.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(-3),
+                    Error = null,
+                    LastSynced = DateTime.UtcNow.AddHours(-2)
+                },
+                
+                // Rock Legends Facebook Post
+                new IntegrationStatus
+                {
+                    AdId = 2,
+                    ChannelId = 2, // Facebook
+                    Status = MusicEventManagementSystem.API.Enums.StatusIntegration.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(-5),
+                    Error = null,
+                    LastSynced = DateTime.UtcNow.AddHours(-1)
+                },
+                
+                // Rock Legends YouTube Trailer
+                new IntegrationStatus
+                {
+                    AdId = 3,
+                    ChannelId = 3, // YouTube
+                    Status = MusicEventManagementSystem.API.Enums.StatusIntegration.Published,
+                    PublicationDate = null,
+                    Error = null,
+                    LastSynced = DateTime.UtcNow.AddMinutes(-30)
+                },
+                
+                // Indie Discovery TikTok
+                new IntegrationStatus
+                {
+                    AdId = 4,
+                    ChannelId = 4, // TikTok
+                    Status = MusicEventManagementSystem.API.Enums.StatusIntegration.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(1),
+                    Error = null,
+                    LastSynced = DateTime.UtcNow.AddMinutes(-15)
+                },
+                
+                // Electronic Waves Facebook Video
+                new IntegrationStatus
+                {
+                    AdId = 6,
+                    ChannelId = 2, // Facebook
+                    Status = MusicEventManagementSystem.API.Enums.StatusIntegration.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(-7),
+                    Error = null,
+                    LastSynced = DateTime.UtcNow.AddHours(-3)
+                },
+                
+                // Electronic Waves YouTube DJ Mix
+                new IntegrationStatus
+                {
+                    AdId = 7,
+                    ChannelId = 3, // YouTube
+                    Status = MusicEventManagementSystem.API.Enums.StatusIntegration.Failed,
+                    PublicationDate = null,
+                    Error = "Video copyright claim detected - audio needs replacement",
+                    LastSynced = DateTime.UtcNow.AddHours(-4)
+                },
+                
+                // Exit Festival Instagram
+                new IntegrationStatus
+                {
+                    AdId = 8,
+                    ChannelId = 1, // Instagram
+                    Status = MusicEventManagementSystem.API.Enums.StatusIntegration.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(-15),
+                    Error = null,
+                    LastSynced = DateTime.UtcNow.AddHours(-6)
+                },
+                
+                // Exit Festival YouTube
+                new IntegrationStatus
+                {
+                    AdId = 9,
+                    ChannelId = 3, // YouTube
+                    Status = MusicEventManagementSystem.API.Enums.StatusIntegration.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(3),
+                    Error = null,
+                    LastSynced = DateTime.UtcNow.AddMinutes(-45)
+                },
+                
+                // Underground TikTok
+                new IntegrationStatus
+                {
+                    AdId = 10,
+                    ChannelId = 4, // TikTok
+                    Status = MusicEventManagementSystem.API.Enums.StatusIntegration.Published,
+                    PublicationDate = DateTime.UtcNow.AddDays(-2),
+                    Error = null,
+                    LastSynced = DateTime.UtcNow.AddMinutes(-10)
+                }
+            };
+            context.IntegrationStatuses.AddRange(integrationStatuses);
+            await context.SaveChangesAsync();
+
             Console.WriteLine($"Database seeded successfully!");
             Console.WriteLine($"- {venues.Count} venues created");
             Console.WriteLine($"- {segments.Count} segments created");

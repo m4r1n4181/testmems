@@ -230,6 +230,11 @@ namespace MusicEventManagementSystem.Data
                 .HasForeignKey(a => a.MediaTaskId)
                 .IsRequired(false);
 
+            builder.Entity<Approval>()
+                .HasOne(a => a.MediaTask)
+                .WithOne(m => m.Approval)
+                .HasForeignKey<Approval>(a => a.MediaTaskId);
+
 
             // Conversion DateTime to UTC
             var dateTimeConverter = new ValueConverter<DateTime, DateTime>(
