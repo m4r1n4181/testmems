@@ -18,83 +18,55 @@ namespace MusicEventManagementSystem.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MediaWorkflowResponseDto>>> GetAllMediaWorkflows()
         {
-            try
-            {
-                var workflows = await _mediaWorkflowService.GetAllMediaWorkflowsAsync();
-                return Ok(workflows);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var workflows = await _mediaWorkflowService.GetAllMediaWorkflowsAsync();
+            return Ok(workflows);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<MediaWorkflowResponseDto>> GetMediaWorkflowById(int id)
         {
-            try
-            {
-                var workflow = await _mediaWorkflowService.GetMediaWorkflowByIdAsync(id);
-                if (workflow == null)
-                    return NotFound($"MediaWorkflow with ID {id} not found.");
-                return Ok(workflow);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var workflow = await _mediaWorkflowService.GetMediaWorkflowByIdAsync(id);
+            if (workflow == null)
+                return NotFound($"MediaWorkflow with ID {id} not found.");
+            return Ok(workflow);
         }
 
         [HttpPost]
-        public async Task<ActionResult<MediaWorkflowResponseDto>> CreateMediaWorkflow([FromBody] MediaWorkflowCreateDto createDto)
+        public async Task<ActionResult<MediaWorkflowResponseDto>> CreateMediaWorkflow([FromBody] MediaWorkflowCreateDto dto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var createdWorkflow = await _mediaWorkflowService.CreateMediaWorkflowAsync(createDto);
-                return CreatedAtAction(nameof(GetMediaWorkflowById), new { id = createdWorkflow.MediaWorkflowId }, createdWorkflow);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var createdWorkflow = await _mediaWorkflowService.CreateMediaWorkflowAsync(dto);
+            return CreatedAtAction(nameof(GetMediaWorkflowById), new { id = createdWorkflow.MediaWorkflowId }, createdWorkflow);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<MediaWorkflowResponseDto>> UpdateMediaWorkflow(int id, [FromBody] MediaWorkflowUpdateDto updateDto)
+        public async Task<ActionResult<MediaWorkflowResponseDto>> UpdateMediaWorkflow(int id, [FromBody] MediaWorkflowUpdateDto dto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var updatedWorkflow = await _mediaWorkflowService.UpdateMediaWorkflowAsync(id, updateDto);
-                if (updatedWorkflow == null)
-                    return NotFound($"MediaWorkflow with ID {id} not found.");
-                return Ok(updatedWorkflow);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var updatedWorkflow = await _mediaWorkflowService.UpdateMediaWorkflowAsync(id, dto);
+            if (updatedWorkflow == null)
+                return NotFound($"MediaWorkflow with ID {id} not found.");
+            return Ok(updatedWorkflow);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteMediaWorkflow(int id)
         {
-            try
-            {
-                var isDeleted = await _mediaWorkflowService.DeleteMediaWorkflowAsync(id);
-                if (!isDeleted)
-                    return NotFound($"MediaWorkflow with ID {id} not found.");
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var isDeleted = await _mediaWorkflowService.DeleteMediaWorkflowAsync(id);
+            if (!isDeleted)
+                return NotFound($"MediaWorkflow with ID {id} not found.");
+            return NoContent();
+        }
+
+        [HttpGet("workflowDescription/{workflowDescription}")]
+        public async Task<ActionResult<IEnumerable<MediaWorkflowResponseDto>>> GetByWorkflowDescription(string workflowDescription)
+        {
+            var workflows = await _mediaWorkflowService.GetByWorkflowDescriptionAsync(workflowDescription);
+            return Ok(workflows);
         }
     }
 }

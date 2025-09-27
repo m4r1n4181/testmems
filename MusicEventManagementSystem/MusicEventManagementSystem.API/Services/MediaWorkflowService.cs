@@ -55,6 +55,12 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
 
+        public async Task<IEnumerable<MediaWorkflowResponseDto>> GetByWorkflowDescriptionAsync(string workflowDescription)
+        {
+            var workflows = await _mediaWorkflowRepository.GetByWorkflowDescriptionAsync(workflowDescription);
+            return workflows.Select(MapToResponseDto);
+        }
+
         private static MediaWorkflowResponseDto MapToResponseDto(MediaWorkflow workflow) => new()
         {
             MediaWorkflowId = workflow.MediaWorkflowId,

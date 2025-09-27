@@ -59,6 +59,36 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
 
+        public async Task<IEnumerable<MediaVersionResponseDto>> GetByVersionFileNameAsync(string versionFileName)
+        {
+            var versions = await _mediaVersionRepository.GetByVersionFileNameAsync(versionFileName);
+            return versions.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<MediaVersionResponseDto>> GetByFileTypeAsync(string fileType)
+        {
+            var versions = await _mediaVersionRepository.GetByFileTypeAsync(fileType);
+            return versions.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<MediaVersionResponseDto>> GetByFileURLAsync(string fileURL)
+        {
+            var versions = await _mediaVersionRepository.GetByFileURLAsync(fileURL);
+            return versions.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<MediaVersionResponseDto>> GetByIsFinalVersionAsync(bool isFinalVersion)
+        {
+            var versions = await _mediaVersionRepository.GetByIsFinalVersionAsync(isFinalVersion);
+            return versions.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<MediaVersionResponseDto>> GetByAdIdAsync(int adId)
+        {
+            var versions = await _mediaVersionRepository.GetByAdIdAsync(adId);
+            return versions.Select(MapToResponseDto);
+        }
+
         private static MediaVersionResponseDto MapToResponseDto(MediaVersion version) => new()
         {
             MediaVersionId = version.MediaVersionId,

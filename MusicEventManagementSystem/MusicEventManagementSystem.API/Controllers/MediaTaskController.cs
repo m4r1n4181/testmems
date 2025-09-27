@@ -18,83 +18,76 @@ namespace MusicEventManagementSystem.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MediaTaskResponseDto>>> GetAllMediaTasks()
         {
-            try
-            {
-                var tasks = await _mediaTaskService.GetAllMediaTasksAsync();
-                return Ok(tasks);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var tasks = await _mediaTaskService.GetAllMediaTasksAsync();
+            return Ok(tasks);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<MediaTaskResponseDto>> GetMediaTaskById(int id)
         {
-            try
-            {
-                var task = await _mediaTaskService.GetMediaTaskByIdAsync(id);
-                if (task == null)
-                    return NotFound($"MediaTask with ID {id} not found.");
-                return Ok(task);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var task = await _mediaTaskService.GetMediaTaskByIdAsync(id);
+            if (task == null)
+                return NotFound($"MediaTask with ID {id} not found.");
+            return Ok(task);
         }
 
         [HttpPost]
-        public async Task<ActionResult<MediaTaskResponseDto>> CreateMediaTask([FromBody] MediaTaskCreateDto createDto)
+        public async Task<ActionResult<MediaTaskResponseDto>> CreateMediaTask([FromBody] MediaTaskCreateDto dto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var createdTask = await _mediaTaskService.CreateMediaTaskAsync(createDto);
-                return CreatedAtAction(nameof(GetMediaTaskById), new { id = createdTask.MediaTaskId }, createdTask);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var createdTask = await _mediaTaskService.CreateMediaTaskAsync(dto);
+            return CreatedAtAction(nameof(GetMediaTaskById), new { id = createdTask.MediaTaskId }, createdTask);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<MediaTaskResponseDto>> UpdateMediaTask(int id, [FromBody] MediaTaskUpdateDto updateDto)
+        public async Task<ActionResult<MediaTaskResponseDto>> UpdateMediaTask(int id, [FromBody] MediaTaskUpdateDto dto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var updatedTask = await _mediaTaskService.UpdateMediaTaskAsync(id, updateDto);
-                if (updatedTask == null)
-                    return NotFound($"MediaTask with ID {id} not found.");
-                return Ok(updatedTask);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var updatedTask = await _mediaTaskService.UpdateMediaTaskAsync(id, dto);
+            if (updatedTask == null)
+                return NotFound($"MediaTask with ID {id} not found.");
+            return Ok(updatedTask);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteMediaTask(int id)
         {
-            try
-            {
-                var isDeleted = await _mediaTaskService.DeleteMediaTaskAsync(id);
-                if (!isDeleted)
-                    return NotFound($"MediaTask with ID {id} not found.");
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var isDeleted = await _mediaTaskService.DeleteMediaTaskAsync(id);
+            if (!isDeleted)
+                return NotFound($"MediaTask with ID {id} not found.");
+            return NoContent();
+        }
+
+        [HttpGet("taskName/{taskName}")]
+        public async Task<ActionResult<IEnumerable<MediaTaskResponseDto>>> GetByTaskName(string taskName)
+        {
+            var tasks = await _mediaTaskService.GetByTaskNameAsync(taskName);
+            return Ok(tasks);
+        }
+
+        [HttpGet("order/{order}")]
+        public async Task<ActionResult<IEnumerable<MediaTaskResponseDto>>> GetByOrder(int order)
+        {
+            var tasks = await _mediaTaskService.GetByOrderAsync(order);
+            return Ok(tasks);
+        }
+
+        [HttpGet("taskStatus/{taskStatus}")]
+        public async Task<ActionResult<IEnumerable<MediaTaskResponseDto>>> GetByTaskStatus(string taskStatus)
+        {
+            var tasks = await _mediaTaskService.GetByTaskStatusAsync(taskStatus);
+            return Ok(tasks);
+        }
+
+        [HttpGet("workflowId/{workflowId}")]
+        public async Task<ActionResult<IEnumerable<MediaTaskResponseDto>>> GetByWorkflowId(int workflowId)
+        {
+            var tasks = await _mediaTaskService.GetByWorkflowIdAsync(workflowId);
+            return Ok(tasks);
         }
     }
 }

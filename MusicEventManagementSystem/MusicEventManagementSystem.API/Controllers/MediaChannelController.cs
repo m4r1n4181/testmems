@@ -18,83 +18,76 @@ namespace MusicEventManagementSystem.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MediaChannelResponseDto>>> GetAllMediaChannels()
         {
-            try
-            {
-                var channels = await _mediaChannelService.GetAllMediaChannelsAsync();
-                return Ok(channels);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var channels = await _mediaChannelService.GetAllMediaChannelsAsync();
+            return Ok(channels);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<MediaChannelResponseDto>> GetMediaChannelById(int id)
         {
-            try
-            {
-                var channel = await _mediaChannelService.GetMediaChannelByIdAsync(id);
-                if (channel == null)
-                    return NotFound($"MediaChannel with ID {id} not found.");
-                return Ok(channel);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var channel = await _mediaChannelService.GetMediaChannelByIdAsync(id);
+            if (channel == null)
+                return NotFound($"MediaChannel with ID {id} not found.");
+            return Ok(channel);
         }
 
         [HttpPost]
-        public async Task<ActionResult<MediaChannelResponseDto>> CreateMediaChannel([FromBody] MediaChannelCreateDto createDto)
+        public async Task<ActionResult<MediaChannelResponseDto>> CreateMediaChannel([FromBody] MediaChannelCreateDto dto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var createdChannel = await _mediaChannelService.CreateMediaChannelAsync(createDto);
-                return CreatedAtAction(nameof(GetMediaChannelById), new { id = createdChannel.MediaChannelId }, createdChannel);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var createdChannel = await _mediaChannelService.CreateMediaChannelAsync(dto);
+            return CreatedAtAction(nameof(GetMediaChannelById), new { id = createdChannel.MediaChannelId }, createdChannel);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<MediaChannelResponseDto>> UpdateMediaChannel(int id, [FromBody] MediaChannelUpdateDto updateDto)
+        public async Task<ActionResult<MediaChannelResponseDto>> UpdateMediaChannel(int id, [FromBody] MediaChannelUpdateDto dto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var updatedChannel = await _mediaChannelService.UpdateMediaChannelAsync(id, updateDto);
-                if (updatedChannel == null)
-                    return NotFound($"MediaChannel with ID {id} not found.");
-                return Ok(updatedChannel);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var updatedChannel = await _mediaChannelService.UpdateMediaChannelAsync(id, dto);
+            if (updatedChannel == null)
+                return NotFound($"MediaChannel with ID {id} not found.");
+            return Ok(updatedChannel);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteMediaChannel(int id)
         {
-            try
-            {
-                var isDeleted = await _mediaChannelService.DeleteMediaChannelAsync(id);
-                if (!isDeleted)
-                    return NotFound($"MediaChannel with ID {id} not found.");
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var isDeleted = await _mediaChannelService.DeleteMediaChannelAsync(id);
+            if (!isDeleted)
+                return NotFound($"MediaChannel with ID {id} not found.");
+            return NoContent();
+        }
+
+        [HttpGet("platformType/{platformType}")]
+        public async Task<ActionResult<IEnumerable<MediaChannelResponseDto>>> GetByPlatformType(string platformType)
+        {
+            var channels = await _mediaChannelService.GetByPlatformTypeAsync(platformType);
+            return Ok(channels);
+        }
+
+        [HttpGet("apiKey/{apiKey}")]
+        public async Task<ActionResult<IEnumerable<MediaChannelResponseDto>>> GetByAPIKey(string apiKey)
+        {
+            var channels = await _mediaChannelService.GetByAPIKeyAsync(apiKey);
+            return Ok(channels);
+        }
+
+        [HttpGet("apiURL/{apiURL}")]
+        public async Task<ActionResult<IEnumerable<MediaChannelResponseDto>>> GetByAPIURL(string apiURL)
+        {
+            var channels = await _mediaChannelService.GetByAPIURLAsync(apiURL);
+            return Ok(channels);
+        }
+
+        [HttpGet("apiVersion/{apiVersion}")]
+        public async Task<ActionResult<IEnumerable<MediaChannelResponseDto>>> GetByAPIVersion(string apiVersion)
+        {
+            var channels = await _mediaChannelService.GetByAPIVersionAsync(apiVersion);
+            return Ok(channels);
         }
     }
 }

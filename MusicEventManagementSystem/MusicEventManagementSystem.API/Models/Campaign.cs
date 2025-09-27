@@ -9,5 +9,9 @@ namespace MusicEventManagementSystem.API.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal TotalBudget { get; set; }
+
+
+        public virtual ICollection<Ad> Ads { get; set; } = new List<Ad>();
+        public virtual Event Event { get; set; } = null!;
     }
 }

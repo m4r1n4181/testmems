@@ -15,12 +15,14 @@ namespace MusicEventManagementSystem.API.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
+        public int CampaignId { get; set; } 
 
         // Navigation property - Event - (1,N) -> TicketType
         public ICollection<TicketType> TicketTypes { get; set; } = new List<TicketType>();
 
         // Navigation property - Event - (1,N) -> PricingRule
         public ICollection<PricingRule> PricingRules { get; set; } = new List<PricingRule>();
+        public ICollection<Campaign> Campaigns { get; set; } = new List<Campaign>(); 
     }
 
 }

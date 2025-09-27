@@ -15,105 +15,86 @@ namespace MusicEventManagementSystem.API.Controllers
             _adTypeService = adTypeService;
         }
 
-        // GET: api/adtype
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AdTypeResponseDto>>> GetAllAdTypes()
         {
-            try
-            {
-                var adTypes = await _adTypeService.GetAllAdTypesAsync();
-                return Ok(adTypes);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var adTypes = await _adTypeService.GetAllAdTypesAsync();
+            return Ok(adTypes);
         }
 
-        // GET: api/adtype/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<AdTypeResponseDto>> GetAdTypeById(int id)
         {
-            try
-            {
-                var adType = await _adTypeService.GetAdTypeByIdAsync(id);
-                if (adType == null)
-                    return NotFound($"AdType with ID {id} not found.");
-
-                return Ok(adType);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var adType = await _adTypeService.GetAdTypeByIdAsync(id);
+            if (adType == null)
+                return NotFound($"AdType with ID {id} not found.");
+            return Ok(adType);
         }
 
-        // POST: api/adtype
         [HttpPost]
-        public async Task<ActionResult<AdTypeResponseDto>> CreateAdType([FromBody] AdTypeCreateDto adTypeCreateDto)
+        public async Task<ActionResult<AdTypeResponseDto>> CreateAdType([FromBody] AdTypeCreateDto dto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var createdAdType = await _adTypeService.CreateAdTypeAsync(adTypeCreateDto);
-
-                return CreatedAtAction(nameof(GetAdTypeById), new { id = createdAdType.AdTypeId }, createdAdType);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var createdAdType = await _adTypeService.CreateAdTypeAsync(dto);
+            return CreatedAtAction(nameof(GetAdTypeById), new { id = createdAdType.AdTypeId }, createdAdType);
         }
 
-        // PUT: api/adtype/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult<AdTypeResponseDto>> UpdateAdType(int id, [FromBody] AdTypeUpdateDto adTypeUpdateDto)
+        public async Task<ActionResult<AdTypeResponseDto>> UpdateAdType(int id, [FromBody] AdTypeUpdateDto dto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var updatedAdType = await _adTypeService.UpdateAdTypeAsync(id, adTypeUpdateDto);
-
-                if (updatedAdType == null)
-                {
-                    return NotFound($"AdType with ID {id} not found.");
-                }
-
-                return Ok(updatedAdType);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var updatedAdType = await _adTypeService.UpdateAdTypeAsync(id, dto);
+            if (updatedAdType == null)
+                return NotFound($"AdType with ID {id} not found.");
+            return Ok(updatedAdType);
         }
 
-        // DELETE: api/adtype/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteAdType(int id)
         {
-            try
-            {
-                var isDeleted = await _adTypeService.DeleteAdTypeAsync(id);
+            var isDeleted = await _adTypeService.DeleteAdTypeAsync(id);
+            if (!isDeleted)
+                return NotFound($"AdType with ID {id} not found.");
+            return NoContent();
+        }
 
-                if (!isDeleted)
-                {
-                    return NotFound($"AdType with ID {id} not found.");
-                }
+        [HttpGet("typeName/{typeName}")]
+        public async Task<ActionResult<IEnumerable<AdTypeResponseDto>>> GetByTypeName(string typeName)
+        {
+            var adTypes = await _adTypeService.GetByTypeNameAsync(typeName);
+            return Ok(adTypes);
+        }
 
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+        [HttpGet("typeDescription/{typeDescription}")]
+        public async Task<ActionResult<IEnumerable<AdTypeResponseDto>>> GetByTypeDescription(string typeDescription)
+        {
+            var adTypes = await _adTypeService.GetByTypeDescriptionAsync(typeDescription);
+            return Ok(adTypes);
+        }
+
+        [HttpGet("dimensions/{dimensions}")]
+        public async Task<ActionResult<IEnumerable<AdTypeResponseDto>>> GetByDimensions(string dimensions)
+        {
+            var adTypes = await _adTypeService.GetByDimensionsAsync(dimensions);
+            return Ok(adTypes);
+        }
+
+        [HttpGet("duration/{duration}")]
+        public async Task<ActionResult<IEnumerable<AdTypeResponseDto>>> GetByDuration(int duration)
+        {
+            var adTypes = await _adTypeService.GetByDurationAsync(duration);
+            return Ok(adTypes);
+        }
+
+        [HttpGet("fileFormat/{fileFormat}")]
+        public async Task<ActionResult<IEnumerable<AdTypeResponseDto>>> GetByFileFormat(string fileFormat)
+        {
+            var adTypes = await _adTypeService.GetByFileFormatAsync(fileFormat);
+            return Ok(adTypes);
         }
     }
 }

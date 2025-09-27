@@ -18,6 +18,7 @@ namespace MusicEventManagementSystem.API.DTOs
         public DateTime? DeletedAt { get; set; }
         public List<int>? TicketTypeIds { get; set; }
         public List<int>? PricingRuleIds { get; set; }
+        public int? CampaignId { get; set; }
     }
 
     public class EventCreateDto
@@ -41,6 +42,7 @@ namespace MusicEventManagementSystem.API.DTOs
 
         [Required]
         public int LocationId { get; set; }
+        public int? CampaignId { get; set; }
     }
 
     public class EventUpdateDto
@@ -54,5 +56,6 @@ namespace MusicEventManagementSystem.API.DTOs
         public DateTime? Interval { get; set; }
         public EventStatus? Status { get; set; }
         public int? LocationId { get; set; }
+        public int? CampaignId { get; set; }
     }
 }

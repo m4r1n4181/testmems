@@ -18,83 +18,76 @@ namespace MusicEventManagementSystem.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ApprovalResponseDto>>> GetAllApprovals()
         {
-            try
-            {
-                var approvals = await _approvalService.GetAllApprovalsAsync();
-                return Ok(approvals);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var approvals = await _approvalService.GetAllApprovalsAsync();
+            return Ok(approvals);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ApprovalResponseDto>> GetApprovalById(int id)
         {
-            try
-            {
-                var approval = await _approvalService.GetApprovalByIdAsync(id);
-                if (approval == null)
-                    return NotFound($"Approval with ID {id} not found.");
-                return Ok(approval);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var approval = await _approvalService.GetApprovalByIdAsync(id);
+            if (approval == null)
+                return NotFound($"Approval with ID {id} not found.");
+            return Ok(approval);
         }
 
         [HttpPost]
-        public async Task<ActionResult<ApprovalResponseDto>> CreateApproval([FromBody] ApprovalCreateDto createDto)
+        public async Task<ActionResult<ApprovalResponseDto>> CreateApproval([FromBody] ApprovalCreateDto dto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var createdApproval = await _approvalService.CreateApprovalAsync(createDto);
-                return CreatedAtAction(nameof(GetApprovalById), new { id = createdApproval.ApprovalId }, createdApproval);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var createdApproval = await _approvalService.CreateApprovalAsync(dto);
+            return CreatedAtAction(nameof(GetApprovalById), new { id = createdApproval.ApprovalId }, createdApproval);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApprovalResponseDto>> UpdateApproval(int id, [FromBody] ApprovalUpdateDto updateDto)
+        public async Task<ActionResult<ApprovalResponseDto>> UpdateApproval(int id, [FromBody] ApprovalUpdateDto dto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var updatedApproval = await _approvalService.UpdateApprovalAsync(id, updateDto);
-                if (updatedApproval == null)
-                    return NotFound($"Approval with ID {id} not found.");
-                return Ok(updatedApproval);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var updatedApproval = await _approvalService.UpdateApprovalAsync(id, dto);
+            if (updatedApproval == null)
+                return NotFound($"Approval with ID {id} not found.");
+            return Ok(updatedApproval);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteApproval(int id)
         {
-            try
-            {
-                var isDeleted = await _approvalService.DeleteApprovalAsync(id);
-                if (!isDeleted)
-                    return NotFound($"Approval with ID {id} not found.");
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var isDeleted = await _approvalService.DeleteApprovalAsync(id);
+            if (!isDeleted)
+                return NotFound($"Approval with ID {id} not found.");
+            return NoContent();
+        }
+
+        [HttpGet("approvalStatus/{approvalStatus}")]
+        public async Task<ActionResult<IEnumerable<ApprovalResponseDto>>> GetByApprovalStatus(string approvalStatus)
+        {
+            var approvals = await _approvalService.GetByApprovalStatusAsync(approvalStatus);
+            return Ok(approvals);
+        }
+
+        [HttpGet("comment/{comment}")]
+        public async Task<ActionResult<IEnumerable<ApprovalResponseDto>>> GetByComment(string comment)
+        {
+            var approvals = await _approvalService.GetByCommentAsync(comment);
+            return Ok(approvals);
+        }
+
+        [HttpGet("approvalDate/{approvalDate}")]
+        public async Task<ActionResult<IEnumerable<ApprovalResponseDto>>> GetByApprovalDate(DateTime approvalDate)
+        {
+            var approvals = await _approvalService.GetByApprovalDateAsync(approvalDate);
+            return Ok(approvals);
+        }
+
+        [HttpGet("mediaTaskId/{mediaTaskId}")]
+        public async Task<ActionResult<IEnumerable<ApprovalResponseDto>>> GetByMediaTaskId(int mediaTaskId)
+        {
+            var approvals = await _approvalService.GetByMediaTaskIdAsync(mediaTaskId);
+            return Ok(approvals);
         }
     }
 }

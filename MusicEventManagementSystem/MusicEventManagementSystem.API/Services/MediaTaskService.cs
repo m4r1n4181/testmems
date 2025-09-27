@@ -43,6 +43,7 @@ namespace MusicEventManagementSystem.API.Services
             if (dto.Order.HasValue) task.Order = dto.Order.Value;
             if (dto.TaskStatus != null) task.TaskStatus = dto.TaskStatus;
             if (dto.WorkflowId.HasValue) task.WorkflowId = dto.WorkflowId.Value;
+            if (dto.ApprovalId.HasValue) task.ApprovalId = dto.ApprovalId.Value;
 
             _mediaTaskRepository.Update(task);
             await _mediaTaskRepository.SaveChangesAsync();
@@ -58,13 +59,38 @@ namespace MusicEventManagementSystem.API.Services
             return true;
         }
 
+        public async Task<IEnumerable<MediaTaskResponseDto>> GetByTaskNameAsync(string taskName)
+        {
+            var tasks = await _mediaTaskRepository.GetByTaskNameAsync(taskName);
+            return tasks.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<MediaTaskResponseDto>> GetByOrderAsync(int order)
+        {
+            var tasks = await _mediaTaskRepository.GetByOrderAsync(order);
+            return tasks.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<MediaTaskResponseDto>> GetByTaskStatusAsync(string taskStatus)
+        {
+            var tasks = await _mediaTaskRepository.GetByTaskStatusAsync(taskStatus);
+            return tasks.Select(MapToResponseDto);
+        }
+
+        public async Task<IEnumerable<MediaTaskResponseDto>> GetByWorkflowIdAsync(int workflowId)
+        {
+            var tasks = await _mediaTaskRepository.GetByWorkflowIdAsync(workflowId);
+            return tasks.Select(MapToResponseDto);
+        }
+
         private static MediaTaskResponseDto MapToResponseDto(MediaTask task) => new()
         {
             MediaTaskId = task.MediaTaskId,
             TaskName = task.TaskName,
             Order = task.Order,
             TaskStatus = task.TaskStatus,
-            WorkflowId = task.WorkflowId
+            WorkflowId = task.WorkflowId,
+            ApprovalId = task.ApprovalId
         };
 
         private static MediaTask MapToEntity(MediaTaskCreateDto dto) => new()
@@ -72,7 +98,8 @@ namespace MusicEventManagementSystem.API.Services
             TaskName = dto.TaskName,
             Order = dto.Order,
             TaskStatus = dto.TaskStatus,
-            WorkflowId = dto.WorkflowId
+            WorkflowId = dto.WorkflowId,
+            ApprovalId = dto.ApprovalId
         };
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using MusicEventManagementSystem.API.DTOs.MediaCampaign;
 
 namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
 {
@@ -10,6 +11,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal TotalBudget { get; set; }
+        public ICollection<int>? AdIds { get; set; }
     }
 
     public class CampaignCreateDto
@@ -30,6 +32,9 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         [Required]
         [Range(0, double.MaxValue)]
         public decimal TotalBudget { get; set; }
+
+        [Range(0,100)]
+        public ICollection<int>? AdIds { get; set; }
     }
 
     public class CampaignUpdateDto
@@ -43,5 +48,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public DateTime? EndDate { get; set; }
         [Range(0, double.MaxValue)]
         public decimal? TotalBudget { get; set; }
+        [Range(0, 100)]
+        public ICollection<int>? AdIds { get; set; }    
     }
 }

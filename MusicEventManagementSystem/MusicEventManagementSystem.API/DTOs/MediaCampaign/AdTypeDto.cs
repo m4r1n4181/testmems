@@ -10,6 +10,8 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public string? Dimensions { get; set; }
         public int Duration { get; set; }
         public string? FileFormat { get; set; }
+        public ICollection<int>? AdIds { get; set; }
+        public int MediaWorkflowId { get; set; } 
     }
 
     public class AdTypeCreateDto
@@ -25,12 +27,16 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public string? Dimensions { get; set; }
 
         [Required]
-        [Range(1, int.MaxValue)]
+        [Range(0, 100)]
         public int Duration { get; set; }
 
         [Required]
         [StringLength(20)]
         public string FileFormat { get; set; }
+
+        [Range(0, 100)]
+        public ICollection<int>? AdIds { get; set; }
+        public int MediaWorkflowId { get; set; }
     }
 
     public class AdTypeUpdateDto
@@ -44,7 +50,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         [StringLength(50)]
         public string? Dimensions { get; set; }
 
-        [Range(1, int.MaxValue)]
+        [Range(0, 100)]
         public int? Duration { get; set; }
 
         [StringLength(20)]

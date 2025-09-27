@@ -9,5 +9,10 @@ namespace MusicEventManagementSystem.API.Services.IService
         Task<ApprovalResponseDto> CreateApprovalAsync(ApprovalCreateDto createDto);
         Task<ApprovalResponseDto?> UpdateApprovalAsync(int id, ApprovalUpdateDto updateDto);
         Task<bool> DeleteApprovalAsync(int id);
+
+        Task<IEnumerable<ApprovalResponseDto>> GetByApprovalStatusAsync(string approvalStatus);
+        Task<IEnumerable<ApprovalResponseDto>> GetByCommentAsync(string comment);
+        Task<IEnumerable<ApprovalResponseDto>> GetByApprovalDateAsync(DateTime approvalDate);
+        Task<IEnumerable<ApprovalResponseDto>> GetByMediaTaskIdAsync(int mediaTaskId);
     }
 }

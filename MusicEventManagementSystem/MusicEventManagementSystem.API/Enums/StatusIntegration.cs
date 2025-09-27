@@ -2,7 +2,7 @@
 {
     public enum StatusIntegration
     {
-        Published = 1, 
+        Published = 1,
         Failed = 2
     }
 }

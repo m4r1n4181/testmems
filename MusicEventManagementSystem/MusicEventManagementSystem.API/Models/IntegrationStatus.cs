@@ -11,5 +11,9 @@ namespace MusicEventManagementSystem.API.Models
         public DateTime? PublicationDate { get; set; }
         public string? Error { get; set; }
         public DateTime? LastSynced { get; set; }
+
+        // Navigation properties
+        public virtual Ad Ad { get; set; } = null!;
+        public virtual MediaChannel MediaChannel { get; set; } = null!;
     }
 }
