@@ -19,6 +19,10 @@ import TicketSalesSpecialOffers from './frontend/ticket-sales/pages/SpecialOffer
 // Event Organization imports
 // ...
 
+// Media Campaign imports
+import MediaCampaignDashboard from "./frontend/media-campaign/pages/Dashboard";
+import MediaCampaigns from "./frontend/media-campaign/pages/Campaigns";
+
 // Add these imports for react-toastify
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -172,6 +176,77 @@ function App() {
             </ProtectedRoute>
           } 
         />
+
+        {/* Protected routes - Media Campaign*/}
+        <Route path="/media-campaign/dashboard" 
+          element={
+            <ProtectedRoute allowedDepartments={[4]}>
+              <Layout>
+                <MediaCampaignDashboard />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* <Route path="/media-campaign/campaigns" 
+          element={
+            <ProtectedRoute allowedDepartments={[4]}>
+              <Layout>
+                <MediaCampaignAds />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        /> */}
+
+        <Route path="/media-campaign/campaigns" 
+          element={
+            <ProtectedRoute allowedDepartments={[4]}>
+              <Layout>
+                <MediaCampaigns />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* <Route path="/media-campaign/adtypes" 
+          element={
+            <ProtectedRoute allowedDepartments={[4]}>
+              <Layout>
+                <MediaCampaignAds />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route path="/media-campaign/workflows" 
+          element={
+            <ProtectedRoute allowedDepartments={[4]}>
+              <Layout>
+                <MediaCampaignAds />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route path="/media-campaign/analytics" 
+          element={
+            <ProtectedRoute allowedDepartments={[4]}>
+              <Layout>
+                <MediaCampaignAds />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route path="/media-campaign/integrations" 
+          element={
+            <ProtectedRoute allowedDepartments={[4]}>
+              <Layout>
+                <MediaCampaignAds />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        /> */}
 
         {/* Redirect root to dashboard */}
         <Route path="/" element={<DepartmentRedirect />} />

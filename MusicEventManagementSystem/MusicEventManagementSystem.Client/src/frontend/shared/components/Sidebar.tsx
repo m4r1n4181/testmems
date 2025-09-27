@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  LogOut, CircleDollarSign, BarChart2, TrendingUp, Star, Bookmark, Clock, ChevronLeft, ChevronRight,
-  MapPin, Map, Ticket, Calendar, PieChart, PlaySquare, ListChecks, CalendarDays, Briefcase, Building2
+  LogOut, CircleDollarSign, BarChart2, TrendingUp, Star, Bookmark, Clock, ChevronLeft, ChevronRight, Megaphone,
+  MapPin, Map, Ticket, Calendar, PieChart, PlaySquare, ListChecks, CalendarDays, Briefcase, Building2, Film, GitBranch, Workflow
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -51,15 +51,21 @@ const Sidebar = () => {
           { icon: <PieChart />, label: "Analytics", path: "/event-organization/analytics" },
         ];
       
-      // case 3: // ArtistCommunication
-      //   return [
-      //     { icon: <BarChart2 />, label: "Dashboard", path: "/artist-communication/dashboard" },
-      //   ];
+      case 3: // ArtistCommunication
+        return [
+          { icon: <BarChart2 />, label: "Dashboard", path: "/artist-communication/dashboard" },
+        ];
       
-      // case 4: // MediaCampaign
-      //   return [
-      //     { icon: <BarChart2 />, label: "Dashboard", path: "/media-campaign/dashboard" },
-      //   ];
+      case 4: // MediaCampaign
+        return [
+          { icon: <BarChart2 />, label: "Dashboard", path: "/media-campaign/dashboard" },
+          { icon: <Megaphone />, label: "Campaigns", path: "/media-campaign/campaigns" },
+          { icon: <Film />, label: "Ads", path: "/media-campaign/ads" },
+          { icon: <Bookmark />, label: "Ad Types", path: "/media-campaign/ad-types" },
+          { icon: <Workflow />, label: "Workflows", path: "/media-campaign/workflows" },
+          { icon: <PieChart />, label: "Analytics", path: "/media-campaign/analytics" },
+          { icon: <GitBranch />, label: "Integrations", path: "/media-campaign/integrations" },
+        ];
       
       default:
         return [
