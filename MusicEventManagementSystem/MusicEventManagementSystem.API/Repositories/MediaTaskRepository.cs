@@ -13,6 +13,9 @@ namespace MusicEventManagementSystem.API.Repositories
         {
             return await _context.MediaTasks
                 .Include(mt => mt.MediaWorkflow)
+                .Include(mt => mt.Approval)
+                .Include(mt => mt.Manager)
+                .Include(mt => mt.Ad)
                 .ToListAsync();
         }
 
@@ -20,6 +23,9 @@ namespace MusicEventManagementSystem.API.Repositories
         {
             return await _context.MediaTasks
                 .Include(mt => mt.MediaWorkflow)
+                .Include(mt => mt.Approval)
+                .Include(mt => mt.Manager)
+                .Include(mt => mt.Ad)
                 .FirstOrDefaultAsync(m => m.MediaTaskId == id);
         }
 
@@ -28,6 +34,9 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.MediaTasks
                 .Where(m => m.TaskName == taskName)
                 .Include(mt => mt.MediaWorkflow)
+                .Include(mt => mt.Approval)
+                .Include(mt => mt.Manager)
+                .Include(mt => mt.Ad)
                 .ToListAsync();
         }
 
@@ -36,6 +45,9 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.MediaTasks
                 .Where(m => m.Order == order)
                 .Include(mt => mt.MediaWorkflow)
+                .Include(mt => mt.Approval)
+                .Include(mt => mt.Manager)
+                .Include(mt => mt.Ad)
                 .ToListAsync();
         }
 
@@ -44,6 +56,9 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.MediaTasks
                 .Where(m => m.TaskStatus == taskStatus)
                 .Include(mt => mt.MediaWorkflow)
+                .Include(mt => mt.Approval)
+                .Include(mt => mt.Manager)
+                .Include(mt => mt.Ad)
                 .ToListAsync();
         }
 
@@ -52,6 +67,20 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.MediaTasks
                 .Where(m => m.WorkflowId == workflowId)
                 .Include(mt => mt.MediaWorkflow)
+                .Include(mt => mt.Approval)
+                .Include(mt => mt.Manager)
+                .Include(mt => mt.Ad)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<MediaTask>> GetTasksByManager(string managerId)
+        {
+            return await _context.MediaTasks
+                .Where(m => m.ManagerId == managerId)
+                .Include(mt => mt.MediaWorkflow)
+                .Include(mt => mt.Approval)
+                .Include(mt => mt.Manager)
+                .Include(mt => mt.Ad)
                 .ToListAsync();
         }
     }

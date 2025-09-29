@@ -236,6 +236,21 @@ namespace MusicEventManagementSystem.Data
                 .HasForeignKey<Approval>(a => a.MediaTaskId);
 
 
+            // Ad → ApplicationUser (CreatedBy)
+            builder.Entity<Ad>()
+                .HasOne(a => a.CreatedBy)
+                .WithMany(u => u.CreatedAds) 
+                .HasForeignKey(a => a.CreatedById)
+                .IsRequired();
+
+            // MediaTask → ApplicationUser (Manager)
+            builder.Entity<MediaTask>()
+                .HasOne(mt => mt.Manager)
+                .WithMany(u => u.MediaTasks) 
+                .HasForeignKey(mt => mt.ManagerId)
+                .IsRequired();
+
+
             // Conversion DateTime to UTC
             var dateTimeConverter = new ValueConverter<DateTime, DateTime>(
                 v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),

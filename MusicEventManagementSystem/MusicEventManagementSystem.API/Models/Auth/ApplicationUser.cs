@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.Enums;
 
 namespace MusicEventManagementSystem.Models.Auth
@@ -10,5 +11,7 @@ namespace MusicEventManagementSystem.Models.Auth
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;
         public Department Department { get; set; }
+        public ICollection<MediaTask>? MediaTasks { get; set; }
+        public ICollection<Ad>? CreatedAds { get; set; }
     }
 }

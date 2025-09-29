@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicEventManagementSystem.API.Migrations
 {
     /// <inheritdoc />
-    public partial class MEMSInitialMigration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -906,11 +906,18 @@ namespace MusicEventManagementSystem.API.Migrations
                     PublicationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CampaignId = table.Column<int>(type: "integer", nullable: false),
                     MediaWorkflowId = table.Column<int>(type: "integer", nullable: false),
-                    AdTypeId = table.Column<int>(type: "integer", nullable: false)
+                    AdTypeId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedById = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Ads", x => x.AdId);
+                    table.ForeignKey(
+                        name: "FK_Ads_AspNetUsers_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Ads_Campaigns_CampaignId",
                         column: x => x.CampaignId,
@@ -1035,11 +1042,24 @@ namespace MusicEventManagementSystem.API.Migrations
                     Order = table.Column<int>(type: "integer", nullable: false),
                     TaskStatus = table.Column<string>(type: "text", nullable: true),
                     WorkflowId = table.Column<int>(type: "integer", nullable: false),
-                    ApprovalId = table.Column<int>(type: "integer", nullable: true)
+                    ApprovalId = table.Column<int>(type: "integer", nullable: true),
+                    ManagerId = table.Column<string>(type: "text", nullable: false),
+                    AdId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MediaTasks", x => x.MediaTaskId);
+                    table.ForeignKey(
+                        name: "FK_MediaTasks_Ads_AdId",
+                        column: x => x.AdId,
+                        principalTable: "Ads",
+                        principalColumn: "AdId");
+                    table.ForeignKey(
+                        name: "FK_MediaTasks_AspNetUsers_ManagerId",
+                        column: x => x.ManagerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_MediaTasks_MediaWorkflows_WorkflowId",
                         column: x => x.WorkflowId,
@@ -1057,6 +1077,11 @@ namespace MusicEventManagementSystem.API.Migrations
                 name: "IX_Ads_CampaignId",
                 table: "Ads",
                 column: "CampaignId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Ads_CreatedById",
+                table: "Ads",
+                column: "CreatedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Ads_MediaWorkflowId",
@@ -1146,6 +1171,16 @@ namespace MusicEventManagementSystem.API.Migrations
                 name: "IX_IntegrationStatuses_ChannelId",
                 table: "IntegrationStatuses",
                 column: "ChannelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MediaTasks_AdId",
+                table: "MediaTasks",
+                column: "AdId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MediaTasks_ManagerId",
+                table: "MediaTasks",
+                column: "ManagerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MediaTasks_WorkflowId",
@@ -1280,6 +1315,26 @@ namespace MusicEventManagementSystem.API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
+                name: "FK_Ads_AdTypes_AdTypeId",
+                table: "Ads");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Ads_AspNetUsers_CreatedById",
+                table: "Ads");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_MediaTasks_AspNetUsers_ManagerId",
+                table: "MediaTasks");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Ads_Campaigns_CampaignId",
+                table: "Ads");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Ads_MediaWorkflows_MediaWorkflowId",
+                table: "Ads");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_MediaTasks_MediaWorkflows_WorkflowId",
                 table: "MediaTasks");
 
@@ -1368,9 +1423,6 @@ namespace MusicEventManagementSystem.API.Migrations
                 name: "MediaChannels");
 
             migrationBuilder.DropTable(
-                name: "Ads");
-
-            migrationBuilder.DropTable(
                 name: "Phases");
 
             migrationBuilder.DropTable(
@@ -1386,25 +1438,13 @@ namespace MusicEventManagementSystem.API.Migrations
                 name: "TicketTypes");
 
             migrationBuilder.DropTable(
-                name: "AdTypes");
-
-            migrationBuilder.DropTable(
-                name: "Campaigns");
-
-            migrationBuilder.DropTable(
                 name: "Contracts");
 
             migrationBuilder.DropTable(
                 name: "Negotiations");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "Zones");
-
-            migrationBuilder.DropTable(
-                name: "Events");
 
             migrationBuilder.DropTable(
                 name: "Performers");
@@ -1416,6 +1456,18 @@ namespace MusicEventManagementSystem.API.Migrations
                 name: "Venues");
 
             migrationBuilder.DropTable(
+                name: "AdTypes");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Campaigns");
+
+            migrationBuilder.DropTable(
+                name: "Events");
+
+            migrationBuilder.DropTable(
                 name: "MediaWorkflows");
 
             migrationBuilder.DropTable(
@@ -1423,6 +1475,9 @@ namespace MusicEventManagementSystem.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "MediaTasks");
+
+            migrationBuilder.DropTable(
+                name: "Ads");
         }
     }
 }

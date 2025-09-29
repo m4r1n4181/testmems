@@ -11,5 +11,6 @@ namespace MusicEventManagementSystem.DTOs.Auth
         public DateTime CreatedAt { get; set; }
         public bool IsActive { get; set; }
         public Department Department { get; set; }
+        public ICollection<int>? MediaTasks { get; set; }
     }
 }

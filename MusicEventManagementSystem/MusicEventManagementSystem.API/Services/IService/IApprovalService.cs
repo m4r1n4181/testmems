@@ -14,5 +14,6 @@ namespace MusicEventManagementSystem.API.Services.IService
         Task<IEnumerable<ApprovalResponseDto>> GetByCommentAsync(string comment);
         Task<IEnumerable<ApprovalResponseDto>> GetByApprovalDateAsync(DateTime approvalDate);
         Task<IEnumerable<ApprovalResponseDto>> GetByMediaTaskIdAsync(int mediaTaskId);
+        Task<IEnumerable<ApprovalResponseDto>> GetApprovalsForManagerAsync(string managerId);
     }
 }

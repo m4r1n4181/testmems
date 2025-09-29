@@ -48,6 +48,7 @@ namespace MusicEventManagementSystem.API.Services
             if (dto.MediaWorkflowId.HasValue) ad.MediaWorkflowId = dto.MediaWorkflowId.Value;
             if (dto.CampaignId.HasValue) ad.CampaignId = dto.CampaignId.Value;
             if (dto.AdTypeId.HasValue) ad.AdTypeId = dto.AdTypeId.Value;
+            if (dto.CreatedById != null) ad.CreatedById = dto.CreatedById;
 
             _adRepository.Update(ad);
             await _adRepository.SaveChangesAsync();
@@ -121,7 +122,8 @@ namespace MusicEventManagementSystem.API.Services
             PublicationDate = ad.PublicationDate,
             MediaWorkflowId = ad.MediaWorkflowId,
             CampaignId = ad.CampaignId,
-            AdTypeId = ad.AdTypeId
+            AdTypeId = ad.AdTypeId,
+            CreatedById = ad.CreatedById
         };
 
         private static Ad MapToEntity(AdCreateDto dto) => new()
@@ -133,7 +135,8 @@ namespace MusicEventManagementSystem.API.Services
             PublicationDate = dto.PublicationDate,
             MediaWorkflowId = dto.MediaWorkflowId,
             CampaignId = dto.CampaignId,
-            AdTypeId = dto.AdTypeId
+            AdTypeId = dto.AdTypeId,
+            CreatedById = dto.CreatedById
         };
     }
 }

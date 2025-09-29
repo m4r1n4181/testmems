@@ -1,17 +1,26 @@
-﻿using MusicEventManagementSystem.API.DTOs.MediaCampaign;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.DTOs.MediaCampaign;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
+using MusicEventManagementSystem.Enums;
+using MusicEventManagementSystem.Models.Auth;
 
 namespace MusicEventManagementSystem.API.Services
 {
     public class MediaTaskService : IMediaTaskService
     {
         private readonly IMediaTaskRepository _mediaTaskRepository;
+        private readonly UserManager<ApplicationUser> _userManager; // Add this line
 
-        public MediaTaskService(IMediaTaskRepository mediaTaskRepository)
+        public MediaTaskService(
+            IMediaTaskRepository mediaTaskRepository,
+            UserManager<ApplicationUser> userManager
+        )
         {
             _mediaTaskRepository = mediaTaskRepository;
+            _userManager = userManager; // Assign here
         }
 
         public async Task<IEnumerable<MediaTaskResponseDto>> GetAllMediaTasksAsync()
@@ -44,7 +53,7 @@ namespace MusicEventManagementSystem.API.Services
             if (dto.TaskStatus != null) task.TaskStatus = dto.TaskStatus;
             if (dto.WorkflowId.HasValue) task.WorkflowId = dto.WorkflowId.Value;
             if (dto.ApprovalId.HasValue) task.ApprovalId = dto.ApprovalId.Value;
-
+            if (dto.ManagerId != null) task.ManagerId = dto.ManagerId;
             _mediaTaskRepository.Update(task);
             await _mediaTaskRepository.SaveChangesAsync();
             return MapToResponseDto(task);
@@ -82,6 +91,12 @@ namespace MusicEventManagementSystem.API.Services
             var tasks = await _mediaTaskRepository.GetByWorkflowIdAsync(workflowId);
             return tasks.Select(MapToResponseDto);
         }
+        public async Task<IEnumerable<MediaTaskResponseDto>> GetTasksByManager(string managerId)
+        {
+            var tasks = await _mediaTaskRepository.GetTasksByManager(managerId);
+            return tasks.Select(MapToResponseDto);
+        }
+
 
         private static MediaTaskResponseDto MapToResponseDto(MediaTask task) => new()
         {
@@ -90,7 +105,8 @@ namespace MusicEventManagementSystem.API.Services
             Order = task.Order,
             TaskStatus = task.TaskStatus,
             WorkflowId = task.WorkflowId,
-            ApprovalId = task.ApprovalId
+            ApprovalId = task.ApprovalId,
+            ManagerId = task.ManagerId
         };
 
         private static MediaTask MapToEntity(MediaTaskCreateDto dto) => new()
@@ -99,7 +115,8 @@ namespace MusicEventManagementSystem.API.Services
             Order = dto.Order,
             TaskStatus = dto.TaskStatus,
             WorkflowId = dto.WorkflowId,
-            ApprovalId = dto.ApprovalId
+            ApprovalId = dto.ApprovalId,
+            ManagerId = dto.ManagerId
         };
     }
 }

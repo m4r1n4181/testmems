@@ -20,6 +20,7 @@ namespace MusicEventManagementSystem.API.Repositories
                 .Include(a => a.AdType)
                 .Include(a => a.Versions)
                 .Include(a => a.IntegrationStatuses)
+                .Include(a => a.CreatedBy)
                 .ToListAsync();
         }
 
@@ -31,6 +32,7 @@ namespace MusicEventManagementSystem.API.Repositories
                 .Include(a => a.AdType)
                 .Include(a => a.Versions)
                 .Include(a => a.IntegrationStatuses)
+                .Include(a => a.CreatedBy)
                 .FirstOrDefaultAsync(a => a.AdId == id);
         }
 
@@ -43,6 +45,7 @@ namespace MusicEventManagementSystem.API.Repositories
                 .Include(a => a.AdType)
                 .Include(a => a.Versions)  
                 .Include(a => a.IntegrationStatuses)
+                .Include(a => a.CreatedBy)
                 .ToListAsync();
         }
 
@@ -55,6 +58,7 @@ namespace MusicEventManagementSystem.API.Repositories
                 .Include(a => a.AdType)
                 .Include(a => a.Versions)
                 .Include(a => a.IntegrationStatuses)
+                .Include(a => a.CreatedBy)
                 .ToListAsync();
         }
 
@@ -67,6 +71,7 @@ namespace MusicEventManagementSystem.API.Repositories
                 .Include(a => a.AdType)
                 .Include(a => a.Versions)
                 .Include(a => a.IntegrationStatuses)
+                .Include(a => a.CreatedBy)
                 .ToListAsync();
         }
 
@@ -77,6 +82,7 @@ namespace MusicEventManagementSystem.API.Repositories
                 .Include(a => a.MediaWorkflow)
                 .Include(a => a.Campaign)
                 .Include(a => a.AdType)
+                .Include(a => a.CreatedBy)
                 .ToListAsync();
         }
 
@@ -89,6 +95,7 @@ namespace MusicEventManagementSystem.API.Repositories
                 .Include(a => a.AdType)
                 .Include(a => a.Versions)
                 .Include(a => a.IntegrationStatuses)
+                .Include(a => a.CreatedBy)
                 .ToListAsync();
         }
 
@@ -101,6 +108,7 @@ namespace MusicEventManagementSystem.API.Repositories
                 .Include(a => a.AdType)
                 .Include(a => a.Versions)
                 .Include(a => a.IntegrationStatuses)
+                .Include(a => a.CreatedBy)
                 .ToListAsync();
         }
 
@@ -113,6 +121,7 @@ namespace MusicEventManagementSystem.API.Repositories
                 .Include(a => a.AdType)
                 .Include(a => a.Versions)
                 .Include(a => a.IntegrationStatuses)
+                .Include(a => a.CreatedBy)
                 .ToListAsync();
         }
 
@@ -125,6 +134,7 @@ namespace MusicEventManagementSystem.API.Repositories
                 .Include(a => a.AdType)
                 .Include(a => a.Versions)
                 .Include(a => a.IntegrationStatuses)
+                .Include(a => a.CreatedBy)
                 .ToListAsync();
         }
     }

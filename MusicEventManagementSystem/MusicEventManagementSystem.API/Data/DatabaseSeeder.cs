@@ -828,6 +828,9 @@ namespace MusicEventManagementSystem.API.Data
             await context.SaveChangesAsync();
 
             // 13. Seed MediaChannels FIRST (no dependencies)
+            var marina = applicationUsers.First(u => u.Email == "marina@mediacampaign.com");
+            var stefan = applicationUsers.First(u => u.Email == "stefan@mediacampaign.com");
+
             var mediaChannels = new List<MediaChannel>
             {
                 new MediaChannel { PlatformType = "Instagram", APIKey = "INSTAGRAM_API_KEY", APIURL = "https://api.instagram.com", APIVersion = "v12.0" },
@@ -935,24 +938,24 @@ namespace MusicEventManagementSystem.API.Data
             var mediaTasks = new List<MediaTask>
             {
                 // Instagram Story Workflow Tasks
-                new MediaTask { TaskName = "Design Instagram Story Creative", Order = 1, TaskStatus = "Completed", WorkflowId = 1 },
-                new MediaTask { TaskName = "Add Interactive Elements", Order = 2, TaskStatus = "Completed", WorkflowId = 1 },
-                new MediaTask { TaskName = "Schedule Instagram Story Post", Order = 3, TaskStatus = "In Progress", WorkflowId = 1 },
+                new MediaTask { TaskName = "Design Instagram Story Creative", Order = 1, TaskStatus = "Completed", WorkflowId = 1, ManagerId = marina.Id }, // ako vežeš na Ad },
+                new MediaTask { TaskName = "Add Interactive Elements", Order = 2, TaskStatus = "Completed", WorkflowId = 1, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Schedule Instagram Story Post", Order = 3, TaskStatus = "In Progress", WorkflowId = 1, ManagerId = marina.Id },
                 
                 // Facebook Post Workflow Tasks
-                new MediaTask { TaskName = "Create Facebook Post Design", Order = 1, TaskStatus = "Completed", WorkflowId = 2 },
-                new MediaTask { TaskName = "Write Engaging Copy", Order = 2, TaskStatus = "Pending Review", WorkflowId = 2 },
-                new MediaTask { TaskName = "Schedule Facebook Post", Order = 3, TaskStatus = "Not Started", WorkflowId = 2 },
+                new MediaTask { TaskName = "Create Facebook Post Design", Order = 1, TaskStatus = "Completed", WorkflowId = 2, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Write Engaging Copy", Order = 2, TaskStatus = "Pending Review", WorkflowId = 2, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Schedule Facebook Post", Order = 3, TaskStatus = "Not Started", WorkflowId = 2, ManagerId = marina.Id },
                 
                 // YouTube Video Workflow Tasks
-                new MediaTask { TaskName = "Edit Video Content", Order = 1, TaskStatus = "In Progress", WorkflowId = 3 },
-                new MediaTask { TaskName = "Create Custom Thumbnail", Order = 2, TaskStatus = "Not Started", WorkflowId = 3 },
-                new MediaTask { TaskName = "Upload to YouTube", Order = 3, TaskStatus = "Not Started", WorkflowId = 3 },
+                new MediaTask { TaskName = "Edit Video Content", Order = 1, TaskStatus = "In Progress", WorkflowId = 3, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Create Custom Thumbnail", Order = 2, TaskStatus = "Not Started", WorkflowId = 3, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Upload to YouTube", Order = 3, TaskStatus = "Not Started", WorkflowId = 3, ManagerId = marina.Id },
                 
                 // TikTok Short Workflow Tasks
-                new MediaTask { TaskName = "Edit TikTok Short", Order = 1, TaskStatus = "Completed", WorkflowId = 4 },
-                new MediaTask { TaskName = "Add Trending Audio", Order = 2, TaskStatus = "Completed", WorkflowId = 4 },
-                new MediaTask { TaskName = "Publish TikTok Short", Order = 3, TaskStatus = "Scheduled", WorkflowId = 4 }
+                new MediaTask { TaskName = "Edit TikTok Short", Order = 1, TaskStatus = "Completed", WorkflowId = 4, ManagerId = marina.Id},
+                new MediaTask { TaskName = "Add Trending Audio", Order = 2, TaskStatus = "Completed", WorkflowId = 4, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Publish TikTok Short", Order = 3, TaskStatus = "Scheduled", WorkflowId = 4, ManagerId = marina.Id }
             };
             context.MediaTasks.AddRange(mediaTasks);
             await context.SaveChangesAsync();
@@ -1059,7 +1062,8 @@ namespace MusicEventManagementSystem.API.Data
                     PublicationDate = DateTime.UtcNow.AddDays(-3),
                     CampaignId = 1,
                     MediaWorkflowId = 1,
-                    AdTypeId = 1
+                    AdTypeId = 1,
+                    CreatedById = marina.Id
                 },
                 new Ad
                 {
@@ -1070,7 +1074,8 @@ namespace MusicEventManagementSystem.API.Data
                     PublicationDate = DateTime.UtcNow.AddDays(-5),
                     CampaignId = 1,
                     MediaWorkflowId = 2,
-                    AdTypeId = 2
+                    AdTypeId = 2,
+                    CreatedById = marina.Id
                 },
                 new Ad
                 {
@@ -1081,7 +1086,8 @@ namespace MusicEventManagementSystem.API.Data
                     PublicationDate = null,
                     CampaignId = 1,
                     MediaWorkflowId = 3,
-                    AdTypeId = 3
+                    AdTypeId = 3,
+                    CreatedById = marina.Id
                 },
                 
                 // Indie Night Campaign Ads
@@ -1094,7 +1100,8 @@ namespace MusicEventManagementSystem.API.Data
                     PublicationDate = DateTime.UtcNow.AddDays(1),
                     CampaignId = 2,
                     MediaWorkflowId = 4,
-                    AdTypeId = 4
+                    AdTypeId = 4,
+                    CreatedById = marina.Id
                 },
                 new Ad
                 {
@@ -1105,7 +1112,8 @@ namespace MusicEventManagementSystem.API.Data
                     PublicationDate = null,
                     CampaignId = 2,
                     MediaWorkflowId = 1,
-                    AdTypeId = 6
+                    AdTypeId = 6,
+                    CreatedById = marina.Id
                 },
                 
                 // Electronic Waves Campaign Ads
@@ -1118,7 +1126,8 @@ namespace MusicEventManagementSystem.API.Data
                     PublicationDate = DateTime.UtcNow.AddDays(-7),
                     CampaignId = 3,
                     MediaWorkflowId = 2,
-                    AdTypeId = 5
+                    AdTypeId = 5,
+                    CreatedById = marina.Id
                 },
                 new Ad
                 {
@@ -1129,7 +1138,8 @@ namespace MusicEventManagementSystem.API.Data
                     PublicationDate = null,
                     CampaignId = 3,
                     MediaWorkflowId = 3,
-                    AdTypeId = 3
+                    AdTypeId = 3,
+                    CreatedById = marina.Id
                 },
                 
                 // Exit Festival Campaign Ads
@@ -1142,7 +1152,8 @@ namespace MusicEventManagementSystem.API.Data
                     PublicationDate = DateTime.UtcNow.AddDays(-15),
                     CampaignId = 4,
                     MediaWorkflowId = 1,
-                    AdTypeId = 1
+                    AdTypeId = 1,
+                    CreatedById = marina.Id
                 },
                 new Ad
                 {
@@ -1153,7 +1164,8 @@ namespace MusicEventManagementSystem.API.Data
                     PublicationDate = DateTime.UtcNow.AddDays(3),
                     CampaignId = 4,
                     MediaWorkflowId = 3,
-                    AdTypeId = 3
+                    AdTypeId = 3,
+                    CreatedById = marina.Id
                 },
                 
                 // Underground Electronic Campaign Ads
@@ -1166,7 +1178,8 @@ namespace MusicEventManagementSystem.API.Data
                     PublicationDate = DateTime.UtcNow.AddDays(-2),
                     CampaignId = 5,
                     MediaWorkflowId = 4,
-                    AdTypeId = 4
+                    AdTypeId = 4,
+                    CreatedById = marina.Id
                 }
             };
             context.Ads.AddRange(ads);

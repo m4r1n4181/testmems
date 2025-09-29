@@ -54,5 +54,13 @@ namespace MusicEventManagementSystem.API.Repositories
                 .Include(a => a.MediaTask)
                 .ToListAsync();
         }
+        public async Task<IEnumerable<Approval>> GetByManagerIdAsync(string managerId)
+        {
+            return await _context.Approvals
+                .Include(a => a.MediaTask)
+                .ThenInclude(mt => mt.Ad)
+                .Where(a => a.MediaTask.Ad.CreatedById == managerId)
+                .ToListAsync();
+        }
     }
 }

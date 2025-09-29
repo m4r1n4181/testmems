@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.Data;
 using MusicEventManagementSystem.DTOs.Auth;
 using MusicEventManagementSystem.Models.Auth;
 
@@ -8,11 +10,16 @@ namespace MusicEventManagementSystem.Services.Auth
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        
-        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        private readonly ApplicationDbContext _dbContext; 
+
+        public AuthService(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            ApplicationDbContext dbContext) 
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _dbContext = dbContext;
         }
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
@@ -153,6 +160,27 @@ namespace MusicEventManagementSystem.Services.Auth
                 IsActive = user.IsActive,
                 Department = user.Department
             };
+        }
+
+        public async Task<List<UserDto>> GetUsersByDepartmentAsync(string department)
+        {
+            if (!Enum.TryParse<Enums.Department>(department, out var deptEnum))
+            {
+                // Optionally handle invalid department string
+                return new List<UserDto>();
+            }
+
+            var users = await _dbContext.Users.Where(u => u.Department == deptEnum).ToListAsync();
+            return users.Select(u => new UserDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                CreatedAt = u.CreatedAt,
+                IsActive = u.IsActive,
+                Department = u.Department
+            }).ToList();
         }
     }
 }

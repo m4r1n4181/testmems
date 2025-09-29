@@ -72,5 +72,14 @@ namespace MusicEventManagementSystem.Controllers
 
             return Ok(user);
         }
+
+        [HttpGet("users/{department}")]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsersByDepartmentAsync(string department)
+        {
+            var users = await _authService.GetUsersByDepartmentAsync(department);
+            return Ok(users);
+        }
+
+
     }
 }

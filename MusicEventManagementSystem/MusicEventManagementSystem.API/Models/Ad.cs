@@ -1,4 +1,5 @@
 ﻿using MusicEventManagementSystem.Enums;
+using MusicEventManagementSystem.Models.Auth;
 namespace MusicEventManagementSystem.API.Models
 {
     public class Ad
@@ -12,6 +13,7 @@ namespace MusicEventManagementSystem.API.Models
         public int CampaignId { get; set; }
         public int MediaWorkflowId { get; set; }
         public int AdTypeId { get; set; }
+        public string CreatedById { get; set; }
 
         // Navigation properties
         public virtual Campaign Campaign { get; set; } = null!;
@@ -19,5 +21,6 @@ namespace MusicEventManagementSystem.API.Models
         public virtual AdType AdType { get; set; } = null!;
         public virtual ICollection<MediaVersion> Versions { get; set; } = new List<MediaVersion>();
         public virtual ICollection<IntegrationStatus> IntegrationStatuses { get; set; } = new List<IntegrationStatus>();
+        public virtual ApplicationUser CreatedBy { get; set; }
     }
 }

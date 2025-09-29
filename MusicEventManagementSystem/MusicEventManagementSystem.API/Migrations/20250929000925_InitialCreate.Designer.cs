@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicEventManagementSystem.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250927223243_MEMSInitialMigration")]
-    partial class MEMSInitialMigration
+    [Migration("20250929000925_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -186,6 +186,10 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<int>("CampaignId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -209,6 +213,8 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.HasIndex("AdTypeId");
 
                     b.HasIndex("CampaignId");
+
+                    b.HasIndex("CreatedById");
 
                     b.HasIndex("MediaWorkflowId");
 
@@ -609,8 +615,15 @@ namespace MusicEventManagementSystem.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MediaTaskId"));
 
+                    b.Property<int?>("AdId")
+                        .HasColumnType("integer");
+
                     b.Property<int?>("ApprovalId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ManagerId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("Order")
                         .HasColumnType("integer");
@@ -625,6 +638,10 @@ namespace MusicEventManagementSystem.API.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("MediaTaskId");
+
+                    b.HasIndex("AdId");
+
+                    b.HasIndex("ManagerId");
 
                     b.HasIndex("WorkflowId");
 
@@ -1586,6 +1603,12 @@ namespace MusicEventManagementSystem.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MusicEventManagementSystem.Models.Auth.ApplicationUser", "CreatedBy")
+                        .WithMany("CreatedAds")
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("MusicEventManagementSystem.API.Models.MediaWorkflow", "MediaWorkflow")
                         .WithMany("Ads")
                         .HasForeignKey("MediaWorkflowId")
@@ -1595,6 +1618,8 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Navigation("AdType");
 
                     b.Navigation("Campaign");
+
+                    b.Navigation("CreatedBy");
 
                     b.Navigation("MediaWorkflow");
                 });
@@ -1684,11 +1709,25 @@ namespace MusicEventManagementSystem.API.Migrations
 
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.MediaTask", b =>
                 {
+                    b.HasOne("MusicEventManagementSystem.API.Models.Ad", "Ad")
+                        .WithMany()
+                        .HasForeignKey("AdId");
+
+                    b.HasOne("MusicEventManagementSystem.Models.Auth.ApplicationUser", "Manager")
+                        .WithMany("MediaTasks")
+                        .HasForeignKey("ManagerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("MusicEventManagementSystem.API.Models.MediaWorkflow", "MediaWorkflow")
                         .WithMany("Tasks")
                         .HasForeignKey("WorkflowId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Ad");
+
+                    b.Navigation("Manager");
 
                     b.Navigation("MediaWorkflow");
                 });
@@ -1989,6 +2028,13 @@ namespace MusicEventManagementSystem.API.Migrations
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.Zone", b =>
                 {
                     b.Navigation("TicketTypes");
+                });
+
+            modelBuilder.Entity("MusicEventManagementSystem.Models.Auth.ApplicationUser", b =>
+                {
+                    b.Navigation("CreatedAds");
+
+                    b.Navigation("MediaTasks");
                 });
 #pragma warning restore 612, 618
         }

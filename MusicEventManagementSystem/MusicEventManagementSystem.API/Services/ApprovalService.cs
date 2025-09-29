@@ -1,4 +1,5 @@
-﻿using MusicEventManagementSystem.API.DTOs.MediaCampaign;
+﻿using Microsoft.EntityFrameworkCore;
+using MusicEventManagementSystem.API.DTOs.MediaCampaign;
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
@@ -79,6 +80,11 @@ namespace MusicEventManagementSystem.API.Services
         public async Task<IEnumerable<ApprovalResponseDto>> GetByMediaTaskIdAsync(int mediaTaskId)
         {
             var approvals = await _approvalRepository.GetByMediaTaskIdAsync(mediaTaskId);
+            return approvals.Select(MapToResponseDto);
+        }
+        public async Task<IEnumerable<ApprovalResponseDto>> GetApprovalsForManagerAsync(string managerId)
+        {
+            var approvals = await _approvalRepository.GetByManagerIdAsync(managerId);
             return approvals.Select(MapToResponseDto);
         }
 

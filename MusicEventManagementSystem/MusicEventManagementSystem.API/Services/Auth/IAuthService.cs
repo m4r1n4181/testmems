@@ -7,5 +7,6 @@ namespace MusicEventManagementSystem.Services.Auth
         Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto);
         Task<AuthResponseDto> LoginAsync(LoginDto loginDto);
         Task<UserDto?> GetUserByIdAsync(string userId);
+        Task<List<UserDto>> GetUsersByDepartmentAsync(string department);
     }
 }

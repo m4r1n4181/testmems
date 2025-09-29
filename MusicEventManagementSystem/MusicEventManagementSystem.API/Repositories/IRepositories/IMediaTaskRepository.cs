@@ -8,5 +8,6 @@ namespace MusicEventManagementSystem.API.Repositories.IRepositories
         Task<IEnumerable<MediaTask>> GetByOrderAsync(int order);
         Task<IEnumerable<MediaTask>> GetByTaskStatusAsync(string taskStatus);
         Task<IEnumerable<MediaTask>> GetByWorkflowIdAsync(int workflowId);
+        Task<IEnumerable<MediaTask>> GetTasksByManager(string managerId);
     }
 }

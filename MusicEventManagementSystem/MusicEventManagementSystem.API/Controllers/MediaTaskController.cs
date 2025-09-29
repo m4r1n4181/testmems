@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MusicEventManagementSystem.API.DTOs.MediaCampaign;
 using MusicEventManagementSystem.API.Services.IService;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MusicEventManagementSystem.API.Controllers
 {
@@ -87,6 +89,18 @@ namespace MusicEventManagementSystem.API.Controllers
         public async Task<ActionResult<IEnumerable<MediaTaskResponseDto>>> GetByWorkflowId(int workflowId)
         {
             var tasks = await _mediaTaskService.GetByWorkflowIdAsync(workflowId);
+            return Ok(tasks);
+        }
+        [Authorize]
+        [HttpGet("manager/my-tasks")]
+        public async Task<IActionResult> GetTasksForManager()
+        {
+            var managerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(managerId))
+                return Unauthorized("Nije moguće preuzeti Id korisnika.");
+
+            var tasks = await _mediaTaskService.GetTasksByManager(managerId);
             return Ok(tasks);
         }
     }

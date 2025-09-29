@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using MusicEventManagementSystem.API.DTOs.MediaCampaign;
+using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Services.IService;
+using System.Security.Claims;
 
 namespace MusicEventManagementSystem.API.Controllers
 {
@@ -87,6 +90,14 @@ namespace MusicEventManagementSystem.API.Controllers
         public async Task<ActionResult<IEnumerable<ApprovalResponseDto>>> GetByMediaTaskId(int mediaTaskId)
         {
             var approvals = await _approvalService.GetByMediaTaskIdAsync(mediaTaskId);
+            return Ok(approvals);
+        }
+        [Authorize]
+        [HttpGet("my-approvals")]
+        public async Task<IActionResult> GetMyApprovals()
+        {
+            var managerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var approvals = await _approvalService.GetApprovalsForManagerAsync(managerId);
             return Ok(approvals);
         }
     }

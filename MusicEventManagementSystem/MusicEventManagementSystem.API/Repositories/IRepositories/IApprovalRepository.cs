@@ -8,5 +8,6 @@ namespace MusicEventManagementSystem.API.Repositories.IRepositories
         Task<IEnumerable<Approval>> GetByCommentAsync(string comment);
         Task<IEnumerable<Approval>> GetByApprovalDateAsync(DateTime approvalDate);
         Task<IEnumerable<Approval>> GetByMediaTaskIdAsync(int mediaTaskId);
+        Task<IEnumerable<Approval>> GetByManagerIdAsync(string managerId);
     }
 }
