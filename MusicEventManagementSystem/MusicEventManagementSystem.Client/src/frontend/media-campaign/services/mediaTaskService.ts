@@ -169,6 +169,18 @@ export class MediaTaskService {
       throw new Error(`Failed to fetch media tasks by workflow ID ${workflowId}`);
     }
   }
+  // GET: api/MediaTask/manager/my-tasks
+static async getTasksForManager(token: string): Promise<MediaTask[]> {
+  const response = await fetch(`${this.BASE_URL}/manager/my-tasks`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error('Failed to fetch manager tasks');
+  return await response.json();
+}
 }
 
 export default MediaTaskService;

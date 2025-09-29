@@ -4,4 +4,5 @@ export interface Approval {
   comment?: string;
   approvalDate: string; // ISO date string
   mediaTaskId: number;
+  
 }

@@ -166,4 +166,17 @@ export class ApprovalService {
       throw new Error('Failed to fetch approvals by media task ID');
     }
   }
+
+  // GET: api/Approval/my-approvals
+static async getMyApprovals(token: string): Promise<Approval[]> {
+  const response = await fetch(`${this.BASE_URL}/my-approvals`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error('Failed to fetch approvals for manager');
+  return await response.json();
+}
 }
