@@ -1,7 +1,8 @@
 import type { MediaWorkflow } from '../types/api/mediaWorkflow';
 import type { 
   CreateMediaWorkflowForm, 
-  UpdateMediaWorkflowForm 
+  UpdateMediaWorkflowForm,
+  MediaTaskForm
 } from '../types/form/mediaWorkflow';
 
 const API_BASE_URL = 'https://localhost:7050/api';

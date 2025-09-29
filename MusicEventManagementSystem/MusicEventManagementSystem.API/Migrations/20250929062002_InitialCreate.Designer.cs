@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicEventManagementSystem.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250929000925_InitialCreate")]
+    [Migration("20250929062002_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

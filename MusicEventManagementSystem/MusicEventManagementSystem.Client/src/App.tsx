@@ -22,6 +22,12 @@ import TicketSalesSpecialOffers from './frontend/ticket-sales/pages/SpecialOffer
 // Media Campaign imports
 import MediaCampaignDashboard from "./frontend/media-campaign/pages/Dashboard";
 import MediaCampaigns from "./frontend/media-campaign/pages/Campaigns";
+import Ads from "./frontend/media-campaign/pages/Ads";
+import AdTypes from "./frontend/media-campaign/pages/AdTypes";
+import Workflows from "./frontend/media-campaign/pages/Workflows";
+// import MediaCampaignAnalytics from "./frontend/media-campaign/pages/Analytics";
+import Integrations from "./frontend/media-campaign/pages/Integrations";
+import MyTasks from "./frontend/media-campaign/pages/MyTasks";
 
 // Add these imports for react-toastify
 import { ToastContainer } from 'react-toastify';
@@ -188,15 +194,15 @@ function App() {
           } 
         />
 
-        {/* <Route path="/media-campaign/campaigns" 
+         <Route path="/media-campaign/ads" 
           element={
             <ProtectedRoute allowedDepartments={[4]}>
               <Layout>
-                <MediaCampaignAds />
+                <Ads />
               </Layout>
             </ProtectedRoute>
           } 
-        /> */}
+        />
 
         <Route path="/media-campaign/campaigns" 
           element={
@@ -208,11 +214,11 @@ function App() {
           } 
         />
 
-        {/* <Route path="/media-campaign/adtypes" 
+         <Route path="/media-campaign/adtypes" 
           element={
             <ProtectedRoute allowedDepartments={[4]}>
               <Layout>
-                <MediaCampaignAds />
+                <AdTypes />
               </Layout>
             </ProtectedRoute>
           } 
@@ -222,12 +228,12 @@ function App() {
           element={
             <ProtectedRoute allowedDepartments={[4]}>
               <Layout>
-                <MediaCampaignAds />
+                <Workflows />
               </Layout>
             </ProtectedRoute>
           } 
         />
-
+         {/*
         <Route path="/media-campaign/analytics" 
           element={
             <ProtectedRoute allowedDepartments={[4]}>
@@ -236,17 +242,26 @@ function App() {
               </Layout>
             </ProtectedRoute>
           } 
-        />
+        />  */}
 
         <Route path="/media-campaign/integrations" 
           element={
             <ProtectedRoute allowedDepartments={[4]}>
               <Layout>
-                <MediaCampaignAds />
+                <Integrations />
               </Layout>
             </ProtectedRoute>
           } 
-        /> */}
+        /> 
+        <Route path="/media-campaign/mytasks" 
+          element={
+            <ProtectedRoute allowedDepartments={[4]}>
+              <Layout>
+                <MyTasks />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        /> 
 
         {/* Redirect root to dashboard */}
         <Route path="/" element={<DepartmentRedirect />} />

@@ -61,10 +61,11 @@ const Sidebar = () => {
           { icon: <BarChart2 />, label: "Dashboard", path: "/media-campaign/dashboard" },
           { icon: <Megaphone />, label: "Campaigns", path: "/media-campaign/campaigns" },
           { icon: <Film />, label: "Ads", path: "/media-campaign/ads" },
-          { icon: <Bookmark />, label: "Ad Types", path: "/media-campaign/ad-types" },
+          { icon: <Bookmark />, label: "Ad Types", path: "/media-campaign/adtypes" },
           { icon: <Workflow />, label: "Workflows", path: "/media-campaign/workflows" },
           { icon: <PieChart />, label: "Analytics", path: "/media-campaign/analytics" },
           { icon: <GitBranch />, label: "Integrations", path: "/media-campaign/integrations" },
+          { icon: <Clock />, label: "My Tasks", path: "/media-campaign/mytasks" },
         ];
       
       default:

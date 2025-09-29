@@ -33,8 +33,6 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         [Range(0, double.MaxValue)]
         public decimal TotalBudget { get; set; }
 
-        [Range(0,100)]
-        public ICollection<int>? AdIds { get; set; }
     }
 
     public class CampaignUpdateDto

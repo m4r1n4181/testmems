@@ -5,6 +5,7 @@
         public int MediaWorkflowId { get; set; }
         public string? WorkflowDescription { get; set; }
         public int? ApprovalId { get; set; }
+        
 
         // Navigation properties
         public virtual ICollection<AdType> AdTypes { get; set; } = new List<AdType>();

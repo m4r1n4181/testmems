@@ -7,7 +7,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
     {
         public int MediaWorkflowId { get; set; }
         public string? WorkflowDescription { get; set; }
-        public ICollection<int>? TaskIds{ get; set; }
+        public ICollection<int>? TaskIds { get; set; }
         public int? ApprovalId { get; set; }
         public int? AdId { get; set; }
     }
@@ -16,11 +16,10 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
     {
         [StringLength(500)]
         public string? WorkflowDescription { get; set; }
-        [Range(0,100)]
-        public ICollection<int>? TaskIds { get; set; }
+        public ICollection<MediaTaskCreateDto>? Tasks { get; set; } 
         [Range(0, 100)]
         public int? ApprovalId { get; set; }
-        [Range(0,100)]
+        [Range(0, 100)]
         public int? AdId { get; set; }
     }
 
@@ -28,8 +27,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
     {
         [StringLength(500)]
         public string? WorkflowDescription { get; set; }
-        [Range(0, 100)]
-        public ICollection<int>? TaskIds { get; set; }
+        public ICollection<MediaTaskUpdateDto>? Tasks { get; set; } // <-- use MediaTaskUpdateDto, not just IDs
         [Range(0, 100)]
         public int? ApprovalId { get; set; }
         [Range(0, 100)]

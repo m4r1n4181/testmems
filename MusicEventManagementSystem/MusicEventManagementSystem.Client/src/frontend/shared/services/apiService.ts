@@ -57,6 +57,11 @@ export const authAPI = {
     const response = await apiService.get(`/auth/user/${id}`);
     return response.data;
   },
+
+  getMediaCampaignUsers: async (): Promise<UserDto[]> => {
+    const response = await apiService.get('/auth/users/MediaCampaign');
+    return response.data;
+  }
 };
 
 export default apiService;
