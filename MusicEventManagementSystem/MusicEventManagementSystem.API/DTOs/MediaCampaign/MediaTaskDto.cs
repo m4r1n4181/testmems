@@ -26,8 +26,9 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         [StringLength(50)]
         public string? TaskStatus { get; set; }
 
-        [Required]
-        public int WorkflowId { get; set; }
+        // WorkflowId should not be required when creating tasks within a workflow creation request
+        // The workflow relationship is established by adding the task to the workflow's Tasks collection
+        public int? WorkflowId { get; set; }
         public int? ApprovalId { get; set; }
         public string? ManagerId { get; set; }
         public int? AdId { get; set; }
