@@ -103,5 +103,12 @@ namespace MusicEventManagementSystem.API.Controllers
             var tasks = await _mediaTaskService.GetTasksByManager(managerId);
             return Ok(tasks);
         }
+
+        [HttpGet("managerId/{managerId}")]
+        public async Task<ActionResult<IEnumerable<MediaTaskResponseDto>>> GetByManagerId(string managerId)
+        {
+            var tasks = await _mediaTaskService.GetTasksByManager(managerId);
+            return Ok(tasks);
+        }
     }
 }

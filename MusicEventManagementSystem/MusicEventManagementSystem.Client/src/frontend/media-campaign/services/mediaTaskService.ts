@@ -170,17 +170,31 @@ export class MediaTaskService {
     }
   }
   // GET: api/MediaTask/manager/my-tasks
-static async getTasksForManager(token: string): Promise<MediaTask[]> {
-  const response = await fetch(`${this.BASE_URL}/manager/my-tasks`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  if (!response.ok) throw new Error('Failed to fetch manager tasks');
-  return await response.json();
-}
+  static async getTasksForManager(token: string): Promise<MediaTask[]> {
+    const response = await fetch(`${this.BASE_URL}/manager/my-tasks`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error('Failed to fetch manager tasks');
+    return await response.json();
+  }
+
+  // GET: api/MediaTask/managerId/{managerId}
+  static async getByManagerId(managerId: string): Promise<MediaTask[]> {
+    try {
+      const response = await fetch(`${this.BASE_URL}/managerId/${encodeURIComponent(managerId)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Error fetching media tasks by manager ID ${managerId}:`, error);
+      throw new Error(`Failed to fetch media tasks by manager ID ${managerId}`);
+    }
+  }
 }
 
 export default MediaTaskService;
