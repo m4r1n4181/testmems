@@ -79,7 +79,10 @@ const MyTasks = () => {
           return details;
         })
       );
-      setTasks(tasksWithDetails);
+      
+      // Sort tasks by order to ensure correct sequence for unlocking logic
+      const sortedTasks = tasksWithDetails.sort((a, b) => a.task.order - b.task.order);
+      setTasks(sortedTasks);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     } finally {
