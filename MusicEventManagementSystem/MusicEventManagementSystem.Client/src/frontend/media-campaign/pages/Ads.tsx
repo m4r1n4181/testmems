@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  X, 
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  X,
   Calendar,
   Clock,
   CheckCircle,
@@ -28,7 +28,6 @@ import type { CreateMediaWorkflowForm } from '../types/form/mediaWorkflow';
 import type { CreateMediaTaskForm } from '../types/form/mediaTask';
 import { AdStatus } from '../types/enums/MediaChampaign';
 
-// Remove requiredRole from WorkflowTask, assignedMember is single (not array)
 interface WorkflowTask {
   id: string;
   taskName: string;
@@ -57,9 +56,8 @@ const Ads = () => {
   // Workflow state
   const [useCustomWorkflow, setUseCustomWorkflow] = useState(false);
   const [workflowTasks, setWorkflowTasks] = useState<WorkflowTask[]>([]);
-  const [showAssignUserModal, setShowAssignUserModal] = useState<{show: boolean, taskId: string | null}>({show: false, taskId: null});
-
-  const [pendingAssignedUser, setPendingAssignedUser] = useState<string>('');
+  const [showWorkflowChoice, setShowWorkflowChoice] = useState(false);
+  const [loadedWorkflowId, setLoadedWorkflowId] = useState<number | null>(null);
 
   const [createForm, setCreateForm] = useState<CreateAdForm>({
     deadline: '',
@@ -71,27 +69,36 @@ const Ads = () => {
     campaignId: 0,
     adTypeId: 0,
     mediaVersionIds: [],
-    integrationStatusIds: []
+    integrationStatusIds: [],
   });
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  const fetchUsers = async () => {
+    try {
+      const usersData = await AuthService.getMediaCampaignUsers();
+      setUsers(usersData);
+    } catch (error) {
+      toast.error('Error loading MediaCampaign users');
+      setUsers([]);
+    }
+  };
+
   const fetchData = async () => {
     try {
-      const [adsData, campaignsData, adTypesData, workflowsData, usersData] = await Promise.all([
+      const [adsData, campaignsData, adTypesData, workflowsData] = await Promise.all([
         AdService.getAllAds(),
         CampaignService.getAllCampaigns(),
         AdTypeService.getAllAdTypes(),
         MediaWorkflowService.getAllMediaWorkflows(),
-        AuthService.getMediaCampaignUsers()
       ]);
       setAds(adsData);
       setCampaigns(campaignsData);
       setAdTypes(adTypesData);
       setWorkflows(workflowsData);
-      setUsers(usersData);
+      await fetchUsers();
     } catch (error) {
       toast.error('Error fetching data');
     } finally {
@@ -107,99 +114,111 @@ const Ads = () => {
         taskName: 'Draft copy',
         description: 'Write initial captions for IG post and story variants.',
         assignedMember: '',
-        order: 1
+        order: 1,
       },
       {
         id: 'task2',
         taskName: 'Design visuals',
         description: 'Create IG post and story assets following brand kit.',
         assignedMember: '',
-        order: 2
-      }
+        order: 2,
+      },
     ]);
   };
 
+  // Loads workflow tasks for the selected AdType
   const handleAdTypeChange = async (adTypeId: number) => {
-    setCreateForm({...createForm, adTypeId});
-    if (editForm) setEditForm({...editForm, adTypeId}); // for edit modal
+    setCreateForm({ ...createForm, adTypeId });
+    if (editForm) setEditForm({ ...editForm, adTypeId });
 
-    // Check if the ad type has a default workflow
-    const selectedAdType = adTypes.find(at => at.adTypeId === adTypeId);
+    const selectedAdType = adTypes.find((at) => at.adTypeId === adTypeId);
+
     if (selectedAdType?.mediaWorkflowId) {
-      // Use suggested workflow
       try {
         const workflow = await MediaWorkflowService.getMediaWorkflowById(selectedAdType.mediaWorkflowId);
         if (workflow?.tasks) {
-          setWorkflowTasks(
-            workflow.tasks.map((t: any, idx: number) => ({
-              id: `task${idx + 1}`,
-              taskName: t.taskName,
-              description: t.description,
-              assignedMember: '',
-              order: t.order || idx + 1
-            }))
-          );
+          const loadedTasks = workflow.tasks.map((t: any, idx: number) => ({
+            id: t.mediaTaskId ? String(t.mediaTaskId) : `task${idx + 1}`,
+            taskName: t.taskName,
+            description: t.description || t.taskStatus || '',
+            assignedMember: '',
+            order: t.order || idx + 1,
+          }));
+          setWorkflowTasks(loadedTasks);
+          setLoadedWorkflowId(selectedAdType.mediaWorkflowId);
+          setShowWorkflowChoice(true);
+          setUseCustomWorkflow(false);
+          toast.info('Suggested workflow loaded for this Ad Type.');
+        } else {
+          setWorkflowTasks([]);
+          setShowWorkflowChoice(false);
         }
-        setUseCustomWorkflow(false);
-        setCreateForm(prev => ({...prev, mediaWorkflowId: selectedAdType.mediaWorkflowId}));
-        if (editForm) setEditForm(prev => ({...prev!, mediaWorkflowId: selectedAdType.mediaWorkflowId}));
-        toast.info('Suggested workflow loaded for this Ad Type.');
       } catch (error) {
         toast.error('Could not load suggested workflow.');
-        setUseCustomWorkflow(true);
+        setShowWorkflowChoice(false);
+        setDefaultWorkflowTasks();
       }
     } else {
-      setUseCustomWorkflow(true);
+      setShowWorkflowChoice(false);
       setDefaultWorkflowTasks();
     }
   };
 
+  const handleUseSuggestedWorkflow = () => {
+    setUseCustomWorkflow(false);
+    setShowWorkflowChoice(false);
+    toast.success('Using suggested workflow');
+  };
+
+  const handleCreateCustomWorkflow = () => {
+    setUseCustomWorkflow(true);
+    setShowWorkflowChoice(false);
+    setDefaultWorkflowTasks();
+    toast.info('Creating custom workflow');
+  };
+
   const addWorkflowTask = () => {
     const newTask: WorkflowTask = {
-      id: `task${workflowTasks.length + 1}`,
+      id: `task${Date.now()}`,
       taskName: '',
       description: '',
       assignedMember: '',
-      order: workflowTasks.length + 1
+      order: workflowTasks.length + 1,
     };
     setWorkflowTasks([...workflowTasks, newTask]);
   };
 
   const updateWorkflowTask = (taskId: string, field: keyof WorkflowTask, value: any) => {
-    setWorkflowTasks(tasks => 
-      tasks.map(task => 
-        task.id === taskId ? { ...task, [field]: value } : task
-      )
+    setWorkflowTasks((tasks) =>
+      tasks.map((task) => (task.id === taskId ? { ...task, [field]: value } : task)),
     );
   };
 
-  const removeWorkflowTask = (taskId: string) => {
-    setWorkflowTasks(tasks => tasks.filter(task => task.id !== taskId));
-  };
-
-  const openAssignUserModal = (taskId: string) => {
-    setShowAssignUserModal({show: true, taskId});
-    setPendingAssignedUser('');
-  };
-
-  const confirmAssignUser = () => {
-    if (showAssignUserModal.taskId && pendingAssignedUser) {
-      setWorkflowTasks(tasks => tasks.map(task =>
-        task.id === showAssignUserModal.taskId ? { ...task, assignedMember: pendingAssignedUser } : task
-      ));
-      setShowAssignUserModal({show: false, taskId: null});
-      setPendingAssignedUser('');
-      toast.success('User assigned to task.');
-    } else {
+  const assignUserToTask = (taskId: string, userId: string) => {
+    if (!userId) {
       toast.warning('Please select a user to assign.');
+      return;
     }
+    setWorkflowTasks((tasks) =>
+      tasks.map((task) =>
+        task.id === taskId ? { ...task, assignedMember: userId } : task,
+      ),
+    );
+    toast.success('User assigned to task.');
+  };
+
+  const removeWorkflowTask = (taskId: string) => {
+    setWorkflowTasks((tasks) => tasks.filter((task) => task.id !== taskId));
   };
 
   const handleCreateAd = async () => {
     try {
-      let workflowId = createForm.mediaWorkflowId;
+      const userJson = localStorage.getItem('user');
+      const currentUserId = userJson ? JSON.parse(userJson).id : null;
+      let workflowId = loadedWorkflowId;
 
       if (useCustomWorkflow) {
+        // Create custom workflow
         const workflowForm: CreateMediaWorkflowForm = {
           workflowDescription: `Custom workflow for ${createForm.title}`,
         };
@@ -213,7 +232,21 @@ const Ads = () => {
               order: task.order,
               taskStatus: 'Pending',
               workflowId: workflowId,
-              managerId: task.assignedMember || undefined
+              managerId: task.assignedMember || undefined,
+            };
+            await MediaTaskService.createMediaTask(taskForm);
+          }
+        }
+      } else if (loadedWorkflowId) {
+        // Using suggested workflow - create tasks with assignments
+        for (const task of workflowTasks) {
+          if (task.assignedMember) {
+            const taskForm: CreateMediaTaskForm = {
+              taskName: task.taskName,
+              order: task.order,
+              taskStatus: 'Pending',
+              workflowId: loadedWorkflowId,
+              managerId: task.assignedMember,
             };
             await MediaTaskService.createMediaTask(taskForm);
           }
@@ -222,17 +255,19 @@ const Ads = () => {
 
       const adForm: CreateAdForm = {
         ...createForm,
-        mediaWorkflowId: workflowId
+        title: createForm.title,
+        createdByUserId: currentUserId,
+        mediaWorkflowId: workflowId || createForm.mediaWorkflowId,
       };
 
       const newAd = await AdService.createAd(adForm);
-      setAds([...ads, newAd]);
-      resetForm();
-      setShowCreateModal(false);
-      toast.success('Ad created successfully!');
-    } catch (error) {
-      toast.error('Error creating ad!');
-    }
+        setAds([...ads, newAd]);
+        resetForm();
+        setShowCreateModal(false);
+        toast.success('Ad created successfully!');
+      } catch (error) {
+        toast.error('Error creating ad!');
+      }
   };
 
   const resetForm = () => {
@@ -246,9 +281,11 @@ const Ads = () => {
       campaignId: 0,
       adTypeId: 0,
       mediaVersionIds: [],
-      integrationStatusIds: []
+      integrationStatusIds: [],
     });
     setUseCustomWorkflow(false);
+    setShowWorkflowChoice(false);
+    setLoadedWorkflowId(null);
     setDefaultWorkflowTasks();
     setEditingAd(null);
     setEditForm(null);
@@ -258,7 +295,7 @@ const Ads = () => {
     if (window.confirm('Are you sure you want to delete this ad?')) {
       try {
         await AdService.deleteAd(id);
-        setAds(ads.filter(ad => ad.adId !== id));
+        setAds(ads.filter((ad) => ad.adId !== id));
         toast.success('Ad deleted!');
       } catch (error) {
         toast.error('Error deleting ad!');
@@ -278,7 +315,7 @@ const Ads = () => {
       campaignId: ad.campaignId,
       adTypeId: ad.adTypeId,
       mediaVersionIds: ad.mediaVersionIds || [],
-      integrationStatusIds: ad.integrationStatusIds || []
+      integrationStatusIds: ad.integrationStatusIds || [],
     });
     setShowCreateModal(false);
   };
@@ -287,7 +324,7 @@ const Ads = () => {
     if (editingAd && editForm) {
       try {
         const updatedAd = await AdService.updateAd(editingAd.adId, editForm);
-        setAds(ads.map(a => a.adId === updatedAd.adId ? updatedAd : a));
+        setAds(ads.map((a) => (a.adId === updatedAd.adId ? updatedAd : a)));
         resetForm();
         toast.success('Ad updated!');
       } catch (error) {
@@ -298,26 +335,26 @@ const Ads = () => {
 
   const getStatusBadge = (status: AdStatus) => {
     const statusConfig = {
-      [AdStatus.InPreparation]: { 
-        label: 'In Preparation', 
+      [AdStatus.InPreparation]: {
+        label: 'In Preparation',
         className: 'bg-yellow-400/20 text-yellow-400 border-yellow-400/30',
-        icon: Clock
+        icon: Clock,
       },
-      [AdStatus.PendingApproval]: { 
-        label: 'Under Review', 
+      [AdStatus.PendingApproval]: {
+        label: 'Under Review',
         className: 'bg-orange-400/20 text-orange-400 border-orange-400/30',
-        icon: AlertCircle
+        icon: AlertCircle,
       },
-      [AdStatus.ScheduledPublication]: { 
-        label: 'Scheduled for Publication', 
+      [AdStatus.ScheduledPublication]: {
+        label: 'Scheduled for Publication',
         className: 'bg-blue-400/20 text-blue-400 border-blue-400/30',
-        icon: Calendar
+        icon: Calendar,
       },
-      [AdStatus.Published]: { 
-        label: 'Published', 
+      [AdStatus.Published]: {
+        label: 'Published',
         className: 'bg-green-400/20 text-green-400 border-green-400/30',
-        icon: CheckCircle
-      }
+        icon: CheckCircle,
+      },
     };
 
     const config = statusConfig[status] || statusConfig[AdStatus.InPreparation];
@@ -332,12 +369,12 @@ const Ads = () => {
   };
 
   const getCampaignName = (campaignId: number) => {
-    const campaign = campaigns.find(c => c.campaignId === campaignId);
+    const campaign = campaigns.find((c) => c.campaignId === campaignId);
     return campaign?.name || 'Unknown Campaign';
   };
 
   const getAdTypeName = (adTypeId: number) => {
-    const adType = adTypes.find(at => at.adTypeId === adTypeId);
+    const adType = adTypes.find((at) => at.adTypeId === adTypeId);
     return adType?.typeName || 'Unknown Type';
   };
 
@@ -345,17 +382,18 @@ const Ads = () => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
-  const filteredAds = ads.filter(ad => {
-    const matchesSearch = ad.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         ad.adId.toString().includes(searchTerm);
+  const filteredAds = ads.filter((ad) => {
+    const matchesSearch =
+      ad.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ad.adId.toString().includes(searchTerm);
     const matchesCampaign = !campaignFilter || ad.campaignId.toString() === campaignFilter;
     const matchesAdType = !adTypeFilter || ad.adTypeId.toString() === adTypeFilter;
     const matchesPhase = !phaseFilter || ad.currentPhase.toString() === phaseFilter;
-    
+
     return matchesSearch && matchesCampaign && matchesAdType && matchesPhase;
   });
 
@@ -396,7 +434,7 @@ const Ads = () => {
             className="w-full pl-12 pr-4 py-3 bg-neutral-700/50 border border-neutral-600 rounded-xl text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
           />
         </div>
-        
+
         {/* Filters */}
         <div className="flex items-center gap-2">
           <select
@@ -405,7 +443,7 @@ const Ads = () => {
             className="px-4 py-3 bg-neutral-700/50 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent appearance-none cursor-pointer"
           >
             <option value="">Campaign</option>
-            {campaigns.map(campaign => (
+            {campaigns.map((campaign) => (
               <option key={campaign.campaignId} value={campaign.campaignId}>
                 {campaign.name}
               </option>
@@ -418,7 +456,7 @@ const Ads = () => {
             className="px-4 py-3 bg-neutral-700/50 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent appearance-none cursor-pointer"
           >
             <option value="">Ad Type</option>
-            {adTypes.map(adType => (
+            {adTypes.map((adType) => (
               <option key={adType.adTypeId} value={adType.adTypeId}>
                 {adType.typeName}
               </option>
@@ -452,8 +490,6 @@ const Ads = () => {
               <div className="col-span-2">Current Phase</div>
               <div className="col-span-1">Actions</div>
             </div>
-
-            {/* Table Body */}
             <div className="divide-y divide-neutral-700">
               {filteredAds.map((ad) => (
                 <div key={ad.adId} className="grid grid-cols-12 gap-4 p-4 hover:bg-neutral-700/30 transition-colors items-center">
@@ -462,36 +498,31 @@ const Ads = () => {
                       #AD-{ad.adId.toString().padStart(4, '0')}
                     </span>
                   </div>
-                  
                   <div className="col-span-3">
                     <div className="text-white font-medium">{ad.title || 'Untitled Ad'}</div>
                     <div className="text-neutral-400 text-sm">
                       Created: {formatDate(ad.creationDate)}
                     </div>
                   </div>
-                  
                   <div className="col-span-2">
                     <div className="text-white">{getCampaignName(ad.campaignId)}</div>
                   </div>
-                  
                   <div className="col-span-2">
                     <div className="text-white">{getAdTypeName(ad.adTypeId)}</div>
                   </div>
-                  
                   <div className="col-span-2">
                     {getStatusBadge(ad.currentPhase)}
                   </div>
-                  
                   <div className="col-span-1">
                     <div className="flex items-center gap-1">
-                      <button 
+                      <button
                         className="p-2 text-neutral-400 hover:text-blue-400 hover:bg-blue-400/20 rounded-lg transition-all duration-200"
                         title="Edit"
                         onClick={() => handleEditAd(ad)}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDeleteAd(ad.adId)}
                         className="p-2 text-neutral-400 hover:text-red-400 hover:bg-red-400/20 rounded-lg transition-all duration-200"
                         title="Delete"
@@ -522,9 +553,9 @@ const Ads = () => {
       {/* Create Ad Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-neutral-800 border border-neutral-700 rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-neutral-800 border border-neutral-700 rounded-2xl p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-white">Create New Ad</h2>
+              <h2 className="text-2xl font-semibold text-white">Create New Ad</h2>
               <button
                 onClick={() => {
                   setShowCreateModal(false);
@@ -535,75 +566,69 @@ const Ads = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
-
+            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column - Basic Info */}
               <div className="space-y-4">
-                {/* Title */}
                 <div>
-                  <label className="block text-sm text-neutral-300 mb-2">Title</label>
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">Title *</label>
                   <input
                     type="text"
                     placeholder="Enter ad title"
                     value={createForm.title}
-                    onChange={(e) => setCreateForm({...createForm, title: e.target.value})}
+                    onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
                     className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                   />
                 </div>
-
+                
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Campaign */}
                   <div>
-                    <label className="block text-sm text-neutral-300 mb-2">Campaign</label>
+                    <label className="block text-sm font-medium text-neutral-300 mb-2">Campaign *</label>
                     <select
                       value={createForm.campaignId}
-                      onChange={(e) => setCreateForm({...createForm, campaignId: Number(e.target.value)})}
+                      onChange={(e) => setCreateForm({ ...createForm, campaignId: Number(e.target.value) })}
                       className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent appearance-none cursor-pointer"
                     >
                       <option value={0}>Select campaign</option>
-                      {campaigns.map(campaign => (
+                      {campaigns.map((campaign) => (
                         <option key={campaign.campaignId} value={campaign.campaignId}>
                           {campaign.name}
                         </option>
                       ))}
                     </select>
                   </div>
-
-                  {/* Due Date */}
                   <div>
-                    <label className="block text-sm text-neutral-300 mb-2">Due Date</label>
+                    <label className="block text-sm font-medium text-neutral-300 mb-2">Due Date *</label>
                     <input
                       type="date"
                       value={createForm.deadline}
-                      onChange={(e) => setCreateForm({...createForm, deadline: e.target.value})}
+                      onChange={(e) => setCreateForm({ ...createForm, deadline: e.target.value })}
                       className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                     />
                   </div>
                 </div>
-
-                {/* Ad Type */}
+                
                 <div>
-                  <label className="block text-sm text-neutral-300 mb-2">Ad Type</label>
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">Ad Type *</label>
                   <select
                     value={createForm.adTypeId}
                     onChange={(e) => handleAdTypeChange(Number(e.target.value))}
                     className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent appearance-none cursor-pointer"
                   >
                     <option value={0}>Select type from catalog</option>
-                    {adTypes.map(adType => (
+                    {adTypes.map((adType) => (
                       <option key={adType.adTypeId} value={adType.adTypeId}>
                         {adType.typeName}
                       </option>
                     ))}
                   </select>
                 </div>
-
-                {/* Instructions */}
+                
                 <div>
-                  <label className="block text-sm text-neutral-300 mb-2">Instructions</label>
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">Instructions</label>
                   <textarea
                     placeholder="Add any production or brand instructions..."
-                    rows={3}
+                    rows={4}
                     className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none"
                   />
                 </div>
@@ -613,93 +638,125 @@ const Ads = () => {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-4">
                   <Settings className="w-5 h-5 text-neutral-400" />
-                  <span className="text-white font-medium">Workflow</span>
-                  <span className="text-neutral-400 text-sm ml-auto">
-                    {useCustomWorkflow ? "Custom Workflow" : "Suggested Workflow"}
-                  </span>
+                  <span className="text-white font-medium text-lg">Workflow</span>
+                  {!useCustomWorkflow && loadedWorkflowId && (
+                    <span className="text-purple-400 text-sm ml-auto bg-purple-400/10 px-3 py-1 rounded-full">
+                      Suggested Workflow
+                    </span>
+                  )}
+                  {useCustomWorkflow && (
+                    <span className="text-blue-400 text-sm ml-auto bg-blue-400/10 px-3 py-1 rounded-full">
+                      Custom Workflow
+                    </span>
+                  )}
                 </div>
 
-                {/* Workflow Options */}
-                <div className="flex gap-4 mb-4">
+                {/* Workflow Choice Buttons */}
+                {showWorkflowChoice && (
+                  <div className="flex gap-3 mb-4 p-4 bg-neutral-700/30 border border-neutral-600 rounded-xl">
+                    <button
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors text-sm font-medium shadow-lg"
+                      onClick={handleUseSuggestedWorkflow}
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      Use Suggested
+                    </button>
+                    <button
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-neutral-700 hover:bg-neutral-600 text-white rounded-lg transition-colors text-sm font-medium"
+                      onClick={handleCreateCustomWorkflow}
+                    >
+                      <Plus className="w-4 h-4" />
+                      Create Custom
+                    </button>
+                  </div>
+                )}
+
+                {/* Workflow Tasks */}
+                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                  {workflowTasks.map((task, index) => (
+                    <div key={task.id} className="p-4 bg-neutral-700/50 border border-neutral-600 rounded-xl hover:border-neutral-500 transition-colors">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-neutral-300 text-sm font-medium">
+                          Task {index + 1} of {workflowTasks.length}
+                        </span>
+                        <button
+                          onClick={() => removeWorkflowTask(task.id)}
+                          className="p-1.5 text-neutral-400 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
+                          title="Remove task"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs text-neutral-400 mb-1.5">Task Name</label>
+                          <input
+                            type="text"
+                            value={task.taskName}
+                            onChange={(e) => updateWorkflowTask(task.id, 'taskName', e.target.value)}
+                            placeholder="e.g., Draft copy, Design visuals"
+                            className="w-full p-2 bg-neutral-600 border border-neutral-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-neutral-400 mb-1.5">Description</label>
+                          <textarea
+                            value={task.description}
+                            onChange={(e) => updateWorkflowTask(task.id, 'description', e.target.value)}
+                            placeholder="Describe the task requirements..."
+                            rows={2}
+                            className="w-full p-2 bg-neutral-600 border border-neutral-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-neutral-400 mb-1.5">Assign to User</label>
+                          <div className="flex gap-2">
+                            <select
+                              value={task.assignedMember}
+                              onChange={(e) => updateWorkflowTask(task.id, 'assignedMember', e.target.value)}
+                              className="flex-1 p-2 bg-neutral-600 border border-neutral-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                            >
+                              <option value="">Select user</option>
+                              {users.map((user) => (
+                                <option key={user.id} value={user.id}>
+                                  {user.firstName} {user.lastName}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              onClick={() => assignUserToTask(task.id, task.assignedMember)}
+                              disabled={!task.assignedMember}
+                              className="px-4 py-2 bg-purple-500 hover:bg-purple-600 disabled:bg-neutral-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm font-medium"
+                              title="Assign selected user"
+                            >
+                              Assign
+                            </button>
+                          </div>
+                          {task.assignedMember && (
+                            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-lg">
+                              <CheckCircle className="w-3.5 h-3.5 text-green-400" />
+                              <span className="text-green-400 text-xs font-medium">
+                                Assigned to {users.find((u) => u.id === task.assignedMember)?.firstName}{' '}
+                                {users.find((u) => u.id === task.assignedMember)?.lastName}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Add Task Button - Under all tasks */}
                   <button
                     onClick={addWorkflowTask}
-                    className="flex items-center gap-2 px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-lg transition-colors text-sm"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-neutral-700 hover:bg-neutral-600 text-white rounded-xl transition-colors text-sm font-medium border border-neutral-600 border-dashed"
                   >
                     <Plus className="w-4 h-4" />
                     Add Task
                   </button>
-                  <button
-                    className="flex items-center gap-2 px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-lg transition-colors text-sm"
-                    onClick={() => setUseCustomWorkflow(false)}
-                    disabled={!createForm.adTypeId}
-                  >
-                    <Settings className="w-4 h-4" />
-                    Use Suggested Workflow
-                  </button>
-                  <button
-                    className="flex items-center gap-2 px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-lg transition-colors text-sm"
-                    onClick={() => setUseCustomWorkflow(true)}
-                  >
-                    <Plus className="w-4 h-4" />
-                    Create Custom Workflow
-                  </button>
-                </div>
-
-                {/* Workflow Tasks */}
-                <div className="space-y-4">
-                  {workflowTasks.map((task, index) => (
-                    <div key={task.id} className="p-4 bg-neutral-700/50 border border-neutral-600 rounded-xl">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-neutral-400 text-sm">Task {index + 1} of {workflowTasks.length}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={() => openAssignUserModal(task.id)}
-                            className="p-1 text-neutral-400 hover:text-purple-400 transition-colors"
-                            title="Assign User"
-                          >
-                            <Settings className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => removeWorkflowTask(task.id)}
-                            className="p-1 text-neutral-400 hover:text-red-400 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="mb-3">
-                        <label className="block text-xs text-neutral-400 mb-1">Task Name</label>
-                        <input
-                          type="text"
-                          value={task.taskName}
-                          onChange={(e) => updateWorkflowTask(task.id, 'taskName', e.target.value)}
-                          className="w-full p-2 bg-neutral-600 border border-neutral-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                        />
-                      </div>
-
-                      <div className="mb-3">
-                        <label className="block text-xs text-neutral-400 mb-1">Description</label>
-                        <textarea
-                          value={task.description}
-                          onChange={(e) => updateWorkflowTask(task.id, 'description', e.target.value)}
-                          rows={2}
-                          className="w-full p-2 bg-neutral-600 border border-neutral-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs text-neutral-400 mb-1">Assigned User</label>
-                        <span className="inline-block px-3 py-1 rounded bg-neutral-800 border border-neutral-600 text-white text-xs">
-                          {task.assignedMember
-                            ? users.find(u => u.id === task.assignedMember)?.firstName + ' ' + users.find(u => u.id === task.assignedMember)?.lastName
-                            : 'Not Assigned'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
             </div>
@@ -726,45 +783,6 @@ const Ads = () => {
         </div>
       )}
 
-      {/* Assign User Modal */}
-      {showAssignUserModal.show && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-neutral-800 border border-neutral-700 rounded-2xl p-6 w-full max-w-lg">
-            <h3 className="text-lg text-white mb-4">Assign User to Task</h3>
-            // Inside your Assign User Modal
-          <select
-            value={pendingAssignedUser}
-            onChange={e => setPendingAssignedUser(e.target.value)}
-            className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white mb-4"
-          >
-            <option value="">Select user</option>
-            {users
-              .filter(u => u.department === 4) // or u.role === 'MediaCampaign'
-              .map(user => (
-                <option key={user.id} value={user.id}>
-                  {user.firstName} {user.lastName}
-                </option>
-              ))}
-          </select>
-            <div className="flex gap-2 justify-end">
-              <button
-                className="px-4 py-2 bg-neutral-700 text-white rounded-lg"
-                onClick={() => setShowAssignUserModal({show: false, taskId: null})}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-purple-500 text-white rounded-lg"
-                onClick={confirmAssignUser}
-                disabled={!pendingAssignedUser}
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Edit Ad Modal */}
       {editingAd && editForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -778,9 +796,7 @@ const Ads = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Title */}
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm text-neutral-300 mb-2">Title</label>
@@ -788,21 +804,20 @@ const Ads = () => {
                     type="text"
                     placeholder="Enter ad title"
                     value={editForm.title}
-                    onChange={(e) => setEditForm(f => ({...f!, title: e.target.value}))}
+                    onChange={(e) => setEditForm((f) => ({ ...f!, title: e.target.value }))}
                     className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                   />
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm text-neutral-300 mb-2">Campaign</label>
                     <select
                       value={editForm.campaignId}
-                      onChange={(e) => setEditForm(f => ({...f!, campaignId: Number(e.target.value)}))}
+                      onChange={(e) => setEditForm((f) => ({ ...f!, campaignId: Number(e.target.value) }))}
                       className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent appearance-none cursor-pointer"
                     >
                       <option value={0}>Select campaign</option>
-                      {campaigns.map(campaign => (
+                      {campaigns.map((campaign) => (
                         <option key={campaign.campaignId} value={campaign.campaignId}>
                           {campaign.name}
                         </option>
@@ -814,7 +829,7 @@ const Ads = () => {
                     <input
                       type="date"
                       value={editForm.deadline}
-                      onChange={(e) => setEditForm(f => ({...f!, deadline: e.target.value}))}
+                      onChange={(e) => setEditForm((f) => ({ ...f!, deadline: e.target.value }))}
                       className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                     />
                   </div>
@@ -827,7 +842,7 @@ const Ads = () => {
                     className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent appearance-none cursor-pointer"
                   >
                     <option value={0}>Select type from catalog</option>
-                    {adTypes.map(adType => (
+                    {adTypes.map((adType) => (
                       <option key={adType.adTypeId} value={adType.adTypeId}>
                         {adType.typeName}
                       </option>
@@ -843,14 +858,9 @@ const Ads = () => {
                   />
                 </div>
               </div>
-              {/* Add workflow edit if needed */}
             </div>
-
             <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-neutral-700">
-              <button
-                onClick={resetForm}
-                className="px-4 py-2 text-neutral-400 hover:text-white transition-colors"
-              >
+              <button onClick={resetForm} className="px-4 py-2 text-neutral-400 hover:text-white transition-colors">
                 Cancel
               </button>
               <button

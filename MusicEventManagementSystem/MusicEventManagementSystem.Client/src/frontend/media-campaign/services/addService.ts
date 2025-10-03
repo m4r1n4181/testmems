@@ -40,13 +40,21 @@ export class AdService {
 
   // POST: api/Ad
   static async createAd(createForm: CreateAdForm): Promise<Ad> {
+    // FIX: Wrap payload as { dto: ... }
+    // FIX: Send null for publicationDate if empty string
+    const payload = {
+      dto: {
+        ...createForm,
+        publicationDate: createForm.publicationDate ? createForm.publicationDate : null,
+      }
+    };
     try {
       const response = await fetch(this.BASE_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(createForm),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -60,19 +68,27 @@ export class AdService {
       return await response.json();
     } catch (error) {
       console.error('Error creating ad:', error);
-      throw new Error('Failed to create ad');
+      throw error; // preserve error message, don't overwrite
     }
   }
 
   // PUT: api/Ad/{id}
   static async updateAd(id: number, updateForm: UpdateAdForm): Promise<Ad> {
+    // FIX: Wrap payload as { dto: ... }
+    // FIX: Send null for publicationDate if empty string
+    const payload = {
+      dto: {
+        ...updateForm,
+        publicationDate: updateForm.publicationDate ? updateForm.publicationDate : null,
+      }
+    };
     try {
       const response = await fetch(`${this.BASE_URL}/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updateForm),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
