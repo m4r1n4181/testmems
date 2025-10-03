@@ -7,13 +7,8 @@ import {
   Send,
   Eye,
   Download,
-  Clock,
-  Calendar,
   User,
   FileText,
-  CheckCircle,
-  AlertCircle,
-  XCircle
 } from 'lucide-react';
 import { MediaTaskService } from '../services/mediaTaskService';
 import { ApprovalService } from '../services/approvalService';
@@ -36,8 +31,9 @@ const MyTasks = () => {
   const [tasks, setTasks] = useState<TaskWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTask, setSelectedTask] = useState<TaskWithDetails | null>(null);
-  const [approvals, setApprovals] = useState<Approval[]>([]);
   const [fileUpload, setFileUpload] = useState<File | null>(null);
+  const [versionFileName, setVersionFileName] = useState('');
+  const [activeVersionId, setActiveVersionId] = useState<number | null>(null);
 
   // Get logged-in user ID from localStorage
   const getLoggedInUserId = () => {
@@ -45,7 +41,6 @@ const MyTasks = () => {
     if (!userJson) return null;
     try {
       const userObj = JSON.parse(userJson);
-      // If user has an 'id' field, return it
       return userObj.id;
     } catch {
       return null;
@@ -61,11 +56,10 @@ const MyTasks = () => {
       const userId = getLoggedInUserId();
       if (!userId) {
         setLoading(false);
-        return; // Optionally, show a message "No user logged in"
+        return;
       }
       const tasksData = await MediaTaskService.getByManagerId(userId);
 
-      // Fetch additional details for each task
       const tasksWithDetails = await Promise.all(
         tasksData.map(async (task) => {
           const details: TaskWithDetails = { task };
@@ -89,16 +83,6 @@ const MyTasks = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fetchApprovals = async () => {
-    // Note: This requires authentication - disabled for demo
-    // try {
-    //   const approvalsData = await ApprovalService.getMyApprovals(token);
-    //   setApprovals(approvalsData);
-    // } catch (error) {
-    //   console.error('Error fetching approvals:', error);
-    // }
   };
 
   const getStatusInfo = (status?: string) => {
@@ -143,43 +127,115 @@ const MyTasks = () => {
     const file = event.target.files?.[0];
     if (file) {
       setFileUpload(file);
+      setVersionFileName(file.name);
     }
   };
 
-  const handleSubmitForApproval = async () => {
-    if (!selectedTask) return;
+  // Save as draft: upload file and create a new MediaVersion
+  const handleSaveDraft = async () => {
+    if (!selectedTask || !fileUpload) {
+      alert('Please select a file');
+      return;
+    }
+
+    if (!selectedTask.ad?.adId) {
+      alert('This task does not have an associated ad');
+      return;
+    }
     
     try {
-      // Create approval request
-      const approvalForm = {
-        approvalStatus: 'Pending',
-        comment: 'Submitted for review',
-        approvalDate: new Date().toISOString(),
-        mediaTaskId: selectedTask.task.mediaTaskId
+      const fileURL = URL.createObjectURL(fileUpload);
+
+      const createForm = {
+        versionFileName: versionFileName || fileUpload.name,
+        fileType: fileUpload.type,
+        fileURL,
+        isFinalVersion: false,
+        adId: selectedTask.ad.adId
       };
+
+      // Save the new version
+      const newVersion = await MediaVersionService.createMediaVersion(createForm);
+      console.log('New version created:', newVersion);
+
+      // Fetch updated versions for the current task/ad
+      const updatedVersions = await MediaVersionService.getByAdId(selectedTask.ad.adId);
+      console.log('Updated versions:', updatedVersions);
+
+      // Update the selectedTask state
+      const updatedSelectedTask = {
+        ...selectedTask,
+        versions: updatedVersions
+      };
+      setSelectedTask(updatedSelectedTask);
+
+      // Also update the tasks array to keep it in sync
+      setTasks(prevTasks => 
+        prevTasks.map(t => 
+          t.task.mediaTaskId === selectedTask.task.mediaTaskId 
+            ? updatedSelectedTask 
+            : t
+        )
+      );
+
+      // Set the active version to the newly added one
+      setActiveVersionId(newVersion.mediaVersionId);
+
+      // Clear the file input
+      setFileUpload(null);
+      setVersionFileName('');
       
-      await ApprovalService.createApproval(approvalForm);
-      
-      // Refresh data
-      fetchTasksData();
-      fetchApprovals();
-      
-      alert('Task submitted for approval successfully!');
+      alert('Draft version saved successfully!');
     } catch (error) {
-      console.error('Error submitting for approval:', error);
-      alert('Error submitting task for approval');
+      console.error('Error saving draft:', error);
+      alert(`Error saving draft version: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
+  // Mark as final version
   const handleMarkAsFinal = async (versionId: number) => {
+    if (!selectedTask?.ad?.adId) return;
+    
     try {
       await MediaVersionService.updateMediaVersion(versionId, { isFinalVersion: true });
-      fetchTasksData();
+      
+      // Fetch updated versions
+      const updatedVersions = await MediaVersionService.getByAdId(selectedTask.ad.adId);
+      
+      // Update selectedTask
+      const updatedSelectedTask = {
+        ...selectedTask,
+        versions: updatedVersions
+      };
+      setSelectedTask(updatedSelectedTask);
+      
+      // Update tasks array
+      setTasks(prevTasks => 
+        prevTasks.map(t => 
+          t.task.mediaTaskId === selectedTask.task.mediaTaskId 
+            ? updatedSelectedTask 
+            : t
+        )
+      );
+      
       alert('Version marked as final!');
     } catch (error) {
       console.error('Error marking as final:', error);
       alert('Error marking version as final');
     }
+  };
+
+  // Download specific version
+  const handleDownloadVersion = (version: MediaVersion) => {
+    if (version.fileURL) {
+      window.open(version.fileURL, '_blank');
+    }
+  };
+
+  // Go back to the selected version (set active)
+  const handleGoBackToVersion = (versionId: number) => {
+    setActiveVersionId(versionId);
+    alert('Switched to selected version.');
   };
 
   if (loading) {
@@ -192,7 +248,9 @@ const MyTasks = () => {
 
   if (selectedTask) {
     const statusInfo = getStatusInfo(selectedTask.task.taskStatus);
-    
+    const versions = selectedTask.versions || [];
+    const activeVersion = versions.find(v => v.mediaVersionId === activeVersionId) || versions[versions.length - 1];
+
     return (
       <div className="space-y-6">
         {/* Header */}
@@ -203,7 +261,7 @@ const MyTasks = () => {
               className="flex items-center gap-2 px-4 py-2 text-neutral-400 hover:text-white transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
-              Back to Workflow
+              Back to Tasks
             </button>
             <div className="h-6 w-px bg-neutral-600"></div>
             <div>
@@ -212,13 +270,6 @@ const MyTasks = () => {
               </h1>
             </div>
           </div>
-          <button
-            onClick={handleSubmitForApproval}
-            className="flex items-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-colors font-medium"
-          >
-            <Send className="w-5 h-5" />
-            Submit for Approval
-          </button>
         </div>
 
         <div className="flex gap-6">
@@ -231,25 +282,17 @@ const MyTasks = () => {
                   <label className="block text-sm text-neutral-300 mb-2">Task</label>
                   <input
                     type="text"
-                    value={selectedTask.ad?.title || 'Create a Visual for Exit campaign'}
+                    value={selectedTask.ad?.title || selectedTask.task.taskName || ''}
                     className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
                     readOnly
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-neutral-300 mb-2">Phase</label>
-                    <div className="p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-neutral-300">
-                      {selectedTask.ad ? getPhaseInfo(selectedTask.ad.currentPhase).text : 'In Preparation'}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm text-neutral-300 mb-2">Status</label>
-                    <div className="flex">
-                      <span className={`px-4 py-2 rounded-xl text-sm font-medium ${statusInfo.color} ${statusInfo.textColor}`}>
-                        {statusInfo.text}
-                      </span>
-                    </div>
+                <div>
+                  <label className="block text-sm text-neutral-300 mb-2">Status</label>
+                  <div className="flex">
+                    <span className={`px-4 py-2 rounded-xl text-sm font-medium ${statusInfo.color} ${statusInfo.textColor}`}>
+                      {statusInfo.text}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -258,27 +301,25 @@ const MyTasks = () => {
                 <div>
                   <label className="block text-sm text-neutral-300 mb-2">File Format</label>
                   <div className="p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white">
-                    PNG
+                    {activeVersion?.fileType || 'Unknown'}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm text-neutral-300 mb-2">Dimensions</label>
+                  <label className="block text-sm text-neutral-300 mb-2">File Name</label>
                   <div className="p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white">
-                    1080 × 1920
+                    {activeVersion?.versionFileName || 'Unknown'}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm text-neutral-300 mb-2">Duration</label>
-                  <div className="p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white">
-                    15s
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-sm text-neutral-300 mb-2">Notes (Visual)</label>
-                <div className="p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white">
-                  High contrast icons, bold CTA
+                  <label className="block text-sm text-neutral-300 mb-2">Download</label>
+                  <button
+                    onClick={() => activeVersion && handleDownloadVersion(activeVersion)}
+                    className="flex items-center gap-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-xl px-4 py-2"
+                    disabled={!activeVersion?.fileURL}
+                  >
+                    <Download className="w-5 h-5" />
+                    Download
+                  </button>
                 </div>
               </div>
 
@@ -308,20 +349,13 @@ const MyTasks = () => {
 
             {/* Action Buttons */}
             <div className="flex justify-start gap-4">
-              <button className="flex items-center gap-2 px-6 py-3 bg-neutral-700 hover:bg-neutral-600 text-white rounded-xl transition-colors">
+              <button
+                onClick={handleSaveDraft}
+                disabled={!fileUpload}
+                className="flex items-center gap-2 px-6 py-3 bg-neutral-700 hover:bg-neutral-600 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <Save className="w-5 h-5" />
                 Save Draft
-              </button>
-              <button className="flex items-center gap-2 px-6 py-3 bg-neutral-700 hover:bg-neutral-600 text-white rounded-xl transition-colors">
-                <CheckSquare className="w-5 h-5" />
-                Mark as Final
-              </button>
-              <button 
-                onClick={handleSubmitForApproval}
-                className="flex items-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-colors"
-              >
-                <Send className="w-5 h-5" />
-                Submit for Approval
               </button>
             </div>
           </div>
@@ -330,78 +364,58 @@ const MyTasks = () => {
           <div className="w-80">
             <div className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Versions</h3>
-              
-              <div className="space-y-4">
-                {selectedTask.versions?.map((version, index) => (
-                  <div key={version.mediaVersionId} className="flex items-center justify-between p-4 bg-neutral-700/50 rounded-xl">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-white font-medium">v{index + 3}</span>
-                        <span className="text-sm text-neutral-400">
-                          {version.versionFileName || 'Candidate'}
-                        </span>
+              {versions.length === 0 ? (
+                <div className="text-center py-8">
+                  <FileText className="w-12 h-12 text-neutral-600 mx-auto mb-2" />
+                  <p className="text-neutral-400 text-sm">No versions yet</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {versions.map((version, index) => (
+                    <div key={version.mediaVersionId} className={`flex items-center justify-between p-4 bg-neutral-700/50 rounded-xl ${activeVersionId === version.mediaVersionId ? "border-2 border-purple-500" : ""}`}>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-white font-medium">v{index + 1}</span>
+                          <span className="text-sm text-neutral-400 truncate">
+                            {version.versionFileName || 'Candidate'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-neutral-500">
+                          Uploaded {formatDate(selectedTask.ad?.creationDate || new Date().toISOString())}
+                        </p>
                       </div>
-                      <p className="text-xs text-neutral-500">
-                        Uploaded {formatDate(selectedTask.ad?.creationDate || new Date().toISOString())}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button className="p-2 text-neutral-400 hover:text-white transition-colors">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      {version.isFinalVersion ? (
-                        <span className="px-3 py-1 bg-purple-500 text-white text-xs rounded-lg font-medium">
-                          Final
-                        </span>
-                      ) : (
+                      <div className="flex items-center gap-2">
                         <button
-                          onClick={() => handleMarkAsFinal(version.mediaVersionId)}
-                          className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded-lg font-medium transition-colors"
+                          className="text-neutral-400 hover:text-white transition-colors"
+                          title="Download"
+                          onClick={() => handleDownloadVersion(version)}
+                          disabled={!version.fileURL}
                         >
-                          Mark as Final
+                          <Download className="w-4 h-4" />
                         </button>
-                      )}
+                        <button
+                          className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-lg font-medium transition-colors"
+                          onClick={() => handleGoBackToVersion(version.mediaVersionId)}
+                        >
+                          Go Back
+                        </button>
+                        {version.isFinalVersion ? (
+                          <span className="px-3 py-1 bg-purple-500 text-white text-xs rounded-lg font-medium">
+                            Final
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleMarkAsFinal(version.mediaVersionId)}
+                            className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded-lg font-medium transition-colors"
+                          >
+                            Mark as Final
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-                
-                {/* Default versions for demo */}
-                <div className="flex items-center justify-between p-4 bg-neutral-700/50 rounded-xl">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-white font-medium">v3</span>
-                      <span className="text-sm text-neutral-400">Candidate</span>
-                    </div>
-                    <p className="text-xs text-neutral-500">Uploaded Sep 3, 2025</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button className="text-neutral-400 hover:text-white transition-colors">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded-lg font-medium transition-colors">
-                      Mark as Final
-                    </button>
-                  </div>
+                  ))}
                 </div>
-
-                <div className="flex items-center justify-between p-4 bg-neutral-700/50 rounded-xl">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-white font-medium">v2</span>
-                      <span className="text-sm text-neutral-400">Contrast tweaks</span>
-                    </div>
-                    <p className="text-xs text-neutral-500">Uploaded Sep 2, 2025</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button className="text-neutral-400 hover:text-white transition-colors">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <span className="px-3 py-1 bg-purple-500 text-white text-xs rounded-lg font-medium">
-                      Final
-                    </span>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -440,10 +454,10 @@ const MyTasks = () => {
                     {taskDetail.task.taskName || 'Create a Visual'}
                   </div>
                   <div className="text-neutral-300">
-                    {taskDetail.ad?.title || 'Instagram Story for Exit'}
+                    {taskDetail.ad?.title || ''}
                   </div>
                   <div className="text-neutral-300">
-                    {taskDetail.ad?.deadline ? formatDate(taskDetail.ad.deadline) : 'Aug 30, 2025'}
+                    {taskDetail.ad?.deadline ? formatDate(taskDetail.ad.deadline) : ''}
                   </div>
                   <div className={`${phaseInfo.color}`}>
                     {phaseInfo.text}
@@ -455,11 +469,16 @@ const MyTasks = () => {
                   </div>
                   <div>
                     <button
-                      onClick={() => setSelectedTask(taskDetail)}
+                      onClick={() => {
+                        setSelectedTask(taskDetail);
+                        setActiveVersionId(null);
+                        setFileUpload(null);
+                        setVersionFileName('');
+                      }}
                       className="flex items-center gap-2 px-3 py-1 text-neutral-400 hover:text-white transition-colors"
                     >
                       <Eye className="w-4 h-4" />
-                      View Workflow
+                      View Task
                     </button>
                   </div>
                 </div>
@@ -474,57 +493,6 @@ const MyTasks = () => {
           </div>
         )}
       </div>
-
-      {/* MM Feedback Section */}
-      {approvals.length > 0 && (
-        <div className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">MM Feedback</h3>
-          <div className="space-y-4">
-            {approvals.slice(0, 2).map((approval) => (
-              <div key={approval.approvalId} className="flex items-center justify-between p-4 bg-neutral-700/30 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-medium">Create a Visual</h4>
-                    <p className="text-sm text-neutral-400">
-                      {approval.comment || "Visual balance is good; adjust contrast on icons"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {approval.approvalStatus?.toLowerCase() === 'approved' ? (
-                    <span className="px-3 py-1 bg-green-500 text-white text-sm rounded-lg font-medium">
-                      Approved
-                    </span>
-                  ) : (
-                    <span className="px-3 py-1 bg-red-500 text-white text-sm rounded-lg font-medium">
-                      Denied
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-            
-            {/* Demo feedback items */}
-            <div className="flex items-center justify-between p-4 bg-neutral-700/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h4 className="text-white font-medium">Create Promo Material</h4>
-                  <p className="text-sm text-neutral-400">Visual hierarchy unclear; make CTA more prominent</p>
-                </div>
-              </div>
-              <span className="px-3 py-1 bg-red-500 text-white text-sm rounded-lg font-medium">
-                Denied
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

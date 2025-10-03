@@ -213,85 +213,99 @@ const Ads = () => {
   };
 
   const handleCreateAd = async () => {
-    try {
-      let workflowId = loadedWorkflowId;
+  try {
+    const userJson = localStorage.getItem('user');
+    const currentUserId = userJson ? JSON.parse(userJson).id : null;
 
-      if (useCustomWorkflow) {
-        // Create custom workflow
-        const workflowForm: CreateMediaWorkflowForm = {
-          workflowDescription: `Custom workflow for ${createForm.title}`,
-        };
-        const newWorkflow = await MediaWorkflowService.createMediaWorkflow(workflowForm);
-        workflowId = newWorkflow.mediaWorkflowId;
+    // First, create the Ad
+    const adForm: CreateAdForm = {
+      deadline: createForm.deadline,
+      title: createForm.title,
+      creationDate: createForm.creationDate,
+      currentPhase: createForm.currentPhase,
+      publicationDate: createForm.publicationDate,
+      mediaWorkflowId: createForm.mediaWorkflowId,
+      campaignId: createForm.campaignId,
+      adTypeId: createForm.adTypeId,
+      mediaVersionIds: createForm.mediaVersionIds,
+      integrationStatusIds: createForm.integrationStatusIds,
+      createdById: currentUserId,
+    };
+    
+    const newAd = await AdService.createAd(adForm);
+    
+    // Now create workflow and tasks with the adId
+    let workflowId = loadedWorkflowId;
 
-        for (const task of workflowTasks) {
-          if (task.taskName.trim()) {
-            const taskForm: CreateMediaTaskForm = {
-              taskName: task.taskName,
-              order: task.order,
-              taskStatus: 'Pending',
-              workflowId: workflowId,
-              managerId: task.assignedMember || undefined,
-            };
-            await MediaTaskService.createMediaTask(taskForm);
-          }
-        }
-      } else if (loadedWorkflowId) {
-        // Using suggested workflow - create tasks with assignments
-        for (const task of workflowTasks) {
-          if (task.assignedMember) {
-            const taskForm: CreateMediaTaskForm = {
-              taskName: task.taskName,
-              order: task.order,
-              taskStatus: 'Pending',
-              workflowId: loadedWorkflowId,
-              managerId: task.assignedMember,
-            };
-            await MediaTaskService.createMediaTask(taskForm);
-          }
+    if (useCustomWorkflow) {
+      // Create custom workflow
+      const workflowForm: CreateMediaWorkflowForm = {
+        workflowDescription: `Custom workflow for ${createForm.title}`,
+      };
+      const newWorkflow = await MediaWorkflowService.createMediaWorkflow(workflowForm);
+      workflowId = newWorkflow.mediaWorkflowId;
+
+      for (const task of workflowTasks) {
+        if (task.taskName.trim()) {
+          const taskForm: CreateMediaTaskForm = {
+            taskName: task.taskName,
+            order: task.order,
+            taskStatus: 'Pending',
+            workflowId: workflowId,
+            managerId: task.assignedMember || undefined,
+            adId: newAd.adId, // Link task to the newly created ad
+          };
+          await MediaTaskService.createMediaTask(taskForm);
         }
       }
-
-      const userJson = localStorage.getItem('user');
-      const currentUserId = userJson ? JSON.parse(userJson).id : null;
-
-      const adForm: CreateAdForm = {
-        ...createForm,
-        mediaWorkflowId: workflowId || createForm.mediaWorkflowId,
-        createdById: currentUserId,                // <-- This is the field backend expects!
-        title: createForm.title,                   // <-- Also add PascalCase Title for backend!
-      };
-      const newAd = await AdService.createAd(adForm);
-      setAds([...ads, newAd]);
-      resetForm();
-      setShowCreateModal(false);
-      toast.success('Ad created successfully!');
-    } catch (error) {
-      toast.error('Error creating ad!');
+    } else if (loadedWorkflowId) {
+      // Using suggested workflow - create tasks with assignments
+      for (const task of workflowTasks) {
+        if (task.assignedMember) {
+          const taskForm: CreateMediaTaskForm = {
+            taskName: task.taskName,
+            order: task.order,
+            taskStatus: 'Pending',
+            workflowId: loadedWorkflowId,
+            managerId: task.assignedMember,
+            adId: newAd.adId, // Link task to the newly created ad
+          };
+          await MediaTaskService.createMediaTask(taskForm);
+        }
+      }
     }
-  };
+
+    setAds([...ads, newAd]);
+    resetForm();
+    setShowCreateModal(false);
+    toast.success('Ad created successfully!');
+  } catch (error) {
+    console.error('Error creating ad:', error);
+    toast.error('Error creating ad!');
+  }
+};
 
   const resetForm = () => {
-    setCreateForm({
-      Deadline: '',
-      Title: '',
-      CreationDate: new Date().toISOString().split('T')[0],
-      CurrentPhase: AdStatus.InPreparation,
-      PublicationDate: '',
-      MediaWorkflowId: 1,
-      CampaignId: 0,
-      AdTypeId: 0,
-      MediaVersionIds: [],
-      IntegrationStatusIds: [],
-      CreatedById: '', // Will be set on submission
-    });
-    setUseCustomWorkflow(false);
-    setShowWorkflowChoice(false);
-    setLoadedWorkflowId(null);
-    setDefaultWorkflowTasks();
-    setEditingAd(null);
-    setEditForm(null);
-  };
+  setCreateForm({
+    deadline: '',
+    title: '',
+    creationDate: new Date().toISOString().split('T')[0],
+    currentPhase: AdStatus.InPreparation,
+    publicationDate: '',
+    mediaWorkflowId: 1,
+    campaignId: 0,
+    adTypeId: 0,
+    mediaVersionIds: [],
+    integrationStatusIds: [],
+    createdById: '',
+  });
+  setUseCustomWorkflow(false);
+  setShowWorkflowChoice(false);
+  setLoadedWorkflowId(null);
+  setDefaultWorkflowTasks();
+  setEditingAd(null);
+  setEditForm(null);
+};
 
   const handleDeleteAd = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this ad?')) {
@@ -308,16 +322,17 @@ const Ads = () => {
   const handleEditAd = (ad: Ad) => {
     setEditingAd(ad);
     setEditForm({
-      deadline: ad.deadline,
-      title: ad.title || '',
-      creationDate: ad.creationDate.split('T')[0],
-      currentPhase: ad.currentPhase,
-      publicationDate: ad.publicationDate ? ad.publicationDate.split('T')[0] : '',
-      mediaWorkflowId: ad.mediaWorkflowId,
-      campaignId: ad.campaignId,
-      adTypeId: ad.adTypeId,
-      mediaVersionIds: ad.mediaVersionIds || [],
-      integrationStatusIds: ad.integrationStatusIds || [],
+      Deadline: ad.deadline,
+      Title: ad.title || '',
+      CreationDate: ad.creationDate.split('T')[0],
+      CurrentPhase: ad.currentPhase,
+      PublicationDate: ad.publicationDate ? ad.publicationDate.split('T')[0] : '',
+      MediaWorkflowId: ad.mediaWorkflowId,
+      CampaignId: ad.campaignId,
+      AdTypeId: ad.adTypeId,
+      MediaVersionIds: ad.mediaVersionIds || [],
+      IntegrationStatusIds: ad.integrationStatusIds || [],
+      CreatedById: ad.createdById, // Will be set on submission
     });
     setShowCreateModal(false);
   };

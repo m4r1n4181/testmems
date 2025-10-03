@@ -1,25 +1,25 @@
 import type { AdStatus } from '../enums/MediaChampaign';
 
 export interface CreateAdForm {
-  Deadline: string;
-  Title: string;
-  CreationDate: string;
-  CurrentPhase: AdStatus;
-  PublicationDate?: string;
-  MediaWorkflowId: number;
-  CampaignId: number;
-  AdTypeId: number;
-  MediaVersionIds?: number[];
-  IntegrationStatusIds?: number[];
-  CreatedById: string;
+  deadline: string;
+  title: string;
+  creationDate: string;
+  currentPhase: AdStatus;
+  publicationDate?: string;
+  mediaWorkflowId: number;
+  campaignId: number;
+  adTypeId: number;
+  mediaVersionIds?: number[];
+  integrationStatusIds?: number[];
+  createdById: string;
 }
 
 export interface UpdateAdForm {
-  deadline?: string; // ISO date string
+  deadline?: string;
   title?: string;
-  creationDate?: string; // ISO date string
+  creationDate?: string;
   currentPhase?: AdStatus;
-  publicationDate?: string; // ISO date string
+  publicationDate?: string;
   mediaWorkflowId?: number;
   campaignId?: number;
   adTypeId?: number;

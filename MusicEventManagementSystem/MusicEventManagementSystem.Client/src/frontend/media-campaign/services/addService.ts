@@ -40,44 +40,43 @@ export class AdService {
 
   // POST: api/Ad
   static async createAd(createForm: CreateAdForm): Promise<Ad> {
-    // FIX: Wrap payload as { dto: ... }
-    // FIX: Send null for publicationDate if empty string
-    const payload = {
-      Deadline: createForm.deadline,
-      Title: createForm.title,
-      CreationDate: createForm.creationDate,
-      CurrentPhase: createForm.currentPhase,
-      PublicationDate: createForm.publicationDate || null,
-      MediaWorkflowId: createForm.mediaWorkflowId,
-      CampaignId: createForm.campaignId,
-      AdTypeId: createForm.adTypeId,
-      MediaVersionIds: createForm.mediaVersionIds,
-      IntegrationStatusIds: createForm.integrationStatusIds,
-      CreatedById: createForm.createdById, // Required by backend
-    };
-    try {
-      const response = await fetch(this.BASE_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+  const payload = {
+    Deadline: createForm.deadline,
+    Title: createForm.title,
+    CreationDate: createForm.creationDate,
+    CurrentPhase: createForm.currentPhase,
+    PublicationDate: createForm.publicationDate || null,
+    MediaWorkflowId: createForm.mediaWorkflowId,
+    CampaignId: createForm.campaignId,
+    AdTypeId: createForm.adTypeId,
+    MediaVersionIds: createForm.mediaVersionIds,
+    IntegrationStatusIds: createForm.integrationStatusIds,
+    CreatedById: createForm.createdById,
+  };
+  
+  try {
+    const response = await fetch(this.BASE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
 
-      if (!response.ok) {
-        if (response.status === 400) {
-          const errorData = await response.json();
-          throw new Error(`Validation error: ${JSON.stringify(errorData)}`);
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+      if (response.status === 400) {
+        const errorData = await response.json();
+        throw new Error(`Validation error: ${JSON.stringify(errorData)}`);
       }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error creating ad:', error);
-      throw error; // preserve error message, don't overwrite
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating ad:', error);
+    throw error;
   }
+}
 
   // PUT: api/Ad/{id}
   static async updateAd(id: number, updateForm: UpdateAdForm): Promise<Ad> {
