@@ -21,6 +21,6 @@ namespace MusicEventManagementSystem.API.Models
         public virtual AdType AdType { get; set; } = null!;
         public virtual ICollection<MediaVersion> Versions { get; set; } = new List<MediaVersion>();
         public virtual ICollection<IntegrationStatus> IntegrationStatuses { get; set; } = new List<IntegrationStatus>();
-        public virtual ApplicationUser CreatedBy { get; set; }
+        public virtual ApplicationUser CreatedBy { get; set; } = null!;
     }
 }

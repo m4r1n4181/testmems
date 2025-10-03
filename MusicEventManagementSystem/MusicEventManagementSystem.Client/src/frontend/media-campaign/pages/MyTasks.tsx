@@ -39,25 +39,36 @@ const MyTasks = () => {
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [fileUpload, setFileUpload] = useState<File | null>(null);
 
-  // Demo user ID - in real app this would come from auth context
-  // For testing, you can replace this with an actual user ID from your database
-  const demoUserId = "demo-user-id";
+  // Get logged-in user ID from localStorage
+  const getLoggedInUserId = () => {
+    const userJson = localStorage.getItem('user');
+    if (!userJson) return null;
+    try {
+      const userObj = JSON.parse(userJson);
+      // If user has an 'id' field, return it
+      return userObj.id;
+    } catch {
+      return null;
+    }
+  };
 
   useEffect(() => {
     fetchTasksData();
-    // Note: fetchApprovals requires authentication - disabled for demo
-    // fetchApprovals();
   }, []);
 
   const fetchTasksData = async () => {
     try {
-      const tasksData = await MediaTaskService.getByManagerId(demoUserId);
-      
+      const userId = getLoggedInUserId();
+      if (!userId) {
+        setLoading(false);
+        return; // Optionally, show a message "No user logged in"
+      }
+      const tasksData = await MediaTaskService.getByManagerId(userId);
+
       // Fetch additional details for each task
       const tasksWithDetails = await Promise.all(
         tasksData.map(async (task) => {
           const details: TaskWithDetails = { task };
-          
           try {
             if (task.adId) {
               details.ad = await AdService.getAdById(task.adId);
@@ -69,11 +80,9 @@ const MyTasks = () => {
           } catch (error) {
             console.error(`Error fetching details for task ${task.mediaTaskId}:`, error);
           }
-          
           return details;
         })
       );
-      
       setTasks(tasksWithDetails);
     } catch (error) {
       console.error('Error fetching tasks:', error);

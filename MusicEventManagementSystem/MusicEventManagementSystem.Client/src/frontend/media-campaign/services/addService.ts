@@ -43,10 +43,17 @@ export class AdService {
     // FIX: Wrap payload as { dto: ... }
     // FIX: Send null for publicationDate if empty string
     const payload = {
-      dto: {
-        ...createForm,
-        publicationDate: createForm.publicationDate ? createForm.publicationDate : null,
-      }
+      Deadline: createForm.deadline,
+      Title: createForm.title,
+      CreationDate: createForm.creationDate,
+      CurrentPhase: createForm.currentPhase,
+      PublicationDate: createForm.publicationDate || null,
+      MediaWorkflowId: createForm.mediaWorkflowId,
+      CampaignId: createForm.campaignId,
+      AdTypeId: createForm.adTypeId,
+      MediaVersionIds: createForm.mediaVersionIds,
+      IntegrationStatusIds: createForm.integrationStatusIds,
+      CreatedById: createForm.createdById, // Required by backend
     };
     try {
       const response = await fetch(this.BASE_URL, {
@@ -76,12 +83,19 @@ export class AdService {
   static async updateAd(id: number, updateForm: UpdateAdForm): Promise<Ad> {
     // FIX: Wrap payload as { dto: ... }
     // FIX: Send null for publicationDate if empty string
-    const payload = {
-      dto: {
-        ...updateForm,
-        publicationDate: updateForm.publicationDate ? updateForm.publicationDate : null,
-      }
-    };
+     // Map frontend field names to backend PascalCase DTO
+    const payload: Record<string, any> = {};
+    
+    if (updateForm.deadline !== undefined) payload.Deadline = updateForm.deadline;
+    if (updateForm.title !== undefined) payload.Title = updateForm.title;
+    if (updateForm.creationDate !== undefined) payload.CreationDate = updateForm.creationDate;
+    if (updateForm.currentPhase !== undefined) payload.CurrentPhase = updateForm.currentPhase;
+    if (updateForm.publicationDate !== undefined) payload.PublicationDate = updateForm.publicationDate || null;
+    if (updateForm.mediaWorkflowId !== undefined) payload.MediaWorkflowId = updateForm.mediaWorkflowId;
+    if (updateForm.campaignId !== undefined) payload.CampaignId = updateForm.campaignId;
+    if (updateForm.adTypeId !== undefined) payload.AdTypeId = updateForm.adTypeId;
+    if (updateForm.mediaVersionIds !== undefined) payload.MediaVersionIds = updateForm.mediaVersionIds;
+    if (updateForm.integrationStatusIds !== undefined) payload.IntegrationStatusIds = updateForm.integrationStatusIds;
     try {
       const response = await fetch(`${this.BASE_URL}/${id}`, {
         method: 'PUT',

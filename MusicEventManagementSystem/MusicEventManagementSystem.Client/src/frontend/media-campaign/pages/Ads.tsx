@@ -70,6 +70,7 @@ const Ads = () => {
     adTypeId: 0,
     mediaVersionIds: [],
     integrationStatusIds: [],
+    createdById: '', // Will be set on submission
   });
 
   useEffect(() => {
@@ -213,8 +214,6 @@ const Ads = () => {
 
   const handleCreateAd = async () => {
     try {
-      const userJson = localStorage.getItem('user');
-      const currentUserId = userJson ? JSON.parse(userJson).id : null;
       let workflowId = loadedWorkflowId;
 
       if (useCustomWorkflow) {
@@ -253,35 +252,38 @@ const Ads = () => {
         }
       }
 
+      const userJson = localStorage.getItem('user');
+      const currentUserId = userJson ? JSON.parse(userJson).id : null;
+
       const adForm: CreateAdForm = {
         ...createForm,
-        title: createForm.title,
-        createdByUserId: currentUserId,
         mediaWorkflowId: workflowId || createForm.mediaWorkflowId,
+        createdById: currentUserId,                // <-- This is the field backend expects!
+        title: createForm.title,                   // <-- Also add PascalCase Title for backend!
       };
-
       const newAd = await AdService.createAd(adForm);
-        setAds([...ads, newAd]);
-        resetForm();
-        setShowCreateModal(false);
-        toast.success('Ad created successfully!');
-      } catch (error) {
-        toast.error('Error creating ad!');
-      }
+      setAds([...ads, newAd]);
+      resetForm();
+      setShowCreateModal(false);
+      toast.success('Ad created successfully!');
+    } catch (error) {
+      toast.error('Error creating ad!');
+    }
   };
 
   const resetForm = () => {
     setCreateForm({
-      deadline: '',
-      title: '',
-      creationDate: new Date().toISOString().split('T')[0],
-      currentPhase: AdStatus.InPreparation,
-      publicationDate: '',
-      mediaWorkflowId: 1,
-      campaignId: 0,
-      adTypeId: 0,
-      mediaVersionIds: [],
-      integrationStatusIds: [],
+      Deadline: '',
+      Title: '',
+      CreationDate: new Date().toISOString().split('T')[0],
+      CurrentPhase: AdStatus.InPreparation,
+      PublicationDate: '',
+      MediaWorkflowId: 1,
+      CampaignId: 0,
+      AdTypeId: 0,
+      MediaVersionIds: [],
+      IntegrationStatusIds: [],
+      CreatedById: '', // Will be set on submission
     });
     setUseCustomWorkflow(false);
     setShowWorkflowChoice(false);

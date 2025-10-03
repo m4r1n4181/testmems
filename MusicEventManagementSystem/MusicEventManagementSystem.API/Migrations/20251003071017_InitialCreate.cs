@@ -1305,7 +1305,8 @@ namespace MusicEventManagementSystem.API.Migrations
                 table: "Approvals",
                 column: "MediaTaskId",
                 principalTable: "MediaTasks",
-                principalColumn: "MediaTaskId");
+                principalColumn: "MediaTaskId",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />

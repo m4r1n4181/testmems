@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://localhost:5255/api'; // Promeni na svoj API URL
+const API_BASE_URL = 'http://localhost:5255/api'; // Promeni na svoj API URL
 
 const apiService = axios.create({
   baseURL: API_BASE_URL,

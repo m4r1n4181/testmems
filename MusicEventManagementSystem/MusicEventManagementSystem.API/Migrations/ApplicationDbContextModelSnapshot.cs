@@ -1631,7 +1631,9 @@ namespace MusicEventManagementSystem.API.Migrations
                 {
                     b.HasOne("MusicEventManagementSystem.API.Models.MediaTask", "MediaTask")
                         .WithOne("Approval")
-                        .HasForeignKey("MusicEventManagementSystem.API.Models.Approval", "MediaTaskId");
+                        .HasForeignKey("MusicEventManagementSystem.API.Models.Approval", "MediaTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("MediaTask");
                 });

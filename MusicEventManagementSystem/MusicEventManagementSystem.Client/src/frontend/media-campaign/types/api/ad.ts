@@ -12,4 +12,5 @@ export interface Ad {
   adTypeId: number;
   mediaVersionIds?: number[];
   integrationStatusIds?: number[];
+  createdById: string;
 }

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicEventManagementSystem.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251003041718_InitialCreate")]
+    [Migration("20251003071017_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1634,7 +1634,9 @@ namespace MusicEventManagementSystem.API.Migrations
                 {
                     b.HasOne("MusicEventManagementSystem.API.Models.MediaTask", "MediaTask")
                         .WithOne("Approval")
-                        .HasForeignKey("MusicEventManagementSystem.API.Models.Approval", "MediaTaskId");
+                        .HasForeignKey("MusicEventManagementSystem.API.Models.Approval", "MediaTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("MediaTask");
                 });

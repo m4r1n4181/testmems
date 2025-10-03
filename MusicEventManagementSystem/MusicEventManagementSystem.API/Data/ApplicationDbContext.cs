@@ -230,16 +230,11 @@ namespace MusicEventManagementSystem.Data
                 .HasForeignKey(at => at.MediaWorkflowId)
                 .IsRequired(false);
 
-            builder.Entity<Approval>()
-                .HasOne<MediaTask>()
-                .WithMany()
-                .HasForeignKey(a => a.MediaTaskId)
-                .IsRequired(false);
-
-            builder.Entity<Approval>()
-                .HasOne(a => a.MediaTask)
-                .WithOne(m => m.Approval)
-                .HasForeignKey<Approval>(a => a.MediaTaskId);
+            builder.Entity<MediaTask>()
+                .HasOne(m => m.Approval)
+                .WithOne(a => a.MediaTask)
+                .HasForeignKey<Approval>(a => a.MediaTaskId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete!
 
 
             // Ad → ApplicationUser (CreatedBy)
