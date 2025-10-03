@@ -11,7 +11,7 @@ export interface CreateAdForm {
   adTypeId: number;
   mediaVersionIds?: number[];
   integrationStatusIds?: number[];
-  createdByUserId: string; // ID korisnika koji kreira oglas
+  createdByUserId?: string; // ID korisnika koji kreira oglas (set when submitting)
 }
 
 export interface UpdateAdForm {
