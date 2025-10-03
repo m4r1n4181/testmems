@@ -330,7 +330,7 @@ const Campaigns = () => {
                     >
                       <option value="">Select event</option>
                       {events.map(event => (
-                        <option key={event.eventId} value={event.eventId}>
+                        <option key={event.id} value={event.id}>
                           {event.name}
                         </option>
                       ))}

@@ -244,7 +244,7 @@ const Ads = () => {
     setEditingAd(ad);
     setEditForm({
       deadline: ad.deadline,
-      title: ad.title,
+      title: ad.title || '',
       creationDate: ad.creationDate.split('T')[0],
       currentPhase: ad.currentPhase,
       publicationDate: ad.publicationDate ? ad.publicationDate.split('T')[0] : '',

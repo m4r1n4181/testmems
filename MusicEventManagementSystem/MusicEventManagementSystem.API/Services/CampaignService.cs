@@ -96,7 +96,8 @@ namespace MusicEventManagementSystem.API.Services
             Name = campaign.Name,
             StartDate = campaign.StartDate,
             EndDate = campaign.EndDate,
-            TotalBudget = campaign.TotalBudget
+            TotalBudget = campaign.TotalBudget,
+            AdIds = campaign.Ads?.Select(a => a.AdId).ToList()
         };
 
         private static Campaign MapToEntity(CampaignCreateDto dto) => new()
