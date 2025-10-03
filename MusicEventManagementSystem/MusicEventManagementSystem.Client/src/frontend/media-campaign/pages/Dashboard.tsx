@@ -10,6 +10,7 @@ import {
   XCircle,
   Play
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { CampaignService } from '../services/campaignService';
 import { AdService } from '../services/addService';
 import { ApprovalService } from '../services/approvalService';
@@ -25,6 +26,7 @@ const Dashboard = () => {
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [tasks, setTasks] = useState<MediaTask[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -201,6 +203,14 @@ const Dashboard = () => {
                     <span className="px-3 py-1 bg-yellow-400/20 text-yellow-400 rounded-full text-xs font-medium">
                       Pending
                     </span>
+                    {/* Button to go to approval page for this approval */}
+                    <button
+                      className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-xs font-medium transition-colors"
+                      onClick={() => navigate(`/approval/${approval.approvalId}`)}
+                      title="Review Approval"
+                    >
+                      Review
+                    </button>
                   </div>
                 </div>
               ))

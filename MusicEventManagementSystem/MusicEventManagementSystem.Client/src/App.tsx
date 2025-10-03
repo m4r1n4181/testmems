@@ -28,6 +28,7 @@ import Workflows from "./frontend/media-campaign/pages/Workflows";
 // import MediaCampaignAnalytics from "./frontend/media-campaign/pages/Analytics";
 import Integrations from "./frontend/media-campaign/pages/Integrations";
 import MyTasks from "./frontend/media-campaign/pages/MyTasks";
+import Approval from "./frontend/media-campaign/pages/Approval";
 
 // Add these imports for react-toastify
 import { ToastContainer } from 'react-toastify';
@@ -262,6 +263,13 @@ function App() {
             </ProtectedRoute>
           } 
         /> 
+        <Route path="/approval/:approvalId" element={
+            <ProtectedRoute allowedDepartments={[4]}>
+              <Layout>
+                <Approval />
+              </Layout>
+            </ProtectedRoute>
+          } />
 
         {/* Redirect root to dashboard */}
         <Route path="/" element={<DepartmentRedirect />} />
