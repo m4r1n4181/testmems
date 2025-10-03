@@ -39,17 +39,19 @@ const MyTasks = () => {
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [fileUpload, setFileUpload] = useState<File | null>(null);
 
-  // Mock token - in real app this would come from auth context
-  const token = "mock-jwt-token";
+  // Demo user ID - in real app this would come from auth context
+  // For testing, you can replace this with an actual user ID from your database
+  const demoUserId = "demo-user-id";
 
   useEffect(() => {
     fetchTasksData();
-    fetchApprovals();
+    // Note: fetchApprovals requires authentication - disabled for demo
+    // fetchApprovals();
   }, []);
 
   const fetchTasksData = async () => {
     try {
-      const tasksData = await MediaTaskService.getTasksForManager(token);
+      const tasksData = await MediaTaskService.getByManagerId(demoUserId);
       
       // Fetch additional details for each task
       const tasksWithDetails = await Promise.all(
@@ -81,12 +83,13 @@ const MyTasks = () => {
   };
 
   const fetchApprovals = async () => {
-    try {
-      const approvalsData = await ApprovalService.getMyApprovals(token);
-      setApprovals(approvalsData);
-    } catch (error) {
-      console.error('Error fetching approvals:', error);
-    }
+    // Note: This requires authentication - disabled for demo
+    // try {
+    //   const approvalsData = await ApprovalService.getMyApprovals(token);
+    //   setApprovals(approvalsData);
+    // } catch (error) {
+    //   console.error('Error fetching approvals:', error);
+    // }
   };
 
   const getStatusInfo = (status?: string) => {

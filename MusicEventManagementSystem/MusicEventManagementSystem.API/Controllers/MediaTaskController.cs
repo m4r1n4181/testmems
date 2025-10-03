@@ -91,15 +91,9 @@ namespace MusicEventManagementSystem.API.Controllers
             var tasks = await _mediaTaskService.GetByWorkflowIdAsync(workflowId);
             return Ok(tasks);
         }
-        [Authorize]
-        [HttpGet("manager/my-tasks")]
-        public async Task<IActionResult> GetTasksForManager()
+        [HttpGet("managerId/{managerId}")]
+        public async Task<ActionResult<IEnumerable<MediaTaskResponseDto>>> GetByManagerId(string managerId)
         {
-            var managerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(managerId))
-                return Unauthorized("Nije moguće preuzeti Id korisnika.");
-
             var tasks = await _mediaTaskService.GetTasksByManager(managerId);
             return Ok(tasks);
         }

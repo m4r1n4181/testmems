@@ -101,7 +101,18 @@ namespace MusicEventManagementSystem.API.Services
             MediaWorkflowId = workflow.MediaWorkflowId,
             WorkflowDescription = workflow.WorkflowDescription,
             ApprovalId = workflow.ApprovalId,
-            TaskIds = workflow.Tasks.Select(t => t.MediaTaskId).ToList()
+            TaskIds = workflow.Tasks.Select(t => t.MediaTaskId).ToList(),
+            Tasks = workflow.Tasks.Select(t => new MediaTaskResponseDto
+            {
+                MediaTaskId = t.MediaTaskId,
+                TaskName = t.TaskName,
+                Order = t.Order,
+                TaskStatus = t.TaskStatus,
+                WorkflowId = t.WorkflowId,
+                ApprovalId = t.ApprovalId,
+                ManagerId = t.ManagerId,
+                AdId = t.AdId
+            }).ToList()
         };
 
         private static MediaWorkflow MapToEntity(MediaWorkflowCreateDto dto) => new()

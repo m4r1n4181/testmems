@@ -8,6 +8,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public int MediaWorkflowId { get; set; }
         public string? WorkflowDescription { get; set; }
         public ICollection<int>? TaskIds { get; set; }
+        public ICollection<MediaTaskResponseDto>? Tasks { get; set; }
         public int? ApprovalId { get; set; }
         public int? AdId { get; set; }
     }

@@ -2,26 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
-  Eye, 
   Edit, 
   Trash2, 
   X, 
   Calendar,
-  ChevronDown,
-  Filter,
-  FileText,
   Clock,
   CheckCircle,
   AlertCircle,
-  PlayCircle,
+  FileText,
   Settings,
-  Users
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { AdService } from '../services/addService';
 import { CampaignService } from '../services/campaignService';
 import { AdTypeService } from '../services/adTypeService';
 import { MediaWorkflowService } from '../services/mediaWorkflowService';
 import { MediaTaskService } from '../services/mediaTaskService';
+import { AuthService, type User } from '../../shared/services/authService';
 import type { Ad } from '../types/api/ad';
 import type { Campaign } from '../types/api/campaign';
 import type { AdType } from '../types/api/adType';
@@ -31,12 +28,12 @@ import type { CreateMediaWorkflowForm } from '../types/form/mediaWorkflow';
 import type { CreateMediaTaskForm } from '../types/form/mediaTask';
 import { AdStatus } from '../types/enums/MediaChampaign';
 
+// Remove requiredRole from WorkflowTask, assignedMember is single (not array)
 interface WorkflowTask {
   id: string;
   taskName: string;
   description: string;
-  requiredRole: string;
-  assignedMembers: string[];
+  assignedMember: string;
   order: number;
 }
 
@@ -45,6 +42,7 @@ const Ads = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [adTypes, setAdTypes] = useState<AdType[]>([]);
   const [workflows, setWorkflows] = useState<MediaWorkflow[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,24 +56,10 @@ const Ads = () => {
 
   // Workflow state
   const [useCustomWorkflow, setUseCustomWorkflow] = useState(false);
-  const [workflowTasks, setWorkflowTasks] = useState<WorkflowTask[]>([
-    {
-      id: 'task1',
-      taskName: 'Draft copy',
-      description: 'Write initial captions for IG post and story variants.',
-      requiredRole: 'Copywriter',
-      assignedMembers: [],
-      order: 1
-    },
-    {
-      id: 'task2',
-      taskName: 'Design visuals',
-      description: 'Create IG post and story assets following brand kit.',
-      requiredRole: 'Designer',
-      assignedMembers: [],
-      order: 2
-    }
-  ]);
+  const [workflowTasks, setWorkflowTasks] = useState<WorkflowTask[]>([]);
+  const [showAssignUserModal, setShowAssignUserModal] = useState<{show: boolean, taskId: string | null}>({show: false, taskId: null});
+
+  const [pendingAssignedUser, setPendingAssignedUser] = useState<string>('');
 
   const [createForm, setCreateForm] = useState<CreateAdForm>({
     deadline: '',
@@ -90,30 +74,49 @@ const Ads = () => {
     integrationStatusIds: []
   });
 
-  const roleOptions = ['Copywriter', 'Designer', 'Creative Director', 'Marketing Manager'];
-  const teamMembers = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson', 'Alex Brown'];
-
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      const [adsData, campaignsData, adTypesData, workflowsData] = await Promise.all([
+      const [adsData, campaignsData, adTypesData, workflowsData, usersData] = await Promise.all([
         AdService.getAllAds(),
         CampaignService.getAllCampaigns(),
         AdTypeService.getAllAdTypes(),
-        MediaWorkflowService.getAllMediaWorkflows()
+        MediaWorkflowService.getAllMediaWorkflows(),
+        AuthService.getMediaCampaignUsers()
       ]);
       setAds(adsData);
       setCampaigns(campaignsData);
       setAdTypes(adTypesData);
       setWorkflows(workflowsData);
+      setUsers(usersData);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      toast.error('Error fetching data');
     } finally {
       setLoading(false);
+      setDefaultWorkflowTasks();
     }
+  };
+
+  const setDefaultWorkflowTasks = () => {
+    setWorkflowTasks([
+      {
+        id: 'task1',
+        taskName: 'Draft copy',
+        description: 'Write initial captions for IG post and story variants.',
+        assignedMember: '',
+        order: 1
+      },
+      {
+        id: 'task2',
+        taskName: 'Design visuals',
+        description: 'Create IG post and story assets following brand kit.',
+        assignedMember: '',
+        order: 2
+      }
+    ]);
   };
 
   const handleAdTypeChange = async (adTypeId: number) => {
@@ -123,11 +126,31 @@ const Ads = () => {
     // Check if the ad type has a default workflow
     const selectedAdType = adTypes.find(at => at.adTypeId === adTypeId);
     if (selectedAdType?.mediaWorkflowId) {
-      setCreateForm(prev => ({...prev, mediaWorkflowId: selectedAdType.mediaWorkflowId}));
-      if (editForm) setEditForm(prev => ({...prev!, mediaWorkflowId: selectedAdType.mediaWorkflowId}));
-      setUseCustomWorkflow(false);
+      // Use suggested workflow
+      try {
+        const workflow = await MediaWorkflowService.getMediaWorkflowById(selectedAdType.mediaWorkflowId);
+        if (workflow?.tasks) {
+          setWorkflowTasks(
+            workflow.tasks.map((t: any, idx: number) => ({
+              id: `task${idx + 1}`,
+              taskName: t.taskName,
+              description: t.description,
+              assignedMember: '',
+              order: t.order || idx + 1
+            }))
+          );
+        }
+        setUseCustomWorkflow(false);
+        setCreateForm(prev => ({...prev, mediaWorkflowId: selectedAdType.mediaWorkflowId}));
+        if (editForm) setEditForm(prev => ({...prev!, mediaWorkflowId: selectedAdType.mediaWorkflowId}));
+        toast.info('Suggested workflow loaded for this Ad Type.');
+      } catch (error) {
+        toast.error('Could not load suggested workflow.');
+        setUseCustomWorkflow(true);
+      }
     } else {
       setUseCustomWorkflow(true);
+      setDefaultWorkflowTasks();
     }
   };
 
@@ -136,8 +159,7 @@ const Ads = () => {
       id: `task${workflowTasks.length + 1}`,
       taskName: '',
       description: '',
-      requiredRole: 'Copywriter',
-      assignedMembers: [],
+      assignedMember: '',
       order: workflowTasks.length + 1
     };
     setWorkflowTasks([...workflowTasks, newTask]);
@@ -153,6 +175,24 @@ const Ads = () => {
 
   const removeWorkflowTask = (taskId: string) => {
     setWorkflowTasks(tasks => tasks.filter(task => task.id !== taskId));
+  };
+
+  const openAssignUserModal = (taskId: string) => {
+    setShowAssignUserModal({show: true, taskId});
+    setPendingAssignedUser('');
+  };
+
+  const confirmAssignUser = () => {
+    if (showAssignUserModal.taskId && pendingAssignedUser) {
+      setWorkflowTasks(tasks => tasks.map(task =>
+        task.id === showAssignUserModal.taskId ? { ...task, assignedMember: pendingAssignedUser } : task
+      ));
+      setShowAssignUserModal({show: false, taskId: null});
+      setPendingAssignedUser('');
+      toast.success('User assigned to task.');
+    } else {
+      toast.warning('Please select a user to assign.');
+    }
   };
 
   const handleCreateAd = async () => {
@@ -173,6 +213,7 @@ const Ads = () => {
               order: task.order,
               taskStatus: 'Pending',
               workflowId: workflowId,
+              managerId: task.assignedMember || undefined
             };
             await MediaTaskService.createMediaTask(taskForm);
           }
@@ -188,8 +229,9 @@ const Ads = () => {
       setAds([...ads, newAd]);
       resetForm();
       setShowCreateModal(false);
+      toast.success('Ad created successfully!');
     } catch (error) {
-      console.error('Error creating ad:', error);
+      toast.error('Error creating ad!');
     }
   };
 
@@ -207,24 +249,7 @@ const Ads = () => {
       integrationStatusIds: []
     });
     setUseCustomWorkflow(false);
-    setWorkflowTasks([
-      {
-        id: 'task1',
-        taskName: 'Draft copy',
-        description: 'Write initial captions for IG post and story variants.',
-        requiredRole: 'Copywriter',
-        assignedMembers: [],
-        order: 1
-      },
-      {
-        id: 'task2',
-        taskName: 'Design visuals',
-        description: 'Create IG post and story assets following brand kit.',
-        requiredRole: 'Designer',
-        assignedMembers: [],
-        order: 2
-      }
-    ]);
+    setDefaultWorkflowTasks();
     setEditingAd(null);
     setEditForm(null);
   };
@@ -234,8 +259,9 @@ const Ads = () => {
       try {
         await AdService.deleteAd(id);
         setAds(ads.filter(ad => ad.adId !== id));
+        toast.success('Ad deleted!');
       } catch (error) {
-        console.error('Error deleting ad:', error);
+        toast.error('Error deleting ad!');
       }
     }
   };
@@ -244,7 +270,7 @@ const Ads = () => {
     setEditingAd(ad);
     setEditForm({
       deadline: ad.deadline,
-      title: ad.title,
+      title: ad.title || '',
       creationDate: ad.creationDate.split('T')[0],
       currentPhase: ad.currentPhase,
       publicationDate: ad.publicationDate ? ad.publicationDate.split('T')[0] : '',
@@ -263,8 +289,9 @@ const Ads = () => {
         const updatedAd = await AdService.updateAd(editingAd.adId, editForm);
         setAds(ads.map(a => a.adId === updatedAd.adId ? updatedAd : a));
         resetForm();
+        toast.success('Ad updated!');
       } catch (error) {
-        console.error('Error updating ad:', error);
+        toast.error('Error updating ad!');
       }
     }
   };
@@ -588,7 +615,7 @@ const Ads = () => {
                   <Settings className="w-5 h-5 text-neutral-400" />
                   <span className="text-white font-medium">Workflow</span>
                   <span className="text-neutral-400 text-sm ml-auto">
-                    From Ad Type: Available • Tasks: {workflowTasks.length}
+                    {useCustomWorkflow ? "Custom Workflow" : "Suggested Workflow"}
                   </span>
                 </div>
 
@@ -601,9 +628,20 @@ const Ads = () => {
                     <Plus className="w-4 h-4" />
                     Add Task
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-lg transition-colors text-sm">
+                  <button
+                    className="flex items-center gap-2 px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-lg transition-colors text-sm"
+                    onClick={() => setUseCustomWorkflow(false)}
+                    disabled={!createForm.adTypeId}
+                  >
                     <Settings className="w-4 h-4" />
                     Use Suggested Workflow
+                  </button>
+                  <button
+                    className="flex items-center gap-2 px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-lg transition-colors text-sm"
+                    onClick={() => setUseCustomWorkflow(true)}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create Custom Workflow
                   </button>
                 </div>
 
@@ -616,8 +654,12 @@ const Ads = () => {
                           <span className="text-neutral-400 text-sm">Task {index + 1} of {workflowTasks.length}</span>
                         </div>
                         <div className="flex gap-2">
-                          <button className="p-1 text-neutral-400 hover:text-blue-400 transition-colors">
-                            <Edit className="w-4 h-4" />
+                          <button 
+                            onClick={() => openAssignUserModal(task.id)}
+                            className="p-1 text-neutral-400 hover:text-purple-400 transition-colors"
+                            title="Assign User"
+                          >
+                            <Settings className="w-4 h-4" />
                           </button>
                           <button 
                             onClick={() => removeWorkflowTask(task.id)}
@@ -628,28 +670,14 @@ const Ads = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 mb-3">
-                        <div>
-                          <label className="block text-xs text-neutral-400 mb-1">Task Name</label>
-                          <input
-                            type="text"
-                            value={task.taskName}
-                            onChange={(e) => updateWorkflowTask(task.id, 'taskName', e.target.value)}
-                            className="w-full p-2 bg-neutral-600 border border-neutral-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-neutral-400 mb-1">Required Role</label>
-                          <select
-                            value={task.requiredRole}
-                            onChange={(e) => updateWorkflowTask(task.id, 'requiredRole', e.target.value)}
-                            className="w-full p-2 bg-neutral-600 border border-neutral-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 appearance-none cursor-pointer"
-                          >
-                            {roleOptions.map(role => (
-                              <option key={role} value={role}>{role}</option>
-                            ))}
-                          </select>
-                        </div>
+                      <div className="mb-3">
+                        <label className="block text-xs text-neutral-400 mb-1">Task Name</label>
+                        <input
+                          type="text"
+                          value={task.taskName}
+                          onChange={(e) => updateWorkflowTask(task.id, 'taskName', e.target.value)}
+                          className="w-full p-2 bg-neutral-600 border border-neutral-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                        />
                       </div>
 
                       <div className="mb-3">
@@ -663,19 +691,12 @@ const Ads = () => {
                       </div>
 
                       <div>
-                        <label className="block text-xs text-neutral-400 mb-1">Assign Team Members</label>
-                        <select
-                          multiple
-                          value={task.assignedMembers}
-                          onChange={(e) => updateWorkflowTask(task.id, 'assignedMembers', Array.from(e.target.selectedOptions, option => option.value))}
-                          className="w-full p-2 bg-neutral-600 border border-neutral-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 appearance-none cursor-pointer"
-                          size={3}
-                        >
-                          {teamMembers.map(member => (
-                            <option key={member} value={member}>{member}</option>
-                          ))}
-                        </select>
-                        <p className="text-xs text-neutral-400 mt-1">Hold Ctrl/Cmd to select multiple</p>
+                        <label className="block text-xs text-neutral-400 mb-1">Assigned User</label>
+                        <span className="inline-block px-3 py-1 rounded bg-neutral-800 border border-neutral-600 text-white text-xs">
+                          {task.assignedMember
+                            ? users.find(u => u.id === task.assignedMember)?.firstName + ' ' + users.find(u => u.id === task.assignedMember)?.lastName
+                            : 'Not Assigned'}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -705,6 +726,45 @@ const Ads = () => {
         </div>
       )}
 
+      {/* Assign User Modal */}
+      {showAssignUserModal.show && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-neutral-800 border border-neutral-700 rounded-2xl p-6 w-full max-w-lg">
+            <h3 className="text-lg text-white mb-4">Assign User to Task</h3>
+            // Inside your Assign User Modal
+          <select
+            value={pendingAssignedUser}
+            onChange={e => setPendingAssignedUser(e.target.value)}
+            className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white mb-4"
+          >
+            <option value="">Select user</option>
+            {users
+              .filter(u => u.department === 4) // or u.role === 'MediaCampaign'
+              .map(user => (
+                <option key={user.id} value={user.id}>
+                  {user.firstName} {user.lastName}
+                </option>
+              ))}
+          </select>
+            <div className="flex gap-2 justify-end">
+              <button
+                className="px-4 py-2 bg-neutral-700 text-white rounded-lg"
+                onClick={() => setShowAssignUserModal({show: false, taskId: null})}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-purple-500 text-white rounded-lg"
+                onClick={confirmAssignUser}
+                disabled={!pendingAssignedUser}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Edit Ad Modal */}
       {editingAd && editForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -720,9 +780,8 @@ const Ads = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column - Basic Info */}
+              {/* Title */}
               <div className="space-y-4">
-                {/* Title */}
                 <div>
                   <label className="block text-sm text-neutral-300 mb-2">Title</label>
                   <input
@@ -735,7 +794,6 @@ const Ads = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Campaign */}
                   <div>
                     <label className="block text-sm text-neutral-300 mb-2">Campaign</label>
                     <select
@@ -751,8 +809,6 @@ const Ads = () => {
                       ))}
                     </select>
                   </div>
-
-                  {/* Due Date */}
                   <div>
                     <label className="block text-sm text-neutral-300 mb-2">Due Date</label>
                     <input
@@ -763,8 +819,6 @@ const Ads = () => {
                     />
                   </div>
                 </div>
-
-                {/* Ad Type */}
                 <div>
                   <label className="block text-sm text-neutral-300 mb-2">Ad Type</label>
                   <select
@@ -780,8 +834,6 @@ const Ads = () => {
                     ))}
                   </select>
                 </div>
-
-                {/* Instructions */}
                 <div>
                   <label className="block text-sm text-neutral-300 mb-2">Instructions</label>
                   <textarea
@@ -791,8 +843,7 @@ const Ads = () => {
                   />
                 </div>
               </div>
-
-              {/* You can add workflow edit fields here as needed */}
+              {/* Add workflow edit if needed */}
             </div>
 
             <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-neutral-700">
