@@ -989,7 +989,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     Dimensions = table.Column<string>(type: "text", nullable: true),
                     Duration = table.Column<int>(type: "integer", nullable: false),
                     FileFormat = table.Column<string>(type: "text", nullable: true),
-                    MediaWorkflowId = table.Column<int>(type: "integer", nullable: false)
+                    MediaWorkflowId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1042,7 +1042,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     TaskStatus = table.Column<string>(type: "text", nullable: true),
                     WorkflowId = table.Column<int>(type: "integer", nullable: false),
                     ApprovalId = table.Column<int>(type: "integer", nullable: true),
-                    ManagerId = table.Column<string>(type: "text", nullable: false),
+                    ManagerId = table.Column<string>(type: "text", nullable: true),
                     AdId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
@@ -1057,8 +1057,7 @@ namespace MusicEventManagementSystem.API.Migrations
                         name: "FK_MediaTasks_AspNetUsers_ManagerId",
                         column: x => x.ManagerId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_MediaTasks_MediaWorkflows_WorkflowId",
                         column: x => x.WorkflowId,
@@ -1299,8 +1298,7 @@ namespace MusicEventManagementSystem.API.Migrations
                 table: "AdTypes",
                 column: "MediaWorkflowId",
                 principalTable: "MediaWorkflows",
-                principalColumn: "MediaWorkflowId",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "MediaWorkflowId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Approvals_MediaTasks_MediaTaskId",

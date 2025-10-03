@@ -114,9 +114,10 @@ namespace MusicEventManagementSystem.API.Services
             TaskName = dto.TaskName,
             Order = dto.Order,
             TaskStatus = dto.TaskStatus,
-            WorkflowId = dto.WorkflowId,
+            WorkflowId = dto.WorkflowId,  // Default to 0 if not provided; should be set by EF Core when added to workflow
             ApprovalId = dto.ApprovalId,
-            ManagerId = dto.ManagerId
+            ManagerId = dto.ManagerId,
+            AdId = dto.AdId
         };
     }
 }

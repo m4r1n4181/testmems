@@ -228,7 +228,7 @@ namespace MusicEventManagementSystem.Data
                 .HasOne(at => at.MediaWorkflow)
                 .WithMany(mw => mw.AdTypes)
                 .HasForeignKey(at => at.MediaWorkflowId)
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Entity<Approval>()
                 .HasOne<MediaTask>()
@@ -254,7 +254,7 @@ namespace MusicEventManagementSystem.Data
                 .HasOne(mt => mt.Manager)
                 .WithMany(u => u.MediaTasks) 
                 .HasForeignKey(mt => mt.ManagerId)
-                .IsRequired();
+                .IsRequired(false);
 
 
             // Conversion DateTime to UTC

@@ -11,7 +11,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public int Duration { get; set; }
         public string? FileFormat { get; set; }
         public ICollection<int>? AdIds { get; set; }
-        public int MediaWorkflowId { get; set; } 
+        public int? MediaWorkflowId { get; set; } 
     }
 
     public class AdTypeCreateDto
@@ -36,7 +36,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
 
         [Range(0, 100)]
         public ICollection<int>? AdIds { get; set; }
-        public int MediaWorkflowId { get; set; }
+        public int? MediaWorkflowId { get; set; }
     }
 
     public class AdTypeUpdateDto

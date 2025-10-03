@@ -107,7 +107,8 @@ namespace MusicEventManagementSystem.API.Services
             TypeDescription = dto.TypeDescription,
             Dimensions = dto.Dimensions,
             Duration = dto.Duration,
-            FileFormat = dto.FileFormat
+            FileFormat = dto.FileFormat,
+            MediaWorkflowId = dto.MediaWorkflowId
         };
     }
 }

@@ -29,24 +29,32 @@ namespace MusicEventManagementSystem.API.Services
 
         public async Task<MediaWorkflowResponseDto> CreateMediaWorkflowAsync(MediaWorkflowCreateDto dto)
         {
-            var workflow = new MediaWorkflow { WorkflowDescription = dto.WorkflowDescription, ApprovalId = dto.ApprovalId };
+            var workflow = new MediaWorkflow 
+            { 
+                WorkflowDescription = dto.WorkflowDescription, 
+                ApprovalId = dto.ApprovalId 
+            };
+            
+            // Add tasks to the workflow if provided
+            // EF Core will automatically set the WorkflowId when the workflow is saved
             if (dto.Tasks != null)
             {
                 foreach (var taskDto in dto.Tasks)
                 {
-                    // If ManagerId is not provided, you can set it to null or a default value
                     var task = new MediaTask
                     {
                         TaskName = taskDto.TaskName,
                         Order = taskDto.Order,
                         TaskStatus = taskDto.TaskStatus,
-                        WorkflowId = workflow.MediaWorkflowId,
                         ApprovalId = taskDto.ApprovalId,
-                        ManagerId = taskDto.ManagerId   // might be null!
+                        ManagerId = taskDto.ManagerId,
+                        AdId = taskDto.AdId
+                        // WorkflowId will be set automatically by EF Core when workflow is saved
                     };
                     workflow.Tasks.Add(task);
                 }
             }
+            
             await _mediaWorkflowRepository.AddAsync(workflow);
             await _mediaWorkflowRepository.SaveChangesAsync();
             return MapToResponseDto(workflow);
@@ -57,12 +65,13 @@ namespace MusicEventManagementSystem.API.Services
             var workflow = await _mediaWorkflowRepository.GetByIdAsync(id);
             if (workflow == null) return null;
 
-            if (dto.WorkflowDescription != null) workflow.WorkflowDescription = dto.WorkflowDescription;
+            if (dto.WorkflowDescription != null) 
+                workflow.WorkflowDescription = dto.WorkflowDescription;
 
             // Update tasks if provided
             if (dto.Tasks != null)
             {
-                // Simple logic: clear existing, add all from dto
+                // Clear existing tasks and add new ones
                 workflow.Tasks.Clear();
                 foreach (var taskDto in dto.Tasks)
                 {
@@ -70,8 +79,11 @@ namespace MusicEventManagementSystem.API.Services
                     {
                         TaskName = taskDto.TaskName,
                         TaskStatus = taskDto.TaskStatus,
-                        Order = (int)taskDto.Order,
-                        MediaWorkflow = workflow
+                        Order = taskDto.Order ?? 0,
+                        WorkflowId = workflow.MediaWorkflowId,  // Set the WorkflowId explicitly for updates
+                        ApprovalId = taskDto.ApprovalId,
+                        ManagerId = taskDto.ManagerId,
+                        AdId = taskDto.AdId
                     });
                 }
             }

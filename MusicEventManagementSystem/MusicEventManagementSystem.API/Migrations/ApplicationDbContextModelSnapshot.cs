@@ -235,7 +235,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<string>("FileFormat")
                         .HasColumnType("text");
 
-                    b.Property<int>("MediaWorkflowId")
+                    b.Property<int?>("MediaWorkflowId")
                         .HasColumnType("integer");
 
                     b.Property<string>("TypeDescription")
@@ -616,7 +616,6 @@ namespace MusicEventManagementSystem.API.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("ManagerId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Order")
@@ -628,7 +627,8 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<string>("TaskStatus")
                         .HasColumnType("text");
 
-                    b.Property<int>("WorkflowId")
+                    b.Property<int?>("WorkflowId")
+                        .IsRequired()
                         .HasColumnType("integer");
 
                     b.HasKey("MediaTaskId");
@@ -1622,9 +1622,7 @@ namespace MusicEventManagementSystem.API.Migrations
                 {
                     b.HasOne("MusicEventManagementSystem.API.Models.MediaWorkflow", "MediaWorkflow")
                         .WithMany("AdTypes")
-                        .HasForeignKey("MediaWorkflowId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MediaWorkflowId");
 
                     b.Navigation("MediaWorkflow");
                 });
@@ -1709,9 +1707,7 @@ namespace MusicEventManagementSystem.API.Migrations
 
                     b.HasOne("MusicEventManagementSystem.Models.Auth.ApplicationUser", "Manager")
                         .WithMany("MediaTasks")
-                        .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ManagerId");
 
                     b.HasOne("MusicEventManagementSystem.API.Models.MediaWorkflow", "MediaWorkflow")
                         .WithMany("Tasks")

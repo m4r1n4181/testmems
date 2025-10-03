@@ -8,7 +8,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public string? TaskName { get; set; }
         public int Order { get; set; }
         public string? TaskStatus { get; set; }
-        public int WorkflowId { get; set; }
+        public int? WorkflowId { get; set; }
         public int? ApprovalId { get; set; }
         public string? ManagerId { get; set; }
         public int? AdId { get; set; }
@@ -26,8 +26,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         [StringLength(50)]
         public string? TaskStatus { get; set; }
 
-        [Required]
-        public int WorkflowId { get; set; }
+        public int? WorkflowId { get; set; }
         public int? ApprovalId { get; set; }
         public string? ManagerId { get; set; }
         public int? AdId { get; set; }
