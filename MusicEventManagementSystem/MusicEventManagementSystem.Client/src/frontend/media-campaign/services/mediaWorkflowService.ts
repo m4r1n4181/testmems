@@ -5,7 +5,7 @@ import type {
   MediaTaskForm
 } from '../types/form/mediaWorkflow';
 
-const API_BASE_URL = 'https://localhost:7050/api';
+const API_BASE_URL = 'http://localhost:5255/api'; // Promeni na svoj API URL
 
 export class MediaWorkflowService {
   private static readonly BASE_URL = `${API_BASE_URL}/MediaWorkflow`;

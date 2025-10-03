@@ -4,7 +4,7 @@ import type {
   UpdateMediaChannelForm 
 } from '../types/form/mediaChannel';
 
-const API_BASE_URL = 'https://localhost:7050/api';
+const API_BASE_URL = 'http://localhost:5255/api';
 
 export class MediaChannelService {
   private static readonly BASE_URL = `${API_BASE_URL}/MediaChannel`;

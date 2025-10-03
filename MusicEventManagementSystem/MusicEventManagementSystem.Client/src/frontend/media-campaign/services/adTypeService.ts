@@ -1,7 +1,7 @@
 import type { AdType } from '../types/api/adType';
 import type { CreateAdTypeForm, UpdateAdTypeForm } from '../types/form/adType';
 
-const API_BASE_URL = 'https://localhost:7050/api';
+const API_BASE_URL = 'http://localhost:5255/api';
 
 export class AdTypeService {
   private static readonly BASE_URL = `${API_BASE_URL}/AdType`;

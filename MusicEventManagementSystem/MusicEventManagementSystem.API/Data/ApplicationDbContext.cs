@@ -211,6 +211,12 @@ namespace MusicEventManagementSystem.Data
                 .WithOne(t => t.MediaWorkflow)
                 .HasForeignKey(t => t.WorkflowId)
                 .IsRequired();
+                
+            builder.Entity<Campaign>()
+                .HasOne(c => c.Event)
+                .WithMany(e => e.Campaigns)
+                .HasForeignKey(c => c.EventId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Campaign>()
                 .HasMany(c => c.Ads)

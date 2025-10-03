@@ -465,9 +465,6 @@ namespace MusicEventManagementSystem.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -1646,7 +1643,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.HasOne("MusicEventManagementSystem.API.Models.Event", "Event")
                         .WithMany("Campaigns")
                         .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Event");

@@ -13,6 +13,8 @@ import {
 import { CampaignService } from '../services/campaignService';
 import type { Campaign } from '../types/api/campaign';
 import type { CreateCampaignForm, UpdateCampaignForm } from '../types/form/campaign';
+import { EventService } from '../../event-organization/services/eventService';
+import type { EventResponse } from '../../event-organization/types/api/event';
 
 const Campaigns = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -22,6 +24,7 @@ const Campaigns = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [events, setEvents] = useState<EventResponse[]>([]);
   const [createForm, setCreateForm] = useState<CreateCampaignForm>({
     eventId: 1,
     name: '',
@@ -32,9 +35,21 @@ const Campaigns = () => {
   });
   const [editForm, setEditForm] = useState<UpdateCampaignForm>({});
 
+  // Only one useEffect for fetching campaigns and events
   useEffect(() => {
     fetchCampaigns();
+    fetchEvents();
   }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const data = await EventService.getAllEvents();
+      setEvents(data);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      alert('Error loading events. Please try again.');
+    }
+  };
 
   const fetchCampaigns = async () => {
     try {
@@ -50,23 +65,12 @@ const Campaigns = () => {
 
   const handleCreateCampaign = async () => {
     try {
-      // Validate required fields
-      if (!createForm.name || !createForm.startDate || !createForm.endDate) {
+      if (!createForm.name || !createForm.startDate || !createForm.endDate || !createForm.eventId) {
         alert('Please fill in all required fields.');
         return;
       }
-
-      console.log('Creating campaign with data:', createForm);
-
-      // Create the campaign in the database
       const newCampaign = await CampaignService.createCampaign(createForm);
-      
-      console.log('Campaign created successfully:', newCampaign);
-      
-      // Update local state with the new campaign
       setCampaigns(prev => [...prev, newCampaign]);
-      
-      // Close modal and reset form
       setShowCreateModal(false);
       setCreateForm({
         eventId: 1,
@@ -76,13 +80,9 @@ const Campaigns = () => {
         totalBudget: 0,
         adIds: []
       });
-      
-      // Show success message
       alert('Campaign created successfully!');
     } catch (error) {
       console.error('Detailed error creating campaign:', error);
-      
-      // More specific error messages
       if (error instanceof Error) {
         if (error.message.includes('404')) {
           alert('API endpoint not found. Please check if the server is running.');
@@ -119,31 +119,23 @@ const Campaigns = () => {
 
   const handleUpdateCampaign = async () => {
     if (!selectedCampaign) return;
-    
     try {
-      // Validate required fields
-      if (!editForm.name || !editForm.startDate || !editForm.endDate) {
+      if (!editForm.name || !editForm.startDate || !editForm.endDate || !editForm.eventId) {
         alert('Please fill in all required fields.');
         return;
       }
-
       const updatedCampaign = await CampaignService.updateCampaign(
         selectedCampaign.campaignId,
         editForm
       );
-      
-      // Update local state
       setCampaigns(prev => prev.map(campaign => 
         campaign.campaignId === selectedCampaign.campaignId 
           ? updatedCampaign 
           : campaign
       ));
-      
-      // Close modal and reset
       setShowEditModal(false);
       setSelectedCampaign(null);
       setEditForm({});
-      
       alert('Campaign updated successfully!');
     } catch (error) {
       console.error('Error updating campaign:', error);
@@ -196,105 +188,107 @@ const Campaigns = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Campaigns</h1>
-          <p className="text-neutral-400">Manage your marketing campaigns</p>
+    <>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Campaigns</h1>
+            <p className="text-neutral-400">Manage your marketing campaigns</p>
+          </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-all duration-200 font-medium"
+          >
+            <Plus className="w-5 h-5" />
+            Create New Campaign
+          </button>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-all duration-200 font-medium"
-        >
-          <Plus className="w-5 h-5" />
-          Create New Campaign
-        </button>
-      </div>
 
-      {/* Search Bar */}
-      <div className="flex items-center gap-4 p-4 bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Search campaigns, ads, workflows"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-neutral-700/50 border border-neutral-600 rounded-xl text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
-          />
+        {/* Search Bar */}
+        <div className="flex items-center gap-4 p-4 bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search campaigns, ads, workflows"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-neutral-700/50 border border-neutral-600 rounded-xl text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Campaigns List */}
-      <div className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl overflow-hidden">
-        {filteredCampaigns.length > 0 ? (
-          <div className="divide-y divide-neutral-700">
-            {filteredCampaigns.map((campaign) => (
-              <div key={campaign.campaignId} className="p-6 hover:bg-neutral-700/30 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-purple-400/20 rounded-xl">
-                      <Calendar className="w-6 h-6 text-purple-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-1">{campaign.name}</h3>
-                      <div className="flex items-center gap-4 text-sm text-neutral-400">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4" />
-                          {formatCurrency(campaign.totalBudget)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          📊 {campaign.adIds?.length || 0} Ads
-                        </span>
+        {/* Campaigns List */}
+        <div className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl overflow-hidden">
+          {filteredCampaigns.length > 0 ? (
+            <div className="divide-y divide-neutral-700">
+              {filteredCampaigns.map((campaign) => (
+                <div key={campaign.campaignId} className="p-6 hover:bg-neutral-700/30 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-purple-400/20 rounded-xl">
+                        <Calendar className="w-6 h-6 text-purple-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-white mb-1">{campaign.name}</h3>
+                        <div className="flex items-center gap-4 text-sm text-neutral-400">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <DollarSign className="w-4 h-4" />
+                            {formatCurrency(campaign.totalBudget)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            📊 {campaign.adIds?.length || 0} Ads
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <button 
-                      onClick={() => handleViewCampaign(campaign)}
-                      className="p-2 text-neutral-400 hover:text-blue-400 hover:bg-blue-400/20 rounded-lg transition-all duration-200"
-                      title="View Details"
-                    >
-                      <Eye className="w-5 h-5" />
-                    </button>
-                    <button 
-                      onClick={() => handleEditCampaign(campaign)}
-                      className="p-2 text-neutral-400 hover:text-yellow-400 hover:bg-yellow-400/20 rounded-lg transition-all duration-200"
-                      title="Edit Campaign"
-                    >
-                      <Edit className="w-5 h-5" />
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteCampaign(campaign.campaignId)}
-                      className="p-2 text-neutral-400 hover:text-red-400 hover:bg-red-400/20 rounded-lg transition-all duration-200"
-                      title="Delete Campaign"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                    
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => handleViewCampaign(campaign)}
+                        className="p-2 text-neutral-400 hover:text-blue-400 hover:bg-blue-400/20 rounded-lg transition-all duration-200"
+                        title="View Details"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={() => handleEditCampaign(campaign)}
+                        className="p-2 text-neutral-400 hover:text-yellow-400 hover:bg-yellow-400/20 rounded-lg transition-all duration-200"
+                        title="Edit Campaign"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteCampaign(campaign.campaignId)}
+                        className="p-2 text-neutral-400 hover:text-red-400 hover:bg-red-400/20 rounded-lg transition-all duration-200"
+                        title="Delete Campaign"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="p-12 text-center">
-            <Calendar className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No campaigns found</h3>
-            <p className="text-neutral-400 mb-6">Get started by creating your first campaign</p>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-colors"
-            >
-              Create New Campaign
-            </button>
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="p-12 text-center">
+              <Calendar className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">No campaigns found</h3>
+              <p className="text-neutral-400 mb-6">Get started by creating your first campaign</p>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-colors"
+              >
+                Create New Campaign
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Create Campaign Modal */}
@@ -334,9 +328,12 @@ const Campaigns = () => {
                       onChange={(e) => setCreateForm({...createForm, eventId: Number(e.target.value)})}
                       className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent appearance-none cursor-pointer"
                     >
-                      <option value={1}>Exit Festival Instagram</option>
-                      <option value={2}>Summer Music Fest</option>
-                      <option value={3}>Rock Concert 2024</option>
+                      <option value="">Select event</option>
+                      {events.map(event => (
+                        <option key={event.eventId} value={event.eventId}>
+                          {event.name}
+                        </option>
+                      ))}
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5 pointer-events-none" />
                   </div>
@@ -393,7 +390,7 @@ const Campaigns = () => {
               <button
                 onClick={handleCreateCampaign}
                 className="px-6 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-colors font-medium"
-                disabled={!createForm.name || !createForm.startDate || !createForm.endDate}
+                disabled={!createForm.name || !createForm.startDate || !createForm.endDate || !createForm.eventId}
               >
                 Save Campaign
               </button>
@@ -512,9 +509,11 @@ const Campaigns = () => {
                       className="w-full p-3 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent appearance-none cursor-pointer"
                     >
                       <option value="">Select event</option>
-                      <option value={1}>Exit Festival Instagram</option>
-                      <option value={2}>Summer Music Fest</option>
-                      <option value={3}>Rock Concert 2024</option>
+                      {events.map(event => (
+                        <option key={event.id} value={event.id}>
+                          {event.name}
+                        </option>
+                      ))}
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5 pointer-events-none" />
                   </div>
@@ -571,7 +570,7 @@ const Campaigns = () => {
               <button
                 onClick={handleUpdateCampaign}
                 className="px-6 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-colors font-medium"
-                disabled={!editForm.name || !editForm.startDate || !editForm.endDate}
+                disabled={!editForm.name || !editForm.startDate || !editForm.endDate || !editForm.eventId}
               >
                 Update Campaign
               </button>
@@ -579,7 +578,7 @@ const Campaigns = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

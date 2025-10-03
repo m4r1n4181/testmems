@@ -2,7 +2,7 @@ import type { Ad } from '../types/api/ad';
 import type { CreateAdForm, UpdateAdForm } from '../types/form/ad';
 import { AdStatus } from '../types/enums/MediaChampaign';
 
-const API_BASE_URL = 'https://localhost:7050/api';
+const API_BASE_URL = 'http://localhost:5255/api';
 
 export class AdService {
   private static readonly BASE_URL = `${API_BASE_URL}/Ad`;

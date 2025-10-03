@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicEventManagementSystem.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250929062002_InitialCreate")]
+    [Migration("20251003004925_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -467,9 +467,6 @@ namespace MusicEventManagementSystem.API.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -1649,7 +1646,7 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.HasOne("MusicEventManagementSystem.API.Models.Event", "Event")
                         .WithMany("Campaigns")
                         .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Event");

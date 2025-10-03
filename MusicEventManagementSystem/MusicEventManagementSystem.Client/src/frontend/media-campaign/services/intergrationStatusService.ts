@@ -5,7 +5,8 @@ import type {
 } from '../types/form/integrationStatus';
 import type { StatusIntegration } from '../types/enums/MediaChampaign';
 
-const API_BASE_URL = 'https://localhost:7050/api';
+
+const API_BASE_URL = 'http://localhost:5255/api'; // Promeni na svoj API URL
 
 export class IntegrationStatusService {
   private static readonly BASE_URL = `${API_BASE_URL}/IntegrationStatus`;

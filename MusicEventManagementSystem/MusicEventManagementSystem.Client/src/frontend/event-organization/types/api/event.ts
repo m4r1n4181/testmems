@@ -13,4 +13,5 @@ export interface EventResponse {
   deletedAt?: Date;
   ticketTypes?: number[];
   pricingRules?: number[];
+  campaignId?: number[];
 }

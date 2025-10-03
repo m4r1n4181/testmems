@@ -1,7 +1,7 @@
 import type { Approval } from '../types/api/approval';
 import type { CreateApprovalForm, UpdateApprovalForm } from '../types/form/approval';
 
-const API_BASE_URL = 'https://localhost:7050/api';
+const API_BASE_URL = 'http://localhost:5255/api';
 
 export class ApprovalService {
   private static readonly BASE_URL = `${API_BASE_URL}/Approval`;

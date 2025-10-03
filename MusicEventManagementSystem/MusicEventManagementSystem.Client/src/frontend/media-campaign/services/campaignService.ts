@@ -1,7 +1,7 @@
 import type { Campaign } from '../types/api/campaign';
 import type { CreateCampaignForm, UpdateCampaignForm } from '../types/form/campaign';
 
-const API_BASE_URL = 'https://localhost:7050/api';
+const API_BASE_URL = 'http://localhost:5255/api'; // Promeni na svoj API URL
 
 export class CampaignService {
   private static readonly BASE_URL = `${API_BASE_URL}/Campaign`;
