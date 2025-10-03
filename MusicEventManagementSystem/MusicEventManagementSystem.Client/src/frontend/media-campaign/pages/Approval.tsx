@@ -8,10 +8,16 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { ApprovalService } from '../services/approvalService';
 import { MediaTaskService } from '../services/mediaTaskService';
+import { MediaVersionService } from '../services/mediaVersionService';
 import { AdService } from '../services/addService';
+import { CampaignService } from '../services/campaignService';
+import { AdTypeService } from '../services/adTypeService';
 import type { Approval } from '../types/api/approval';
 import type { MediaTask } from '../types/api/mediaTask';
+import type { MediaVersion } from '../types/api/mediaVersion';
 import type { Ad } from '../types/api/ad';
+import type { Campaign } from '../types/api/campaign';
+import type { AdType } from '../types/api/adType';
 
 const ApprovalPage = () => {
   const navigate = useNavigate();
@@ -21,6 +27,9 @@ const ApprovalPage = () => {
   const [approval, setApproval] = useState<Approval | null>(null);
   const [mediaTask, setMediaTask] = useState<MediaTask | null>(null);
   const [ad, setAd] = useState<Ad | null>(null);
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [adType, setAdType] = useState<AdType | null>(null);
+  const [versions, setVersions] = useState<MediaVersion[]>([]);
   const [note, setNote] = useState('');
 
   // Media version info (file) is unavailable so we'll use placeholders
@@ -44,12 +53,37 @@ const ApprovalPage = () => {
             const adData = await AdService.getAdById(taskData.adId);
             setAd(adData);
 
-            // Placeholder file info - since media version is not available
-            setFileInfo({
-              fileType: adData.fileType || '.mp4',
-              duration: adData.duration || 15,
-              fileURL: adData.fileURL, // If ad has fileURL, else undefined
-            });
+            // Get campaign details
+            try {
+              const campaignData = await CampaignService.getCampaignById(adData.campaignId);
+              setCampaign(campaignData);
+            } catch (error) {
+              console.error('Error fetching campaign:', error);
+            }
+
+            // Get ad type details
+            try {
+              const adTypeData = await AdTypeService.getAdTypeById(adData.adTypeId);
+              setAdType(adTypeData);
+            } catch (error) {
+              console.error('Error fetching ad type:', error);
+            }
+
+            // Get media versions
+            const versionsData = await MediaVersionService.getByAdId(taskData.adId);
+            setVersions(versionsData);
+
+            // Get final version or latest version for preview
+            const finalVersion = versionsData.find(v => v.isFinalVersion) || versionsData[versionsData.length - 1];
+            
+            // Set file info from media version
+            if (finalVersion) {
+              setFileInfo({
+                fileType: finalVersion.fileType || '.mp4',
+                duration: 15, // Default duration, could be extended in MediaVersion model
+                fileURL: finalVersion.fileURL,
+              });
+            }
           }
         }
       } catch (error) {
@@ -62,14 +96,32 @@ const ApprovalPage = () => {
   }, [approvalId]);
 
   const handleApprove = async () => {
-    if (!approval) return;
+    if (!approval || !mediaTask) return;
     try {
+      // Update approval status to "Approved"
       await ApprovalService.updateApproval(approval.approvalId, {
         approvalStatus: 'Approved',
         comment: note,
         approvalDate: new Date().toISOString(),
       });
-      navigate('/dashboard');
+
+      // Update task status to "Approved"
+      await MediaTaskService.updateMediaTask(mediaTask.mediaTaskId, {
+        taskStatus: 'Approved'
+      });
+
+      // Ensure the final version is set (if any versions exist)
+      if (versions.length > 0) {
+        const finalVersion = versions.find(v => v.isFinalVersion);
+        if (finalVersion) {
+          await MediaVersionService.updateMediaVersion(finalVersion.mediaVersionId, {
+            isFinalVersion: true
+          });
+        }
+      }
+
+      alert('Task approved successfully!');
+      navigate('/media-campaign/mytasks');
     } catch (error) {
       console.error('Error approving:', error);
       alert('Failed to approve.');
@@ -77,14 +129,22 @@ const ApprovalPage = () => {
   };
 
   const handleReject = async () => {
-    if (!approval) return;
+    if (!approval || !mediaTask) return;
     try {
+      // Update approval status to "Denied"
       await ApprovalService.updateApproval(approval.approvalId, {
         approvalStatus: 'Denied',
         comment: note,
         approvalDate: new Date().toISOString(),
       });
-      navigate('/dashboard');
+
+      // Update task status to "Rejected"
+      await MediaTaskService.updateMediaTask(mediaTask.mediaTaskId, {
+        taskStatus: 'Rejected'
+      });
+
+      alert('Task rejected successfully!');
+      navigate('/media-campaign/mytasks');
     } catch (error) {
       console.error('Error rejecting:', error);
       alert('Failed to reject.');
@@ -161,7 +221,7 @@ const ApprovalPage = () => {
                 <span className="text-white mt-4 text-center">
                   {ad?.title || mediaTask?.taskName || 'Asset'}
                   <span className="block text-neutral-400 text-sm mt-1">
-                    {ad?.dimensions || '1080 x 1920'}
+                    Media Asset
                   </span>
                 </span>
               </div>
@@ -177,13 +237,13 @@ const ApprovalPage = () => {
               <div>
                 <label className="block text-neutral-300 mb-2">Campaign</label>
                 <div className="bg-neutral-700 border border-neutral-600 rounded-xl p-4 text-white">
-                  {ad?.campaignName || 'Unknown Campaign'}
+                  {campaign?.name || 'Unknown Campaign'}
                 </div>
               </div>
               <div>
                 <label className="block text-neutral-300 mb-2">Channel</label>
                 <div className="bg-neutral-700 border border-neutral-600 rounded-xl p-4 text-white">
-                  {ad?.adTypeName || 'Unknown Channel'}
+                  {adType?.typeName || 'Unknown Channel'}
                 </div>
               </div>
               <div>
