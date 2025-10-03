@@ -22,6 +22,7 @@ import { CampaignService } from '../services/campaignService';
 import { AdTypeService } from '../services/adTypeService';
 import { MediaWorkflowService } from '../services/mediaWorkflowService';
 import { MediaTaskService } from '../services/mediaTaskService';
+import { AuthService, type User } from '../../shared/services/authService';
 import type { Ad } from '../types/api/ad';
 import type { Campaign } from '../types/api/campaign';
 import type { AdType } from '../types/api/adType';
@@ -45,6 +46,7 @@ const Ads = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [adTypes, setAdTypes] = useState<AdType[]>([]);
   const [workflows, setWorkflows] = useState<MediaWorkflow[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -91,7 +93,6 @@ const Ads = () => {
   });
 
   const roleOptions = ['Copywriter', 'Designer', 'Creative Director', 'Marketing Manager'];
-  const teamMembers = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson', 'Alex Brown'];
 
   useEffect(() => {
     fetchData();
@@ -99,16 +100,18 @@ const Ads = () => {
 
   const fetchData = async () => {
     try {
-      const [adsData, campaignsData, adTypesData, workflowsData] = await Promise.all([
+      const [adsData, campaignsData, adTypesData, workflowsData, usersData] = await Promise.all([
         AdService.getAllAds(),
         CampaignService.getAllCampaigns(),
         AdTypeService.getAllAdTypes(),
-        MediaWorkflowService.getAllMediaWorkflows()
+        MediaWorkflowService.getAllMediaWorkflows(),
+        AuthService.getMediaCampaignUsers()
       ]);
       setAds(adsData);
       setCampaigns(campaignsData);
       setAdTypes(adTypesData);
       setWorkflows(workflowsData);
+      setUsers(usersData);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -173,6 +176,7 @@ const Ads = () => {
               order: task.order,
               taskStatus: 'Pending',
               workflowId: workflowId,
+              managerId: task.assignedMembers.length > 0 ? task.assignedMembers[0] : undefined
             };
             await MediaTaskService.createMediaTask(taskForm);
           }
@@ -671,8 +675,8 @@ const Ads = () => {
                           className="w-full p-2 bg-neutral-600 border border-neutral-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 appearance-none cursor-pointer"
                           size={3}
                         >
-                          {teamMembers.map(member => (
-                            <option key={member} value={member}>{member}</option>
+                          {users.map(user => (
+                            <option key={user.id} value={user.id}>{`${user.firstName} ${user.lastName}`}</option>
                           ))}
                         </select>
                         <p className="text-xs text-neutral-400 mt-1">Hold Ctrl/Cmd to select multiple</p>
