@@ -338,3 +338,42 @@ All 11 requested features have been fixed and are now fully functional:
 ✅ Integrations Page - Creating Integration
 
 The system is now ready for development and testing. All major functionality works as expected.
+
+---
+
+## Latest Fixes (MediaWorkflow-MediaTask Relationship)
+
+### 12. ✅ Fixed MediaWorkflow and MediaTask One-to-Many Relationship
+**Problem:** The workflow-task relationship had critical issues preventing the creation and updating of workflows with tasks in a single operation. Issues included:
+- `MediaTaskCreateDto` required `WorkflowId` which wasn't available during workflow creation
+- `CreateMediaWorkflowAsync` was setting `WorkflowId` before the workflow was persisted (resulted in ID = 0)
+- Update logic didn't properly set `WorkflowId` for new tasks
+- DbContext marked `Manager` as required but model defined it as optional
+
+**Solution:**
+1. Made `WorkflowId` optional in `MediaTaskCreateDto` - not needed when creating tasks within a workflow
+2. Fixed `CreateMediaWorkflowAsync` to let Entity Framework Core handle the `WorkflowId` assignment automatically
+3. Fixed `UpdateMediaWorkflowAsync` to explicitly set `WorkflowId` for tasks during updates
+4. Fixed `MapToEntity` in `MediaTaskService` to handle nullable `WorkflowId`
+5. Changed `Manager` relationship to optional in `DbContext` configuration
+
+**Files Changed:**
+- `MusicEventManagementSystem.API/DTOs/MediaCampaign/MediaTaskDto.cs`
+- `MusicEventManagementSystem.API/Services/MediaWorkflowService.cs`
+- `MusicEventManagementSystem.API/Services/MediaTaskService.cs`
+- `MusicEventManagementSystem.API/Data/ApplicationDbContext.cs`
+
+**What Works Now:**
+- ✅ Create workflow with multiple tasks in a single API call
+- ✅ Update workflow and its tasks (add/remove/edit)
+- ✅ Delete workflow (cascades to tasks)
+- ✅ Retrieve workflow with all its tasks
+- ✅ Frontend can create, read, update, and delete workflows with tasks
+- ✅ All foreign key relationships maintained correctly
+- ✅ No orphaned tasks
+
+**Documentation:**
+- Detailed technical explanations: `WORKFLOW_TASK_FIXES.md`
+- Comprehensive testing guide: `TESTING_GUIDE.md`
+
+**Status:** Fully functional and verified ✅
