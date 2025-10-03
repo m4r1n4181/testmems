@@ -254,7 +254,7 @@ namespace MusicEventManagementSystem.Data
                 .HasOne(mt => mt.Manager)
                 .WithMany(u => u.MediaTasks) 
                 .HasForeignKey(mt => mt.ManagerId)
-                .IsRequired();
+                .IsRequired(false);  // Manager is optional
 
 
             // Conversion DateTime to UTC
