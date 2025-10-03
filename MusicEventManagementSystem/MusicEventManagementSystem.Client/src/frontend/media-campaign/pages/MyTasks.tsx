@@ -10,6 +10,7 @@ import {
   User,
   FileText,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { MediaTaskService } from '../services/mediaTaskService';
 import { ApprovalService } from '../services/approvalService';
 import { MediaVersionService } from '../services/mediaVersionService';
@@ -28,6 +29,7 @@ interface TaskWithDetails {
 }
 
 const MyTasks = () => {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<TaskWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTask, setSelectedTask] = useState<TaskWithDetails | null>(null);
@@ -77,7 +79,10 @@ const MyTasks = () => {
           return details;
         })
       );
-      setTasks(tasksWithDetails);
+      
+      // Sort tasks by order to ensure correct sequence for unlocking logic
+      const sortedTasks = tasksWithDetails.sort((a, b) => a.task.order - b.task.order);
+      setTasks(sortedTasks);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     } finally {
@@ -89,12 +94,18 @@ const MyTasks = () => {
     switch (status?.toLowerCase()) {
       case 'done':
         return { text: 'Done', color: 'bg-green-500', textColor: 'text-white' };
+      case 'approved':
+        return { text: 'Approved', color: 'bg-green-500', textColor: 'text-white' };
       case 'in progress':
+      case 'inpreparation':
         return { text: 'In Progress', color: 'bg-yellow-500', textColor: 'text-white' };
       case 'under approval':
+      case 'pendingapproval':
         return { text: 'Under Approval', color: 'bg-orange-500', textColor: 'text-white' };
+      case 'rejected':
+        return { text: 'Rejected', color: 'bg-red-500', textColor: 'text-white' };
       case 'scheduled for publication':
-        return { text: 'Scheduled for Publication', color: 'bg-orange-500', textColor: 'text-white' };
+        return { text: 'Scheduled for Publication', color: 'bg-blue-500', textColor: 'text-white' };
       default:
         return { text: status || 'Pending', color: 'bg-neutral-600', textColor: 'text-white' };
     }
@@ -222,6 +233,46 @@ const MyTasks = () => {
     } catch (error) {
       console.error('Error marking as final:', error);
       alert('Error marking version as final');
+    }
+  };
+
+  // Submit to Approval
+  const handleSubmitToApproval = async () => {
+    if (!selectedTask) return;
+    
+    // Check if there's at least one final version
+    const hasFinalVersion = selectedTask.versions?.some(v => v.isFinalVersion);
+    if (!hasFinalVersion) {
+      alert('Please mark at least one version as final before submitting for approval.');
+      return;
+    }
+
+    try {
+      // Update task status to "PendingApproval"
+      await MediaTaskService.updateMediaTask(selectedTask.task.mediaTaskId, {
+        taskStatus: 'PendingApproval'
+      });
+
+      // Create an approval request
+      const newApproval = await ApprovalService.createApproval({
+        approvalStatus: 'Pending',
+        comment: '',
+        approvalDate: new Date().toISOString(),
+        mediaTaskId: selectedTask.task.mediaTaskId
+      });
+
+      // Update the task with the new approval ID
+      await MediaTaskService.updateMediaTask(selectedTask.task.mediaTaskId, {
+        approvalId: newApproval.approvalId
+      });
+
+      alert('Task submitted for approval!');
+      
+      // Navigate to the approval page
+      navigate(`/approval/${newApproval.approvalId}`);
+    } catch (error) {
+      console.error('Error submitting for approval:', error);
+      alert(`Failed to submit for approval: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -357,6 +408,14 @@ const MyTasks = () => {
                 <Save className="w-5 h-5" />
                 Save Draft
               </button>
+              <button
+                onClick={handleSubmitToApproval}
+                disabled={!selectedTask.versions?.some(v => v.isFinalVersion)}
+                className="flex items-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Send className="w-5 h-5" />
+                Submit to Approval
+              </button>
             </div>
           </div>
 
@@ -444,10 +503,18 @@ const MyTasks = () => {
 
         {tasks.length > 0 ? (
           <div className="divide-y divide-neutral-700">
-            {tasks.map((taskDetail) => {
+            {tasks.map((taskDetail, index) => {
               const statusInfo = getStatusInfo(taskDetail.task.taskStatus);
               const phaseInfo = taskDetail.ad ? getPhaseInfo(taskDetail.ad.currentPhase) : { text: 'In Preparation', color: 'text-neutral-400' };
               
+              // Determine if this task is locked
+              // A task is unlocked if:
+              // 1. It's the first task (index === 0)
+              // 2. Or all previous tasks are approved
+              const isUnlocked = index === 0 || tasks.slice(0, index).every(t => 
+                t.task.taskStatus?.toLowerCase() === 'approved'
+              );
+
               return (
                 <div key={taskDetail.task.mediaTaskId} className="grid grid-cols-6 gap-4 p-4 hover:bg-neutral-700/30 transition-colors items-center">
                   <div className="text-white font-medium">
@@ -468,18 +535,25 @@ const MyTasks = () => {
                     </span>
                   </div>
                   <div>
-                    <button
-                      onClick={() => {
-                        setSelectedTask(taskDetail);
-                        setActiveVersionId(null);
-                        setFileUpload(null);
-                        setVersionFileName('');
-                      }}
-                      className="flex items-center gap-2 px-3 py-1 text-neutral-400 hover:text-white transition-colors"
-                    >
-                      <Eye className="w-4 h-4" />
-                      View Task
-                    </button>
+                    {isUnlocked ? (
+                      <button
+                        onClick={() => {
+                          setSelectedTask(taskDetail);
+                          setActiveVersionId(null);
+                          setFileUpload(null);
+                          setVersionFileName('');
+                        }}
+                        className="flex items-center gap-2 px-3 py-1 text-neutral-400 hover:text-white transition-colors"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View Task
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2 px-3 py-1 text-neutral-600 cursor-not-allowed" title="Complete previous tasks first">
+                        <Eye className="w-4 h-4" />
+                        Locked
+                      </div>
+                    )}
                   </div>
                 </div>
               );

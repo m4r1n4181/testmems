@@ -54,6 +54,7 @@ namespace MusicEventManagementSystem.API.Services
             if (dto.WorkflowId.HasValue) task.WorkflowId = dto.WorkflowId.Value;
             if (dto.ApprovalId.HasValue) task.ApprovalId = dto.ApprovalId.Value;
             if (dto.ManagerId != null) task.ManagerId = dto.ManagerId;
+            if (dto.AdId.HasValue) task.AdId = dto.AdId.Value;
             _mediaTaskRepository.Update(task);
             await _mediaTaskRepository.SaveChangesAsync();
             return MapToResponseDto(task);
@@ -106,7 +107,8 @@ namespace MusicEventManagementSystem.API.Services
             TaskStatus = task.TaskStatus,
             WorkflowId = task.WorkflowId,
             ApprovalId = task.ApprovalId,
-            ManagerId = task.ManagerId
+            ManagerId = task.ManagerId,
+            AdId = task.AdId
         };
 
         private static MediaTask MapToEntity(MediaTaskCreateDto dto) => new()

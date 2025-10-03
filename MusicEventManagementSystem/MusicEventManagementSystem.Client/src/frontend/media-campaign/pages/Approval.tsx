@@ -62,19 +62,29 @@ const ApprovalPage = () => {
   }, [approvalId]);
 
   const handleApprove = async () => {
-    if (!approval) return;
-    try {
-      await ApprovalService.updateApproval(approval.approvalId, {
-        approvalStatus: 'Approved',
-        comment: note,
-        approvalDate: new Date().toISOString(),
+  if (!approval) return;
+  try {
+    // Update approval status
+    await ApprovalService.updateApproval(approval.approvalId, {
+      approvalStatus: 'Approved',
+      comment: note,
+      approvalDate: new Date().toISOString(),
+    });
+
+    // Update associated task status as well!
+    if (approval.mediaTaskId) {
+      await MediaTaskService.updateMediaTask(approval.mediaTaskId, {
+        taskStatus: 'Approved'
       });
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Error approving:', error);
-      alert('Failed to approve.');
     }
-  };
+
+    // Now navigate back to dashboard/tasks
+    navigate('/dashboard');
+  } catch (error) {
+    console.error('Error approving:', error);
+    alert('Failed to approve.');
+  }
+};
 
   const handleReject = async () => {
     if (!approval) return;
