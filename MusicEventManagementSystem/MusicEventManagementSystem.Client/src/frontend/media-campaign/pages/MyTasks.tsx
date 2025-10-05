@@ -9,6 +9,7 @@ import {
   Download,
   User,
   FileText,
+  XCircle,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MediaTaskService } from '../services/mediaTaskService';
@@ -241,24 +242,28 @@ const MyTasks = () => {
     if (!selectedTask) return;
     
     // Check if there's at least one final version
-    const hasFinalVersion = selectedTask.versions?.some(v => v.isFinalVersion);
-    if (!hasFinalVersion) {
+    const finalVersion = selectedTask.versions?.find(v => v.isFinalVersion);
+    if (!finalVersion) {
       alert('Please mark at least one version as final before submitting for approval.');
       return;
     }
 
     try {
-      // Update task status to "PendingApproval"
+      const now = new Date().toISOString();
+      
+      // Update task status to "PendingApproval" and set submission timestamp
       await MediaTaskService.updateMediaTask(selectedTask.task.mediaTaskId, {
-        taskStatus: 'PendingApproval'
+        taskStatus: 'PendingApproval',
+        submittedForApprovalAt: now
       });
 
-      // Create an approval request
+      // Create an approval request with the submitted media version
       const newApproval = await ApprovalService.createApproval({
         approvalStatus: 'Pending',
         comment: '',
-        approvalDate: new Date().toISOString(),
-        mediaTaskId: selectedTask.task.mediaTaskId
+        approvalDate: now,
+        mediaTaskId: selectedTask.task.mediaTaskId,
+        submittedMediaVersionId: finalVersion.mediaVersionId
       });
 
       // Update the task with the new approval ID
@@ -326,6 +331,20 @@ const MyTasks = () => {
         <div className="flex gap-6">
           {/* Main Content */}
           <div className="flex-1 space-y-6">
+            {/* Rejection Feedback Display */}
+            {selectedTask.task.taskStatus?.toLowerCase() === 'rejected' && selectedTask.approval?.comment && (
+              <div className="bg-red-900/20 border-2 border-red-500 rounded-2xl p-6">
+                <div className="flex items-start gap-3">
+                  <XCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-1" />
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-red-400 mb-2">Task Rejected - Feedback from Manager</h3>
+                    <p className="text-red-200 mb-4">{selectedTask.approval.comment}</p>
+                    <p className="text-sm text-red-300">Please address the feedback and resubmit a new version.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Task Details */}
             <div className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl p-6">
               <div className="grid grid-cols-2 gap-6 mb-6">

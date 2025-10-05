@@ -44,6 +44,8 @@ namespace MusicEventManagementSystem.API.Services
             if (dto.FileURL != null) version.FileURL = dto.FileURL;
             if (dto.IsFinalVersion.HasValue) version.IsFinalVersion = dto.IsFinalVersion.Value;
             if (dto.AdId.HasValue) version.AdId = dto.AdId.Value;
+            if (dto.CreatedAt.HasValue) version.CreatedAt = dto.CreatedAt.Value;
+            if (dto.MediaTaskId.HasValue) version.MediaTaskId = dto.MediaTaskId.Value;
 
             _mediaVersionRepository.Update(version);
             await _mediaVersionRepository.SaveChangesAsync();
@@ -96,7 +98,9 @@ namespace MusicEventManagementSystem.API.Services
             FileType = version.FileType,
             FileURL = version.FileURL,
             IsFinalVersion = version.IsFinalVersion,
-            AdId = version.AdId
+            AdId = version.AdId,
+            CreatedAt = version.CreatedAt,
+            MediaTaskId = version.MediaTaskId
         };
 
         private static MediaVersion MapToEntity(MediaVersionCreateDto dto) => new()
@@ -105,7 +109,9 @@ namespace MusicEventManagementSystem.API.Services
             FileType = dto.FileType,
             FileURL = dto.FileURL,
             IsFinalVersion = dto.IsFinalVersion,
-            AdId = dto.AdId
+            AdId = dto.AdId,
+            CreatedAt = dto.CreatedAt ?? DateTime.UtcNow,
+            MediaTaskId = dto.MediaTaskId
         };
     }
 }

@@ -9,6 +9,8 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public string? Comment { get; set; }
         public DateTime ApprovalDate { get; set; }
         public int MediaTaskId { get; set; }
+        public int? SubmittedMediaVersionId { get; set; }
+        public MediaVersionResponseDto? SubmittedMediaVersion { get; set; }
     }
 
     public class ApprovalCreateDto
@@ -25,6 +27,8 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
 
         [Required]
         public int MediaTaskId { get; set; }
+
+        public int? SubmittedMediaVersionId { get; set; }
     }
 
     public class ApprovalUpdateDto
@@ -38,5 +42,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public DateTime? ApprovalDate { get; set; }
 
         public int? MediaTaskId { get; set; }
+
+        public int? SubmittedMediaVersionId { get; set; }
     }
 }

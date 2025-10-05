@@ -8,8 +8,11 @@
         public string? FileType { get; set; }
         public string? FileURL { get; set; }
         public bool IsFinalVersion { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int? MediaTaskId { get; set; }
 
         // Navigation properties
         public virtual Ad Ad { get; set; } = null!;
+        public virtual MediaTask? MediaTask { get; set; }
     }
 }

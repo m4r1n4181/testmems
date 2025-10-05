@@ -12,7 +12,9 @@ namespace MusicEventManagementSystem.API.Models
         public int? ApprovalId { get; set; }
         public string? ManagerId { get; set; }
         public int? AdId { get; set; }
-
+        public DateTime? TaskStartedAt { get; set; }
+        public DateTime? TaskCompletedAt { get; set; }
+        public DateTime? SubmittedForApprovalAt { get; set; }
 
         public virtual MediaWorkflow? MediaWorkflow { get; set; }
         public virtual Approval? Approval { get; set; }

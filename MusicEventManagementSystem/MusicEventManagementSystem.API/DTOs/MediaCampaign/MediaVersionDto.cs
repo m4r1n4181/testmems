@@ -10,6 +10,8 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public string? FileURL { get; set; }
         public bool IsFinalVersion { get; set; }
         public int AdId { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int? MediaTaskId { get; set; }
     }
 
     public class MediaVersionCreateDto
@@ -29,6 +31,10 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
 
         [Required]
         public int AdId { get; set; }
+
+        public DateTime? CreatedAt { get; set; }
+
+        public int? MediaTaskId { get; set; }
     }
 
     public class MediaVersionUpdateDto
@@ -45,5 +51,9 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public bool? IsFinalVersion { get; set; }
 
         public int? AdId { get; set; }
+
+        public DateTime? CreatedAt { get; set; }
+
+        public int? MediaTaskId { get; set; }
     }
 }
