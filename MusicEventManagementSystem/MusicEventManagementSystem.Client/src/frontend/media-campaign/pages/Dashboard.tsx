@@ -31,6 +31,10 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Get current user ID
+        const userJson = localStorage.getItem('user');
+        const currentUserId = userJson ? JSON.parse(userJson).id : null;
+
         const [campaignsData, adsData, approvalsData, tasksData] = await Promise.all([
           CampaignService.getAllCampaigns(),
           AdService.getAllAds(),
@@ -40,7 +44,32 @@ const Dashboard = () => {
 
         setCampaigns(campaignsData);
         setAds(adsData);
-        setApprovals(approvalsData);
+        
+        // Filter approvals to only show those for ads created by the current user
+        if (currentUserId) {
+          const userAds = adsData.filter(ad => ad.createdById === currentUserId);
+          const userAdIds = new Set(userAds.map(ad => ad.adId));
+          
+          // Filter approvals by matching mediaTask's adId to user's ads
+          const userApprovals = await Promise.all(
+            approvalsData.map(async (approval) => {
+              try {
+                const task = await MediaTaskService.getMediaTaskById(approval.mediaTaskId);
+                if (task.adId && userAdIds.has(task.adId)) {
+                  return approval;
+                }
+                return null;
+              } catch {
+                return null;
+              }
+            })
+          );
+          
+          setApprovals(userApprovals.filter(a => a !== null) as Approval[]);
+        } else {
+          setApprovals(approvalsData);
+        }
+        
         setTasks(tasksData);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
