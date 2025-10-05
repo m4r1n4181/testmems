@@ -184,6 +184,20 @@ export class MediaVersionService {
       throw new Error(`Failed to fetch media versions by ad ID ${adId}`);
     }
   }
+
+  // GET: api/MediaVersion/previous-tasks/{taskId}
+  static async getPreviousTaskVersions(taskId: number): Promise<MediaVersion[]> {
+    try {
+      const response = await fetch(`${this.BASE_URL}/previous-tasks/${taskId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Error fetching previous task versions for task ${taskId}:`, error);
+      throw new Error(`Failed to fetch previous task versions for task ${taskId}`);
+    }
+  }
 }
 
 export default MediaVersionService;

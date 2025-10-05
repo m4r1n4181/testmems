@@ -8,10 +8,12 @@ namespace MusicEventManagementSystem.API.Services
     public class MediaVersionService : IMediaVersionService
     {
         private readonly IMediaVersionRepository _mediaVersionRepository;
+        private readonly IMediaTaskRepository _mediaTaskRepository;
 
-        public MediaVersionService(IMediaVersionRepository mediaVersionRepository)
+        public MediaVersionService(IMediaVersionRepository mediaVersionRepository, IMediaTaskRepository mediaTaskRepository)
         {
             _mediaVersionRepository = mediaVersionRepository;
+            _mediaTaskRepository = mediaTaskRepository;
         }
 
         public async Task<IEnumerable<MediaVersionResponseDto>> GetAllMediaVersionsAsync()
@@ -44,6 +46,8 @@ namespace MusicEventManagementSystem.API.Services
             if (dto.FileURL != null) version.FileURL = dto.FileURL;
             if (dto.IsFinalVersion.HasValue) version.IsFinalVersion = dto.IsFinalVersion.Value;
             if (dto.AdId.HasValue) version.AdId = dto.AdId.Value;
+            if (dto.CreatedAt.HasValue) version.CreatedAt = dto.CreatedAt.Value;
+            if (dto.MediaTaskId.HasValue) version.MediaTaskId = dto.MediaTaskId.Value;
 
             _mediaVersionRepository.Update(version);
             await _mediaVersionRepository.SaveChangesAsync();
@@ -89,6 +93,31 @@ namespace MusicEventManagementSystem.API.Services
             return versions.Select(MapToResponseDto);
         }
 
+        public async Task<IEnumerable<MediaVersionResponseDto>> GetPreviousTaskVersionsAsync(int taskId)
+        {
+            // Get the current task
+            var currentTask = await _mediaTaskRepository.GetByIdAsync(taskId);
+            if (currentTask == null || currentTask.WorkflowId == null)
+                return Enumerable.Empty<MediaVersionResponseDto>();
+
+            // Get all tasks in the same workflow that have a lower order (previous tasks)
+            var previousTasks = await _mediaTaskRepository.GetByWorkflowIdAsync(currentTask.WorkflowId.Value);
+            var previousTasksFiltered = previousTasks.Where(t => t.Order < currentTask.Order);
+
+            // Get all versions from those previous tasks
+            var allVersions = new List<MediaVersion>();
+            foreach (var task in previousTasksFiltered)
+            {
+                if (task.AdId.HasValue)
+                {
+                    var versions = await _mediaVersionRepository.GetByAdIdAsync(task.AdId.Value);
+                    allVersions.AddRange(versions);
+                }
+            }
+
+            return allVersions.Select(MapToResponseDto);
+        }
+
         private static MediaVersionResponseDto MapToResponseDto(MediaVersion version) => new()
         {
             MediaVersionId = version.MediaVersionId,
@@ -96,7 +125,9 @@ namespace MusicEventManagementSystem.API.Services
             FileType = version.FileType,
             FileURL = version.FileURL,
             IsFinalVersion = version.IsFinalVersion,
-            AdId = version.AdId
+            AdId = version.AdId,
+            CreatedAt = version.CreatedAt,
+            MediaTaskId = version.MediaTaskId
         };
 
         private static MediaVersion MapToEntity(MediaVersionCreateDto dto) => new()
@@ -105,7 +136,9 @@ namespace MusicEventManagementSystem.API.Services
             FileType = dto.FileType,
             FileURL = dto.FileURL,
             IsFinalVersion = dto.IsFinalVersion,
-            AdId = dto.AdId
+            AdId = dto.AdId,
+            CreatedAt = dto.CreatedAt ?? DateTime.UtcNow,
+            MediaTaskId = dto.MediaTaskId
         };
     }
 }

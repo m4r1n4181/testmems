@@ -9,10 +9,17 @@ namespace MusicEventManagementSystem.API.Services
     public class AdService : IAdService
     {
         private readonly IAdRepository _adRepository;
+        private readonly IMediaTaskRepository _mediaTaskRepository;
+        private readonly IIntegrationStatusService _integrationStatusService;
 
-        public AdService(IAdRepository adRepository)
+        public AdService(
+            IAdRepository adRepository, 
+            IMediaTaskRepository mediaTaskRepository,
+            IIntegrationStatusService integrationStatusService)
         {
             _adRepository = adRepository;
+            _mediaTaskRepository = mediaTaskRepository;
+            _integrationStatusService = integrationStatusService;
         }
 
         public async Task<IEnumerable<AdResponseDto>> GetAllAdsAsync()
@@ -110,6 +117,61 @@ namespace MusicEventManagementSystem.API.Services
         {
             var ads = await _adRepository.GetByAdTypeIdAsync(adTypeId);
             return ads.Select(MapToResponseDto);
+        }
+
+        public async Task<PublicationScheduleResultDto> SchedulePublicationAsync(int adId, PublicationScheduleDto dto)
+        {
+            // Check if all tasks in the workflow are approved
+            var canSchedule = await CanSchedulePublicationAsync(adId);
+            if (!canSchedule)
+            {
+                return new PublicationScheduleResultDto
+                {
+                    Success = false,
+                    Message = "Cannot schedule publication. Not all workflow tasks are approved."
+                };
+            }
+
+            // Create integration status for scheduled publication
+            var integrationStatusDto = new IntegrationStatusCreateDto
+            {
+                Status = API.Enums.StatusIntegration.Scheduled,
+                PublicationDate = dto.PublicationDate,
+                AdId = adId,
+                ChannelId = dto.ChannelId,
+                Error = dto.Notes,
+                LastSynced = DateTime.UtcNow
+            };
+
+            var integrationStatus = await _integrationStatusService.CreateIntegrationStatusAsync(integrationStatusDto);
+
+            // Update ad publication date and phase
+            await UpdateAdAsync(adId, new AdUpdateDto
+            {
+                PublicationDate = dto.PublicationDate,
+                CurrentPhase = AdStatus.ScheduledPublication
+            });
+
+            return new PublicationScheduleResultDto
+            {
+                Success = true,
+                Message = "Publication scheduled successfully.",
+                IntegrationStatusId = integrationStatus.IntegrationStatusId
+            };
+        }
+
+        public async Task<bool> CanSchedulePublicationAsync(int adId)
+        {
+            var ad = await _adRepository.GetByIdAsync(adId);
+            if (ad == null)
+                return false;
+
+            // Get all tasks in the workflow for this ad
+            var workflowTasks = await _mediaTaskRepository.GetByWorkflowIdAsync(ad.MediaWorkflowId);
+            var adTasks = workflowTasks.Where(t => t.AdId == adId).ToList();
+
+            // Check if all tasks are approved
+            return adTasks.Any() && adTasks.All(t => t.TaskStatus?.ToLower() == "approved");
         }
 
         private static AdResponseDto MapToResponseDto(Ad ad) => new()

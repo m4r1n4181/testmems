@@ -43,14 +43,15 @@ const ApprovalPage = () => {
           if (taskData.adId) {
             const adData = await AdService.getAdById(taskData.adId);
             setAd(adData);
-
-            // Placeholder file info - since media version is not available
-            setFileInfo({
-              fileType: adData.fileType || '.mp4',
-              duration: adData.duration || 15,
-              fileURL: adData.fileURL, // If ad has fileURL, else undefined
-            });
           }
+        }
+
+        // Use submitted media version if available
+        if (approvalData.submittedMediaVersion) {
+          setFileInfo({
+            fileType: approvalData.submittedMediaVersion.fileType || '',
+            fileURL: approvalData.submittedMediaVersion.fileURL,
+          });
         }
       } catch (error) {
         console.error('Error loading approval page:', error);
@@ -62,38 +63,54 @@ const ApprovalPage = () => {
   }, [approvalId]);
 
   const handleApprove = async () => {
-  if (!approval) return;
-  try {
-    // Update approval status
-    await ApprovalService.updateApproval(approval.approvalId, {
-      approvalStatus: 'Approved',
-      comment: note,
-      approvalDate: new Date().toISOString(),
-    });
-
-    // Update associated task status as well!
-    if (approval.mediaTaskId) {
-      await MediaTaskService.updateMediaTask(approval.mediaTaskId, {
-        taskStatus: 'Approved'
+    if (!approval) return;
+    try {
+      const now = new Date().toISOString();
+      // Update approval status
+      await ApprovalService.updateApproval(approval.approvalId, {
+        approvalStatus: 'Approved',
+        comment: note,
+        approvalDate: now,
       });
-    }
 
-    // Now navigate back to dashboard/tasks
-    navigate('/dashboard');
-  } catch (error) {
-    console.error('Error approving:', error);
-    alert('Failed to approve.');
-  }
-};
+      // Update associated task status as well and set completion timestamp
+      if (approval.mediaTaskId) {
+        await MediaTaskService.updateMediaTask(approval.mediaTaskId, {
+          taskStatus: 'Approved',
+          taskCompletedAt: now
+        });
+      }
+
+      alert('Task approved successfully!');
+      // Now navigate back to dashboard/tasks
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error approving:', error);
+      alert('Failed to approve.');
+    }
+  };
 
   const handleReject = async () => {
     if (!approval) return;
+    if (!note || note.trim() === '') {
+      alert('Please provide feedback for the rejection.');
+      return;
+    }
     try {
       await ApprovalService.updateApproval(approval.approvalId, {
-        approvalStatus: 'Denied',
+        approvalStatus: 'Rejected',
         comment: note,
         approvalDate: new Date().toISOString(),
       });
+
+      // Update task status back to InProgress so creator can resubmit
+      if (approval.mediaTaskId) {
+        await MediaTaskService.updateMediaTask(approval.mediaTaskId, {
+          taskStatus: 'Rejected'
+        });
+      }
+
+      alert('Task rejected with feedback.');
       navigate('/dashboard');
     } catch (error) {
       console.error('Error rejecting:', error);
@@ -146,6 +163,11 @@ const ApprovalPage = () => {
           <div className="lg:col-span-2 bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl p-8 flex flex-col">
             <div className="mb-8">
               <h2 className="text-2xl font-semibold text-white mb-3">Creative Preview</h2>
+              {approval?.submittedMediaVersion && (
+                <div className="mb-2 text-sm text-neutral-400">
+                  Submitted Version: {approval.submittedMediaVersion.versionFileName}
+                </div>
+              )}
               <div className="flex flex-col items-center justify-center bg-neutral-900 border border-neutral-700 rounded-2xl h-64 mb-6">
                 {/* File preview: show placeholder or download */}
                 {fileInfo?.fileType?.startsWith('image') && fileInfo?.fileURL ? (
@@ -160,12 +182,20 @@ const ApprovalPage = () => {
                     src={fileInfo.fileURL}
                     className="max-h-56 object-contain rounded-xl"
                   />
-                ) : (
+                ) : fileInfo?.fileURL ? (
                   <div className="flex flex-col items-center justify-center h-full">
                     <Download className="w-12 h-12 text-neutral-500 mb-2" />
                     <span className="text-neutral-400 text-lg">
-                      {fileInfo?.fileType?.replace('.', '').toUpperCase() || 'MP4'}
+                      {fileInfo?.fileType?.replace('.', '').toUpperCase() || 'File'}
                     </span>
+                    <span className="text-neutral-500 text-sm mt-2">
+                      Click download to view
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <Download className="w-12 h-12 text-neutral-500 mb-2" />
+                    <span className="text-neutral-400 text-lg">No preview available</span>
                   </div>
                 )}
                 <span className="text-white mt-4 text-center">

@@ -7,4 +7,7 @@ export interface MediaTask {
   approvalId?: number;
   managerId?: string;
   adId?: number;
+  taskStartedAt?: string;
+  taskCompletedAt?: string;
+  submittedForApprovalAt?: string;
 }

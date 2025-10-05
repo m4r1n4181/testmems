@@ -73,4 +73,22 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public ICollection<int>? IntegrationStatusIds { get; set; }
         public string? CreatedById { get; set; }
     }
+
+    public class PublicationScheduleDto
+    {
+        [Required]
+        public DateTime PublicationDate { get; set; }
+
+        [Required]
+        public int ChannelId { get; set; }
+
+        public string? Notes { get; set; }
+    }
+
+    public class PublicationScheduleResultDto
+    {
+        public bool Success { get; set; }
+        public string? Message { get; set; }
+        public int? IntegrationStatusId { get; set; }
+    }
 }

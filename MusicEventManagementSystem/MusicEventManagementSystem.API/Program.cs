@@ -117,6 +117,7 @@ builder.Services.AddScoped<IMediaVersionService, MediaVersionService>();
 builder.Services.AddScoped<IMediaChannelService, MediaChannelService>();
 builder.Services.AddScoped<IIntegrationStatusService, IntegrationStatusService>();
 builder.Services.AddScoped<IApprovalService, ApprovalService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
 builder.Services.AddControllers();
 

@@ -13,6 +13,7 @@ namespace MusicEventManagementSystem.API.Repositories
         {
             return await _context.Approvals
                 .Include(a => a.MediaTask)
+                .Include(a => a.SubmittedMediaVersion)
                 .ToListAsync();
         }
 
@@ -20,6 +21,7 @@ namespace MusicEventManagementSystem.API.Repositories
         {
             return await _context.Approvals
                 .Include(a => a.MediaTask)
+                .Include(a => a.SubmittedMediaVersion)
                 .FirstOrDefaultAsync(a => a.ApprovalId == id);
         }
 
@@ -28,6 +30,7 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.Approvals
                 .Where(a => a.ApprovalStatus == approvalStatus)
                 .Include(a => a.MediaTask)
+                .Include(a => a.SubmittedMediaVersion)
                 .ToListAsync();
         }
 
@@ -36,6 +39,7 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.Approvals
                 .Where(a => a.Comment == comment)
                 .Include(a => a.MediaTask)
+                .Include(a => a.SubmittedMediaVersion)
                 .ToListAsync();
         }
 
@@ -44,6 +48,7 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.Approvals
                 .Where(a => a.ApprovalDate == approvalDate)
                 .Include(a => a.MediaTask)
+                .Include(a => a.SubmittedMediaVersion)
                 .ToListAsync();
         }
 
@@ -52,6 +57,7 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.Approvals
                 .Where(a => a.MediaTaskId == mediaTaskId)
                 .Include(a => a.MediaTask)
+                .Include(a => a.SubmittedMediaVersion)
                 .ToListAsync();
         }
         public async Task<IEnumerable<Approval>> GetByManagerIdAsync(string managerId)
@@ -59,6 +65,7 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.Approvals
                 .Include(a => a.MediaTask)
                 .ThenInclude(mt => mt.Ad)
+                .Include(a => a.SubmittedMediaVersion)
                 .Where(a => a.MediaTask.Ad.CreatedById == managerId)
                 .ToListAsync();
         }
