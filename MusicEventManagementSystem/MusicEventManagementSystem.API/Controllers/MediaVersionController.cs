@@ -96,5 +96,12 @@ namespace MusicEventManagementSystem.API.Controllers
             var versions = await _mediaVersionService.GetByAdIdAsync(adId);
             return Ok(versions);
         }
+
+        [HttpGet("previous-tasks/{taskId}")]
+        public async Task<ActionResult<IEnumerable<MediaVersionResponseDto>>> GetPreviousTaskVersions(int taskId)
+        {
+            var versions = await _mediaVersionService.GetPreviousTaskVersionsAsync(taskId);
+            return Ok(versions);
+        }
     }
 }

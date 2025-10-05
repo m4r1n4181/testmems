@@ -37,6 +37,7 @@ const MyTasks = () => {
   const [fileUpload, setFileUpload] = useState<File | null>(null);
   const [versionFileName, setVersionFileName] = useState('');
   const [activeVersionId, setActiveVersionId] = useState<number | null>(null);
+  const [previousTaskVersions, setPreviousTaskVersions] = useState<MediaVersion[]>([]);
 
   // Get logged-in user ID from localStorage
   const getLoggedInUserId = () => {
@@ -53,6 +54,23 @@ const MyTasks = () => {
   useEffect(() => {
     fetchTasksData();
   }, []);
+
+  useEffect(() => {
+    const fetchPreviousVersions = async () => {
+      if (selectedTask) {
+        try {
+          const versions = await MediaVersionService.getPreviousTaskVersions(selectedTask.task.mediaTaskId);
+          setPreviousTaskVersions(versions);
+        } catch (error) {
+          console.error('Error fetching previous task versions:', error);
+          setPreviousTaskVersions([]);
+        }
+      } else {
+        setPreviousTaskVersions([]);
+      }
+    };
+    fetchPreviousVersions();
+  }, [selectedTask]);
 
   const fetchTasksData = async () => {
     try {
@@ -439,7 +457,39 @@ const MyTasks = () => {
           </div>
 
           {/* Versions Sidebar */}
-          <div className="w-80">
+          <div className="w-80 space-y-6">
+            {/* Previous Task Materials */}
+            {previousTaskVersions.length > 0 && (
+              <div className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Materials from Previous Tasks</h3>
+                <div className="space-y-3">
+                  {previousTaskVersions.map((version) => (
+                    <div key={version.mediaVersionId} className="p-3 bg-neutral-700/50 rounded-xl">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <span className="text-sm text-white font-medium truncate block">
+                            {version.versionFileName}
+                          </span>
+                          <p className="text-xs text-neutral-400">
+                            {version.fileType || 'Unknown type'}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDownloadVersion(version)}
+                        disabled={!version.fileURL}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-neutral-600 hover:bg-neutral-500 text-white text-xs rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        <Download className="w-3 h-3" />
+                        View/Download
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Current Task Versions */}
             <div className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Versions</h3>
               {versions.length === 0 ? (
@@ -511,11 +561,12 @@ const MyTasks = () => {
 
       {/* Tasks Table */}
       <div className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl overflow-hidden">
-        <div className="grid grid-cols-6 gap-4 p-4 border-b border-neutral-700 text-sm font-medium text-neutral-400">
+        <div className="grid grid-cols-7 gap-4 p-4 border-b border-neutral-700 text-sm font-medium text-neutral-400">
           <div>Task Name</div>
           <div>Ad Title</div>
           <div>Deadline</div>
-          <div>Current Phase</div>
+          <div>Workflow Order</div>
+          <div>Assigned To</div>
           <div>Status</div>
           <div>Actions</div>
         </div>
@@ -528,14 +579,22 @@ const MyTasks = () => {
               
               // Determine if this task is locked
               // A task is unlocked if:
-              // 1. It's the first task (index === 0)
-              // 2. Or all previous tasks are approved
-              const isUnlocked = index === 0 || tasks.slice(0, index).every(t => 
+              // 1. It's the first task in its workflow (order === 1 or smallest order in that workflow)
+              // 2. Or all previous tasks in the SAME workflow are approved
+              const workflowTasks = tasks.filter(t => t.task.workflowId === taskDetail.task.workflowId);
+              const sortedWorkflowTasks = workflowTasks.sort((a, b) => a.task.order - b.task.order);
+              const taskIndexInWorkflow = sortedWorkflowTasks.findIndex(t => t.task.mediaTaskId === taskDetail.task.mediaTaskId);
+              
+              // First task in workflow is always unlocked, or if all previous tasks in this workflow are approved
+              const isUnlocked = taskIndexInWorkflow === 0 || sortedWorkflowTasks.slice(0, taskIndexInWorkflow).every(t => 
                 t.task.taskStatus?.toLowerCase() === 'approved'
               );
+              
+              // Get the assigned user name (managerId)
+              const assignedUser = taskDetail.task.managerId || 'Unassigned';
 
               return (
-                <div key={taskDetail.task.mediaTaskId} className="grid grid-cols-6 gap-4 p-4 hover:bg-neutral-700/30 transition-colors items-center">
+                <div key={taskDetail.task.mediaTaskId} className="grid grid-cols-7 gap-4 p-4 hover:bg-neutral-700/30 transition-colors items-center">
                   <div className="text-white font-medium">
                     {taskDetail.task.taskName || 'Create a Visual'}
                   </div>
@@ -545,8 +604,12 @@ const MyTasks = () => {
                   <div className="text-neutral-300">
                     {taskDetail.ad?.deadline ? formatDate(taskDetail.ad.deadline) : ''}
                   </div>
-                  <div className={`${phaseInfo.color}`}>
-                    {phaseInfo.text}
+                  <div className="text-neutral-300">
+                    Task {taskDetail.task.order} of {workflowTasks.length}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-neutral-400" />
+                    <span className="text-neutral-300 text-sm">{assignedUser}</span>
                   </div>
                   <div className="flex">
                     <span className={`px-3 py-1 rounded-lg text-sm font-medium ${statusInfo.color} ${statusInfo.textColor}`}>
