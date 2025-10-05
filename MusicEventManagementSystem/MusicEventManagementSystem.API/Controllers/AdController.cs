@@ -118,5 +118,25 @@ namespace MusicEventManagementSystem.API.Controllers
             var ads = await _adService.GetByAdTypeIdAsync(adTypeId);
             return Ok(ads);
         }
+
+        [HttpPost("{adId}/schedule-publication")]
+        public async Task<ActionResult> SchedulePublication(int adId, [FromBody] PublicationScheduleDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _adService.SchedulePublicationAsync(adId, dto);
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(result);
+        }
+
+        [HttpGet("{adId}/can-schedule")]
+        public async Task<ActionResult<bool>> CanSchedulePublication(int adId)
+        {
+            var canSchedule = await _adService.CanSchedulePublicationAsync(adId);
+            return Ok(canSchedule);
+        }
     }
 }

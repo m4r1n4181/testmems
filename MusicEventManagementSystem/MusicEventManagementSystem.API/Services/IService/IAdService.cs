@@ -19,5 +19,8 @@ namespace MusicEventManagementSystem.API.Services.IService
         Task<IEnumerable<AdResponseDto>> GetByMediaWorkflowIdAsync(int mediaWorkflowId);
         Task<IEnumerable<AdResponseDto>> GetByCampaignIdAsync(int campaignId);
         Task<IEnumerable<AdResponseDto>> GetByAdTypeIdAsync(int adTypeId);
+
+        Task<PublicationScheduleResultDto> SchedulePublicationAsync(int adId, PublicationScheduleDto dto);
+        Task<bool> CanSchedulePublicationAsync(int adId);
     }
 }
