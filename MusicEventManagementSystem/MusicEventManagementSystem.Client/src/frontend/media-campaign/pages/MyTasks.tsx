@@ -10,16 +10,20 @@ import {
   User,
   FileText,
   XCircle,
+  Lock,
+  CheckCircle,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MediaTaskService } from '../services/mediaTaskService';
 import { ApprovalService } from '../services/approvalService';
 import { MediaVersionService } from '../services/mediaVersionService';
 import { AdService } from '../services/addService';
+import { MediaWorkflowService } from '../services/mediaWorkflowService';
 import type { MediaTask } from '../types/api/mediaTask';
 import type { Approval } from '../types/api/approval';
 import type { MediaVersion } from '../types/api/mediaVersion';
 import type { Ad } from '../types/api/ad';
+import type { MediaWorkflow } from '../types/api/mediaWorkflow';
 import { AdStatus } from '../types/enums/MediaChampaign';
 
 interface TaskWithDetails {
@@ -29,9 +33,15 @@ interface TaskWithDetails {
   versions?: MediaVersion[];
 }
 
+interface WorkflowGroup {
+  workflow: MediaWorkflow;
+  ad?: Ad;
+  tasks: TaskWithDetails[];
+}
+
 const MyTasks = () => {
   const navigate = useNavigate();
-  const [tasks, setTasks] = useState<TaskWithDetails[]>([]);
+  const [workflowGroups, setWorkflowGroups] = useState<WorkflowGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTask, setSelectedTask] = useState<TaskWithDetails | null>(null);
   const [fileUpload, setFileUpload] = useState<File | null>(null);
@@ -52,7 +62,7 @@ const MyTasks = () => {
   };
 
   useEffect(() => {
-    fetchTasksData();
+    fetchWorkflowsData();
   }, []);
 
   useEffect(() => {
@@ -72,38 +82,71 @@ const MyTasks = () => {
     fetchPreviousVersions();
   }, [selectedTask]);
 
-  const fetchTasksData = async () => {
+  const fetchWorkflowsData = async () => {
     try {
       const userId = getLoggedInUserId();
       if (!userId) {
         setLoading(false);
         return;
       }
-      const tasksData = await MediaTaskService.getByManagerId(userId);
 
-      const tasksWithDetails = await Promise.all(
-        tasksData.map(async (task) => {
-          const details: TaskWithDetails = { task };
-          try {
-            if (task.adId) {
-              details.ad = await AdService.getAdById(task.adId);
-              details.versions = await MediaVersionService.getByAdId(task.adId);
-            }
-            if (task.approvalId) {
-              details.approval = await ApprovalService.getApprovalById(task.approvalId);
-            }
-          } catch (error) {
-            console.error(`Error fetching details for task ${task.mediaTaskId}:`, error);
+      // Get all tasks assigned to the user
+      const userTasks = await MediaTaskService.getByManagerId(userId);
+
+      // Get unique workflow IDs from user's tasks
+      const workflowIds = [...new Set(userTasks.map(task => task.workflowId).filter(id => id != null))];
+
+      // Fetch all workflows with their complete task lists
+      const workflowGroupsData: WorkflowGroup[] = [];
+
+      for (const workflowId of workflowIds) {
+        try {
+          const workflow = await MediaWorkflowService.getMediaWorkflowById(workflowId);
+          
+          // Get all tasks for this workflow (not just user's tasks)
+          const allWorkflowTasks = await MediaTaskService.getByWorkflowId(workflowId);
+          
+          // Sort tasks by order
+          const sortedTasks = allWorkflowTasks.sort((a, b) => a.order - b.order);
+
+          // Build task details
+          const tasksWithDetails = await Promise.all(
+            sortedTasks.map(async (task) => {
+              const details: TaskWithDetails = { task };
+              try {
+                if (task.adId) {
+                  details.ad = await AdService.getAdById(task.adId);
+                  details.versions = await MediaVersionService.getByAdId(task.adId);
+                }
+                if (task.approvalId) {
+                  details.approval = await ApprovalService.getApprovalById(task.approvalId);
+                }
+              } catch (error) {
+                console.error(`Error fetching details for task ${task.mediaTaskId}:`, error);
+              }
+              return details;
+            })
+          );
+
+          // Get ad info from first task if available
+          let ad: Ad | undefined;
+          if (tasksWithDetails.length > 0 && tasksWithDetails[0].ad) {
+            ad = tasksWithDetails[0].ad;
           }
-          return details;
-        })
-      );
-      
-      // Sort tasks by order to ensure correct sequence for unlocking logic
-      const sortedTasks = tasksWithDetails.sort((a, b) => a.task.order - b.task.order);
-      setTasks(sortedTasks);
+
+          workflowGroupsData.push({
+            workflow,
+            ad,
+            tasks: tasksWithDetails
+          });
+        } catch (error) {
+          console.error(`Error fetching workflow ${workflowId}:`, error);
+        }
+      }
+
+      setWorkflowGroups(workflowGroupsData);
     } catch (error) {
-      console.error('Error fetching tasks:', error);
+      console.error('Error fetching workflows:', error);
     } finally {
       setLoading(false);
     }
@@ -199,14 +242,8 @@ const MyTasks = () => {
       };
       setSelectedTask(updatedSelectedTask);
 
-      // Also update the tasks array to keep it in sync
-      setTasks(prevTasks => 
-        prevTasks.map(t => 
-          t.task.mediaTaskId === selectedTask.task.mediaTaskId 
-            ? updatedSelectedTask 
-            : t
-        )
-      );
+      // Refresh the entire workflow data to keep everything in sync
+      await fetchWorkflowsData();
 
       // Set the active version to the newly added one
       setActiveVersionId(newVersion.mediaVersionId);
@@ -222,7 +259,7 @@ const MyTasks = () => {
     }
   };
 
-  // Mark as final version
+  // Mark as final version - updated to refresh workflow data
   const handleMarkAsFinal = async (versionId: number) => {
     if (!selectedTask?.ad?.adId) return;
     
@@ -239,23 +276,17 @@ const MyTasks = () => {
       };
       setSelectedTask(updatedSelectedTask);
       
-      // Update tasks array
-      setTasks(prevTasks => 
-        prevTasks.map(t => 
-          t.task.mediaTaskId === selectedTask.task.mediaTaskId 
-            ? updatedSelectedTask 
-            : t
-        )
-      );
+      // Refresh the entire workflow data to keep everything in sync
+      await fetchWorkflowsData();
       
-      alert('Version marked as final!');
+      alert('Version marked as done!');
     } catch (error) {
       console.error('Error marking as final:', error);
-      alert('Error marking version as final');
+      alert('Error marking version as done');
     }
   };
 
-  // Submit to Approval
+  // Submit to Approval - fixed for resubmission
   const handleSubmitToApproval = async () => {
     if (!selectedTask) return;
     
@@ -269,13 +300,22 @@ const MyTasks = () => {
     try {
       const now = new Date().toISOString();
       
+      // If this is a resubmission (task was rejected), we need to create a NEW approval
+      // Clear the old approval reference first
+      if (selectedTask.task.taskStatus?.toLowerCase() === 'rejected' && selectedTask.task.approvalId) {
+        // Clear the old approval link
+        await MediaTaskService.updateMediaTask(selectedTask.task.mediaTaskId, {
+          approvalId: null
+        });
+      }
+      
       // Update task status to "PendingApproval" and set submission timestamp
       await MediaTaskService.updateMediaTask(selectedTask.task.mediaTaskId, {
         taskStatus: 'PendingApproval',
         submittedForApprovalAt: now
       });
 
-      // Create an approval request with the submitted media version
+      // Create a NEW approval request with the submitted media version
       const newApproval = await ApprovalService.createApproval({
         approvalStatus: 'Pending',
         comment: '',
@@ -290,6 +330,9 @@ const MyTasks = () => {
       });
 
       alert('Task submitted for approval!');
+      
+      // Refresh the data to show updated status
+      await fetchWorkflowsData();
       
       // Navigate to the approval page
       navigate(`/approval/${newApproval.approvalId}`);
@@ -498,47 +541,68 @@ const MyTasks = () => {
                   <p className="text-neutral-400 text-sm">No versions yet</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {versions.map((version, index) => (
-                    <div key={version.mediaVersionId} className={`flex items-center justify-between p-4 bg-neutral-700/50 rounded-xl ${activeVersionId === version.mediaVersionId ? "border-2 border-purple-500" : ""}`}>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-white font-medium">v{index + 1}</span>
-                          <span className="text-sm text-neutral-400 truncate">
+                    <div 
+                      key={version.mediaVersionId} 
+                      className={`p-4 rounded-xl transition-all ${
+                        activeVersionId === version.mediaVersionId 
+                          ? "bg-purple-500/20 border-2 border-purple-500" 
+                          : "bg-neutral-700/50 border-2 border-transparent hover:border-neutral-600"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-white font-semibold">v{index + 1}</span>
+                            {version.isFinalVersion && (
+                              <span className="px-2 py-0.5 bg-purple-500 text-white text-xs rounded-full font-medium flex items-center gap-1">
+                                <CheckCircle className="w-3 h-3" />
+                                Final
+                              </span>
+                            )}
+                            {activeVersionId === version.mediaVersionId && !version.isFinalVersion && (
+                              <span className="px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full font-medium">
+                                Active
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-sm text-neutral-300 truncate block">
                             {version.versionFileName || 'Candidate'}
                           </span>
+                          <p className="text-xs text-neutral-400 mt-1">
+                            {version.fileType || 'Unknown type'}
+                          </p>
                         </div>
-                        <p className="text-xs text-neutral-500">
-                          Uploaded {formatDate(selectedTask.ad?.creationDate || new Date().toISOString())}
-                        </p>
                       </div>
-                      <div className="flex items-center gap-2">
+                      
+                      <div className="flex flex-col gap-2">
                         <button
-                          className="text-neutral-400 hover:text-white transition-colors"
-                          title="Download"
+                          onClick={() => handleGoBackToVersion(version.mediaVersionId)}
+                          className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Eye className="w-4 h-4" />
+                          {activeVersionId === version.mediaVersionId ? 'Viewing' : 'Switch to This'}
+                        </button>
+                        
+                        {!version.isFinalVersion && (
+                          <button
+                            onClick={() => handleMarkAsFinal(version.mediaVersionId)}
+                            className="w-full px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white text-sm rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                          >
+                            <CheckSquare className="w-4 h-4" />
+                            Mark as Done
+                          </button>
+                        )}
+                        
+                        <button
+                          className="w-full px-3 py-2 bg-neutral-600 hover:bg-neutral-500 text-white text-sm rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                           onClick={() => handleDownloadVersion(version)}
                           disabled={!version.fileURL}
                         >
                           <Download className="w-4 h-4" />
+                          Download
                         </button>
-                        <button
-                          className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-lg font-medium transition-colors"
-                          onClick={() => handleGoBackToVersion(version.mediaVersionId)}
-                        >
-                          Go Back
-                        </button>
-                        {version.isFinalVersion ? (
-                          <span className="px-3 py-1 bg-purple-500 text-white text-xs rounded-lg font-medium">
-                            Final
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleMarkAsFinal(version.mediaVersionId)}
-                            className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded-lg font-medium transition-colors"
-                          >
-                            Mark as Final
-                          </button>
-                        )}
                       </div>
                     </div>
                   ))}
@@ -555,100 +619,162 @@ const MyTasks = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Assigned Tasks</h1>
-        <p className="text-neutral-400">Manage your assigned content creation tasks</p>
+        <h1 className="text-3xl font-bold text-white mb-2">My Tasks</h1>
+        <p className="text-neutral-400">View all workflows you're part of and manage your assigned tasks</p>
       </div>
 
-      {/* Tasks Table */}
-      <div className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl overflow-hidden">
-        <div className="grid grid-cols-7 gap-4 p-4 border-b border-neutral-700 text-sm font-medium text-neutral-400">
-          <div>Task Name</div>
-          <div>Ad Title</div>
-          <div>Deadline</div>
-          <div>Workflow Order</div>
-          <div>Assigned To</div>
-          <div>Status</div>
-          <div>Actions</div>
-        </div>
-
-        {tasks.length > 0 ? (
-          <div className="divide-y divide-neutral-700">
-            {tasks.map((taskDetail, index) => {
-              const statusInfo = getStatusInfo(taskDetail.task.taskStatus);
-              const phaseInfo = taskDetail.ad ? getPhaseInfo(taskDetail.ad.currentPhase) : { text: 'In Preparation', color: 'text-neutral-400' };
-              
-              // Determine if this task is locked
-              // A task is unlocked if:
-              // 1. It's the first task in its workflow (order === 1 or smallest order in that workflow)
-              // 2. Or all previous tasks in the SAME workflow are approved
-              const workflowTasks = tasks.filter(t => t.task.workflowId === taskDetail.task.workflowId);
-              const sortedWorkflowTasks = workflowTasks.sort((a, b) => a.task.order - b.task.order);
-              const taskIndexInWorkflow = sortedWorkflowTasks.findIndex(t => t.task.mediaTaskId === taskDetail.task.mediaTaskId);
-              
-              // First task in workflow is always unlocked, or if all previous tasks in this workflow are approved
-              const isUnlocked = taskIndexInWorkflow === 0 || sortedWorkflowTasks.slice(0, taskIndexInWorkflow).every(t => 
-                t.task.taskStatus?.toLowerCase() === 'approved'
-              );
-              
-              // Get the assigned user name (managerId)
-              const assignedUser = taskDetail.task.managerId || 'Unassigned';
-
-              return (
-                <div key={taskDetail.task.mediaTaskId} className="grid grid-cols-7 gap-4 p-4 hover:bg-neutral-700/30 transition-colors items-center">
-                  <div className="text-white font-medium">
-                    {taskDetail.task.taskName || 'Create a Visual'}
-                  </div>
-                  <div className="text-neutral-300">
-                    {taskDetail.ad?.title || ''}
-                  </div>
-                  <div className="text-neutral-300">
-                    {taskDetail.ad?.deadline ? formatDate(taskDetail.ad.deadline) : ''}
-                  </div>
-                  <div className="text-neutral-300">
-                    Task {taskDetail.task.order} of {workflowTasks.length}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-neutral-400" />
-                    <span className="text-neutral-300 text-sm">{assignedUser}</span>
-                  </div>
-                  <div className="flex">
-                    <span className={`px-3 py-1 rounded-lg text-sm font-medium ${statusInfo.color} ${statusInfo.textColor}`}>
-                      {statusInfo.text}
-                    </span>
-                  </div>
-                  <div>
-                    {isUnlocked ? (
-                      <button
-                        onClick={() => {
-                          setSelectedTask(taskDetail);
-                          setActiveVersionId(null);
-                          setFileUpload(null);
-                          setVersionFileName('');
-                        }}
-                        className="flex items-center gap-2 px-3 py-1 text-neutral-400 hover:text-white transition-colors"
-                      >
-                        <Eye className="w-4 h-4" />
-                        View Task
-                      </button>
-                    ) : (
-                      <div className="flex items-center gap-2 px-3 py-1 text-neutral-600 cursor-not-allowed" title="Complete previous tasks first">
-                        <Eye className="w-4 h-4" />
-                        Locked
+      {/* Workflow Groups */}
+      {workflowGroups.length > 0 ? (
+        <div className="space-y-6">
+          {workflowGroups.map((group) => {
+            const userId = getLoggedInUserId();
+            const userTaskInWorkflow = group.tasks.find(t => t.task.managerId === userId);
+            
+            return (
+              <div key={group.workflow.mediaWorkflowId} className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl overflow-hidden">
+                {/* Workflow Header */}
+                <div className="bg-neutral-800 border-b border-neutral-700 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold text-white mb-1">
+                        {group.ad?.title || group.workflow.workflowDescription || 'Workflow'}
+                      </h2>
+                      <p className="text-neutral-400 text-sm">
+                        {group.workflow.workflowDescription}
+                        {group.ad?.deadline && (
+                          <span className="ml-4">
+                            Deadline: {formatDate(group.ad.deadline)}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    {group.ad && (
+                      <div className="flex items-center gap-2">
+                        <span className={`px-3 py-1 rounded-lg text-sm font-medium ${getPhaseInfo(group.ad.currentPhase).color}`}>
+                          {getPhaseInfo(group.ad.currentPhase).text}
+                        </span>
                       </div>
                     )}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="p-12 text-center">
-            <FileText className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No tasks assigned</h3>
-            <p className="text-neutral-400">You don't have any tasks assigned at the moment</p>
-          </div>
-        )}
-      </div>
+
+                {/* Tasks List */}
+                <div className="divide-y divide-neutral-700">
+                  {group.tasks.map((taskDetail, index) => {
+                    const statusInfo = getStatusInfo(taskDetail.task.taskStatus);
+                    
+                    // Determine if this task is locked
+                    const isFirstTask = index === 0;
+                    const previousTask = index > 0 ? group.tasks[index - 1] : null;
+                    const isPreviousTaskCompleted = previousTask ? 
+                      (previousTask.task.taskStatus?.toLowerCase() === 'approved' || 
+                       previousTask.task.taskStatus?.toLowerCase() === 'done') : true;
+                    const isUnlocked = isFirstTask || isPreviousTaskCompleted;
+                    
+                    // Check if this task is assigned to the current user
+                    const isAssignedToUser = taskDetail.task.managerId === userId;
+                    const assignedUserName = taskDetail.task.managerName || taskDetail.task.managerId || 'Unassigned';
+
+                    return (
+                      <div 
+                        key={taskDetail.task.mediaTaskId} 
+                        className={`p-4 hover:bg-neutral-700/30 transition-colors ${isAssignedToUser ? 'bg-purple-500/5' : ''}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          {/* Task Order Badge */}
+                          <div className="flex-shrink-0">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                              isUnlocked ? 'bg-purple-500 text-white' : 'bg-neutral-700 text-neutral-400'
+                            }`}>
+                              {taskDetail.task.order}
+                            </div>
+                          </div>
+
+                          {/* Task Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-1">
+                              <h3 className="text-white font-medium truncate">
+                                {taskDetail.task.taskName || 'Task'}
+                              </h3>
+                              {isAssignedToUser && (
+                                <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 text-xs rounded-full font-medium">
+                                  Your Task
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4 text-sm">
+                              <div className="flex items-center gap-2 text-neutral-400">
+                                <User className="w-4 h-4" />
+                                <span>{assignedUserName}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Status Badge */}
+                          <div className="flex-shrink-0">
+                            <span className={`px-3 py-1 rounded-lg text-sm font-medium ${statusInfo.color} ${statusInfo.textColor}`}>
+                              {statusInfo.text}
+                            </span>
+                          </div>
+
+                          {/* Action Button */}
+                          <div className="flex-shrink-0">
+                            {!isUnlocked ? (
+                              <div className="flex items-center gap-2 px-3 py-2 text-neutral-600 cursor-not-allowed" title="Complete previous task first">
+                                <Lock className="w-4 h-4" />
+                                <span className="text-sm">Locked</span>
+                              </div>
+                            ) : isAssignedToUser ? (
+                              <button
+                                onClick={() => {
+                                  setSelectedTask(taskDetail);
+                                  setActiveVersionId(null);
+                                  setFileUpload(null);
+                                  setVersionFileName('');
+                                }}
+                                className="flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
+                              >
+                                <Eye className="w-4 h-4" />
+                                Work on Task
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setSelectedTask(taskDetail);
+                                  setActiveVersionId(null);
+                                  setFileUpload(null);
+                                  setVersionFileName('');
+                                }}
+                                className="flex items-center gap-2 px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-lg transition-colors"
+                              >
+                                <Eye className="w-4 h-4" />
+                                View
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Progress indicator line */}
+                        {index < group.tasks.length - 1 && (
+                          <div className="ml-5 mt-2 mb-0">
+                            <div className={`w-0.5 h-4 ${isPreviousTaskCompleted ? 'bg-purple-500' : 'bg-neutral-700'}`}></div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl p-12 text-center">
+          <FileText className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white mb-2">No workflows assigned</h3>
+          <p className="text-neutral-400">You don't have any tasks assigned at the moment</p>
+        </div>
+      )}
     </div>
   );
 };

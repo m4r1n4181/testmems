@@ -6,6 +6,7 @@ export interface MediaTask {
   workflowId: number;
   approvalId?: number;
   managerId?: string;
+  managerName?: string;
   adId?: number;
   taskStartedAt?: string;
   taskCompletedAt?: string;

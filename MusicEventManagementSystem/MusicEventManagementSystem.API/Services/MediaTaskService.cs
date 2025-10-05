@@ -102,20 +102,31 @@ namespace MusicEventManagementSystem.API.Services
         }
 
 
-        private static MediaTaskResponseDto MapToResponseDto(MediaTask task) => new()
+        private MediaTaskResponseDto MapToResponseDto(MediaTask task)
         {
-            MediaTaskId = task.MediaTaskId,
-            TaskName = task.TaskName,
-            Order = task.Order,
-            TaskStatus = task.TaskStatus,
-            WorkflowId = task.WorkflowId,
-            ApprovalId = task.ApprovalId,
-            ManagerId = task.ManagerId,
-            AdId = task.AdId,
-            TaskStartedAt = task.TaskStartedAt,
-            TaskCompletedAt = task.TaskCompletedAt,
-            SubmittedForApprovalAt = task.SubmittedForApprovalAt
-        };
+            var dto = new MediaTaskResponseDto
+            {
+                MediaTaskId = task.MediaTaskId,
+                TaskName = task.TaskName,
+                Order = task.Order,
+                TaskStatus = task.TaskStatus,
+                WorkflowId = task.WorkflowId,
+                ApprovalId = task.ApprovalId,
+                ManagerId = task.ManagerId,
+                AdId = task.AdId,
+                TaskStartedAt = task.TaskStartedAt,
+                TaskCompletedAt = task.TaskCompletedAt,
+                SubmittedForApprovalAt = task.SubmittedForApprovalAt
+            };
+
+            // Add manager name if manager is loaded
+            if (task.Manager != null)
+            {
+                dto.ManagerName = $"{task.Manager.FirstName} {task.Manager.LastName}";
+            }
+
+            return dto;
+        }
 
         private static MediaTask MapToEntity(MediaTaskCreateDto dto) => new()
         {
