@@ -11,6 +11,7 @@ namespace MusicEventManagementSystem.API.DTOs.MediaCampaign
         public int? WorkflowId { get; set; }
         public int? ApprovalId { get; set; }
         public string? ManagerId { get; set; }
+        public string? ManagerName { get; set; }
         public int? AdId { get; set; }
         public DateTime? TaskStartedAt { get; set; }
         public DateTime? TaskCompletedAt { get; set; }

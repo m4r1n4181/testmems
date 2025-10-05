@@ -14,6 +14,7 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.MediaWorkflows
                 .Include(mw => mw.Ads)
                 .Include(mw => mw.Tasks)
+                    .ThenInclude(t => t.Manager)
                 .ToListAsync();
         }
 
@@ -22,6 +23,7 @@ namespace MusicEventManagementSystem.API.Repositories
             return await _context.MediaWorkflows
                 .Include(mw => mw.Ads)
                 .Include(mw => mw.Tasks)
+                    .ThenInclude(t => t.Manager)
                 .FirstOrDefaultAsync(m => m.MediaWorkflowId == id);
         }
 
@@ -31,6 +33,7 @@ namespace MusicEventManagementSystem.API.Repositories
                 .Where(m => m.WorkflowDescription == workflowDescription)
                 .Include(mw => mw.Ads)
                 .Include(mw => mw.Tasks)
+                    .ThenInclude(t => t.Manager)
                 .ToListAsync();
         }
     }

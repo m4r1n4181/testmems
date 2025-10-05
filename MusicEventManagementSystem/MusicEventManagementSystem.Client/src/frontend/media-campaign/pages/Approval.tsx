@@ -22,14 +22,29 @@ const ApprovalPage = () => {
   const [mediaTask, setMediaTask] = useState<MediaTask | null>(null);
   const [ad, setAd] = useState<Ad | null>(null);
   const [note, setNote] = useState('');
+  const [canApprove, setCanApprove] = useState(false);
 
   // Media version info (file) is unavailable so we'll use placeholders
   const [fileInfo, setFileInfo] = useState<{ fileType?: string; fileURL?: string; duration?: number } | null>(null);
+
+  // Get logged-in user ID from localStorage
+  const getLoggedInUserId = () => {
+    const userJson = localStorage.getItem('user');
+    if (!userJson) return null;
+    try {
+      const userObj = JSON.parse(userJson);
+      return userObj.id;
+    } catch {
+      return null;
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (!approvalId) return;
+        const userId = getLoggedInUserId();
+        
         // Get approval
         const approvalData = await ApprovalService.getApprovalById(Number(approvalId));
         setApproval(approvalData);
@@ -43,6 +58,11 @@ const ApprovalPage = () => {
           if (taskData.adId) {
             const adData = await AdService.getAdById(taskData.adId);
             setAd(adData);
+            
+            // Check if the current user is the ad creator
+            if (userId && adData.createdById === userId) {
+              setCanApprove(true);
+            }
           }
         }
 
@@ -243,24 +263,33 @@ const ApprovalPage = () => {
                 rows={3}
                 className="w-full p-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none"
                 placeholder="Add your feedback or notes here..."
+                disabled={!canApprove}
               />
             </div>
-            <div className="flex gap-4 mt-4">
-              <button
-                onClick={handleApprove}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-medium text-lg transition-colors"
-              >
-                <CheckCircle className="w-5 h-5" />
-                Approve
-              </button>
-              <button
-                onClick={handleReject}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium text-lg transition-colors"
-              >
-                <XCircle className="w-5 h-5" />
-                Reject
-              </button>
-            </div>
+            {canApprove ? (
+              <div className="flex gap-4 mt-4">
+                <button
+                  onClick={handleApprove}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-medium text-lg transition-colors"
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  Approve
+                </button>
+                <button
+                  onClick={handleReject}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium text-lg transition-colors"
+                >
+                  <XCircle className="w-5 h-5" />
+                  Reject
+                </button>
+              </div>
+            ) : (
+              <div className="bg-yellow-900/20 border border-yellow-500/50 rounded-xl p-4 mt-4">
+                <p className="text-yellow-200 text-center">
+                  Only the ad creator can approve or reject this task.
+                </p>
+              </div>
+            )}
           </div>
           {/* Details sidebar */}
           <div className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl p-8 flex flex-col gap-6 min-w-[300px]">

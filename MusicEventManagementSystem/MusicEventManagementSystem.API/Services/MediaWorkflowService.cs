@@ -123,7 +123,11 @@ namespace MusicEventManagementSystem.API.Services
                 WorkflowId = t.WorkflowId,
                 ApprovalId = t.ApprovalId,
                 ManagerId = t.ManagerId,
-                AdId = t.AdId
+                ManagerName = t.Manager != null ? $"{t.Manager.FirstName} {t.Manager.LastName}" : null,
+                AdId = t.AdId,
+                TaskStartedAt = t.TaskStartedAt,
+                TaskCompletedAt = t.TaskCompletedAt,
+                SubmittedForApprovalAt = t.SubmittedForApprovalAt
             }).ToList()
         };
 
