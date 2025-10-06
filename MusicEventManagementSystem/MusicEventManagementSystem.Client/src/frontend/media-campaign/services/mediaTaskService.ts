@@ -1,4 +1,5 @@
 import type { MediaTask } from '../types/api/mediaTask';
+import type { MediaTaskStatus } from '../types/enums/MediaChampaign';
 import type { 
   CreateMediaTaskForm, 
   UpdateMediaTaskForm 
@@ -143,7 +144,7 @@ export class MediaTaskService {
   }
 
   // GET: api/MediaTask/taskStatus/{taskStatus}
-  static async getByTaskStatus(taskStatus: string): Promise<MediaTask[]> {
+  static async getByTaskStatus(taskStatus: MediaTaskStatus): Promise<MediaTask[]> {
     try {
       const response = await fetch(`${this.BASE_URL}/taskStatus/${encodeURIComponent(taskStatus)}`);
       if (!response.ok) {

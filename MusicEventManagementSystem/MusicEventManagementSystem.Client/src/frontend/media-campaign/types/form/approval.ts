@@ -3,6 +3,7 @@ export interface CreateApprovalForm {
   comment?: string;
   approvalDate: string; // ISO date string
   mediaTaskId: number;
+  submittedMediaVersionId?: number;
 }
 
 export interface UpdateApprovalForm {
@@ -10,4 +11,5 @@ export interface UpdateApprovalForm {
   comment?: string;
   approvalDate?: string; // ISO date string
   mediaTaskId?: number;
+  submittedMediaVersionId?: number;
 }

@@ -2,6 +2,7 @@
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.API.Services.IService;
+using MusicEventManagementSystem.Enums;
 using System.Xml;
 
 namespace MusicEventManagementSystem.API.Services
@@ -78,7 +79,7 @@ namespace MusicEventManagementSystem.API.Services
                     workflow.Tasks.Add(new MediaTask
                     {
                         TaskName = taskDto.TaskName,
-                        TaskStatus = taskDto.TaskStatus,
+                        TaskStatus = taskDto.TaskStatus ?? MediaTaskStatus.InPreparation,
                         Order = taskDto.Order ?? 0,
                         WorkflowId = workflow.MediaWorkflowId,  // Set the WorkflowId explicitly for updates
                         ApprovalId = taskDto.ApprovalId,

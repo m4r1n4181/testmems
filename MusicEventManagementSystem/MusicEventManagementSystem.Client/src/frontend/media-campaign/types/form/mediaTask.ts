@@ -1,7 +1,8 @@
+import type { MediaTaskStatus } from '../enums/MediaChampaign';
 export interface CreateMediaTaskForm {
   taskName: string;
   order: number;
-  taskStatus?: string;
+  taskStatus: MediaTaskStatus;
   workflowId: number;
   approvalId?: number;
   managerId?: string;
@@ -11,7 +12,10 @@ export interface CreateMediaTaskForm {
 export interface UpdateMediaTaskForm {
   taskName?: string;
   order?: number;
-  taskStatus?: string;
+  taskStatus?: MediaTaskStatus;
   workflowId?: number;
   approvalId?: number;
+  taskStartedAt?: string;
+  taskCompletedAt?: string;
+  submittedForApprovalAt?: string;
 }

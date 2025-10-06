@@ -15,5 +15,6 @@ namespace MusicEventManagementSystem.API.Services.IService
         Task<IEnumerable<MediaVersionResponseDto>> GetByFileURLAsync(string fileURL);
         Task<IEnumerable<MediaVersionResponseDto>> GetByIsFinalVersionAsync(bool isFinalVersion);
         Task<IEnumerable<MediaVersionResponseDto>> GetByAdIdAsync(int adId);
+        Task<IEnumerable<MediaVersionResponseDto>> GetPreviousTaskVersionsAsync(int taskId);
     }
 }

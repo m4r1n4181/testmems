@@ -252,6 +252,22 @@ namespace MusicEventManagementSystem.Data
                 .IsRequired(false);
 
 
+            // Approval → SubmittedMediaVersion (one-to-one, optional)
+            builder.Entity<Approval>()
+                .HasOne(a => a.SubmittedMediaVersion)
+                .WithMany()
+                .HasForeignKey(a => a.SubmittedMediaVersionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // MediaVersion → MediaTask (many-to-one, optional)
+            builder.Entity<MediaVersion>()
+                .HasOne(mv => mv.MediaTask)
+                .WithMany() // No collection navigation on MediaTask, so use .WithMany()
+                .HasForeignKey(mv => mv.MediaTaskId)
+                .IsRequired(false);
+
+
             // Conversion DateTime to UTC
             var dateTimeConverter = new ValueConverter<DateTime, DateTime>(
                 v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),

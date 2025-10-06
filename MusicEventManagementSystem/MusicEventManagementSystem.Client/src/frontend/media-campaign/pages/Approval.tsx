@@ -12,6 +12,7 @@ import { AdService } from '../services/addService';
 import type { Approval } from '../types/api/approval';
 import type { MediaTask } from '../types/api/mediaTask';
 import type { Ad } from '../types/api/ad';
+import { MediaTaskStatus } from './MyTasks';
 
 const ApprovalPage = () => {
   const navigate = useNavigate();
@@ -22,14 +23,29 @@ const ApprovalPage = () => {
   const [mediaTask, setMediaTask] = useState<MediaTask | null>(null);
   const [ad, setAd] = useState<Ad | null>(null);
   const [note, setNote] = useState('');
+  const [canApprove, setCanApprove] = useState(false);
 
   // Media version info (file) is unavailable so we'll use placeholders
   const [fileInfo, setFileInfo] = useState<{ fileType?: string; fileURL?: string; duration?: number } | null>(null);
+
+  // Get logged-in user ID from localStorage
+  const getLoggedInUserId = () => {
+    const userJson = localStorage.getItem('user');
+    if (!userJson) return null;
+    try {
+      const userObj = JSON.parse(userJson);
+      return userObj.id;
+    } catch {
+      return null;
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (!approvalId) return;
+        const userId = getLoggedInUserId();
+        
         // Get approval
         const approvalData = await ApprovalService.getApprovalById(Number(approvalId));
         setApproval(approvalData);
@@ -43,14 +59,20 @@ const ApprovalPage = () => {
           if (taskData.adId) {
             const adData = await AdService.getAdById(taskData.adId);
             setAd(adData);
-
-            // Placeholder file info - since media version is not available
-            setFileInfo({
-              fileType: adData.fileType || '.mp4',
-              duration: adData.duration || 15,
-              fileURL: adData.fileURL, // If ad has fileURL, else undefined
-            });
+            
+            // Check if the current user is the ad creator
+            if (userId && adData.createdById === userId) {
+              setCanApprove(true);
+            }
           }
+        }
+
+        // Use submitted media version if available
+        if (approvalData.submittedMediaVersion) {
+          setFileInfo({
+            fileType: approvalData.submittedMediaVersion.fileType || '',
+            fileURL: approvalData.submittedMediaVersion.fileURL,
+          });
         }
       } catch (error) {
         console.error('Error loading approval page:', error);
@@ -62,38 +84,54 @@ const ApprovalPage = () => {
   }, [approvalId]);
 
   const handleApprove = async () => {
-  if (!approval) return;
-  try {
-    // Update approval status
-    await ApprovalService.updateApproval(approval.approvalId, {
-      approvalStatus: 'Approved',
-      comment: note,
-      approvalDate: new Date().toISOString(),
-    });
-
-    // Update associated task status as well!
-    if (approval.mediaTaskId) {
-      await MediaTaskService.updateMediaTask(approval.mediaTaskId, {
-        taskStatus: 'Approved'
+    if (!approval) return;
+    try {
+      const now = new Date().toISOString();
+      // Update approval status
+      await ApprovalService.updateApproval(approval.approvalId, {
+        approvalStatus: 'Approved',
+        comment: note,
+        approvalDate: now,
       });
-    }
 
-    // Now navigate back to dashboard/tasks
-    navigate('/dashboard');
-  } catch (error) {
-    console.error('Error approving:', error);
-    alert('Failed to approve.');
-  }
-};
+      // Update associated task status as well and set completion timestamp
+      if (approval.mediaTaskId) {
+        await MediaTaskService.updateMediaTask(approval.mediaTaskId, {
+          taskStatus: MediaTaskStatus.Approved,
+          taskCompletedAt: now
+        });
+      }
+
+      alert('Task approved successfully!');
+      // Now navigate back to dashboard/tasks
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error approving:', error);
+      alert('Failed to approve.');
+    }
+  };
 
   const handleReject = async () => {
     if (!approval) return;
+    if (!note || note.trim() === '') {
+      alert('Please provide feedback for the rejection.');
+      return;
+    }
     try {
       await ApprovalService.updateApproval(approval.approvalId, {
-        approvalStatus: 'Denied',
+        approvalStatus: 'Rejected',
         comment: note,
         approvalDate: new Date().toISOString(),
       });
+
+      // Update task status back to InProgress so creator can resubmit
+      if (approval.mediaTaskId) {
+        await MediaTaskService.updateMediaTask(approval.mediaTaskId, {
+          taskStatus: MediaTaskStatus.Rejected,
+        });
+      }
+
+      alert('Task rejected with feedback.');
       navigate('/dashboard');
     } catch (error) {
       console.error('Error rejecting:', error);
@@ -146,6 +184,11 @@ const ApprovalPage = () => {
           <div className="lg:col-span-2 bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl p-8 flex flex-col">
             <div className="mb-8">
               <h2 className="text-2xl font-semibold text-white mb-3">Creative Preview</h2>
+              {approval?.submittedMediaVersion && (
+                <div className="mb-2 text-sm text-neutral-400">
+                  Submitted Version: {approval.submittedMediaVersion.versionFileName}
+                </div>
+              )}
               <div className="flex flex-col items-center justify-center bg-neutral-900 border border-neutral-700 rounded-2xl h-64 mb-6">
                 {/* File preview: show placeholder or download */}
                 {fileInfo?.fileType?.startsWith('image') && fileInfo?.fileURL ? (
@@ -160,20 +203,23 @@ const ApprovalPage = () => {
                     src={fileInfo.fileURL}
                     className="max-h-56 object-contain rounded-xl"
                   />
-                ) : (
+                ) : fileInfo?.fileURL ? (
                   <div className="flex flex-col items-center justify-center h-full">
                     <Download className="w-12 h-12 text-neutral-500 mb-2" />
                     <span className="text-neutral-400 text-lg">
-                      {fileInfo?.fileType?.replace('.', '').toUpperCase() || 'MP4'}
+                      {fileInfo?.fileType?.replace('.', '').toUpperCase() || 'File'}
+                    </span>
+                    <span className="text-neutral-500 text-sm mt-2">
+                      Click download to view
                     </span>
                   </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <Download className="w-12 h-12 text-neutral-500 mb-2" />
+                    <span className="text-neutral-400 text-lg">No preview available</span>
+                  </div>
                 )}
-                <span className="text-white mt-4 text-center">
-                  {ad?.title || mediaTask?.taskName || 'Asset'}
-                  <span className="block text-neutral-400 text-sm mt-1">
-                    {ad?.dimensions || '1080 x 1920'}
-                  </span>
-                </span>
+                
               </div>
               <button
                 onClick={handleDownload}
@@ -187,13 +233,13 @@ const ApprovalPage = () => {
               <div>
                 <label className="block text-neutral-300 mb-2">Campaign</label>
                 <div className="bg-neutral-700 border border-neutral-600 rounded-xl p-4 text-white">
-                  {ad?.campaignName || 'Unknown Campaign'}
+                  {ad?.campaignId || 'Unknown Campaign'}
                 </div>
               </div>
               <div>
                 <label className="block text-neutral-300 mb-2">Channel</label>
                 <div className="bg-neutral-700 border border-neutral-600 rounded-xl p-4 text-white">
-                  {ad?.adTypeName || 'Unknown Channel'}
+                  {ad?.adTypeId || 'Unknown Channel'}
                 </div>
               </div>
               <div>
@@ -213,24 +259,33 @@ const ApprovalPage = () => {
                 rows={3}
                 className="w-full p-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none"
                 placeholder="Add your feedback or notes here..."
+                disabled={!canApprove}
               />
             </div>
-            <div className="flex gap-4 mt-4">
-              <button
-                onClick={handleApprove}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-medium text-lg transition-colors"
-              >
-                <CheckCircle className="w-5 h-5" />
-                Approve
-              </button>
-              <button
-                onClick={handleReject}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium text-lg transition-colors"
-              >
-                <XCircle className="w-5 h-5" />
-                Reject
-              </button>
-            </div>
+            {canApprove ? (
+              <div className="flex gap-4 mt-4">
+                <button
+                  onClick={handleApprove}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-medium text-lg transition-colors"
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  Approve
+                </button>
+                <button
+                  onClick={handleReject}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium text-lg transition-colors"
+                >
+                  <XCircle className="w-5 h-5" />
+                  Reject
+                </button>
+              </div>
+            ) : (
+              <div className="bg-yellow-900/20 border border-yellow-500/50 rounded-xl p-4 mt-4">
+                <p className="text-yellow-200 text-center">
+                  Only the ad creator can approve or reject this task.
+                </p>
+              </div>
+            )}
           </div>
           {/* Details sidebar */}
           <div className="bg-neutral-800/50 backdrop-blur-sm border border-neutral-700 rounded-2xl p-8 flex flex-col gap-6 min-w-[300px]">

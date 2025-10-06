@@ -27,13 +27,15 @@ import type { CreateAdForm } from '../types/form/ad';
 import type { CreateMediaWorkflowForm } from '../types/form/mediaWorkflow';
 import type { CreateMediaTaskForm } from '../types/form/mediaTask';
 import { AdStatus } from '../types/enums/MediaChampaign';
+import { MediaTaskStatus } from '../types/enums/MediaChampaign';
 
-interface WorkflowTask {
+interface MediaTask {
   id: string;
   taskName: string;
   description: string;
   assignedMember: string;
   order: number;
+  taskStatus: MediaTaskStatus;
 }
 
 const Ads = () => {
@@ -55,7 +57,7 @@ const Ads = () => {
 
   // Workflow state
   const [useCustomWorkflow, setUseCustomWorkflow] = useState(false);
-  const [workflowTasks, setWorkflowTasks] = useState<WorkflowTask[]>([]);
+  const [mediaTasks, setWorkflowTasks] = useState<MediaTask[]>([]);
   const [showWorkflowChoice, setShowWorkflowChoice] = useState(false);
   const [loadedWorkflowId, setLoadedWorkflowId] = useState<number | null>(null);
 
@@ -116,6 +118,7 @@ const Ads = () => {
         description: 'Write initial captions for IG post and story variants.',
         assignedMember: '',
         order: 1,
+        taskStatus: MediaTaskStatus.InPreparation,
       },
       {
         id: 'task2',
@@ -123,6 +126,7 @@ const Ads = () => {
         description: 'Create IG post and story assets following brand kit.',
         assignedMember: '',
         order: 2,
+        taskStatus: MediaTaskStatus.InPreparation,
       },
     ]);
   };
@@ -144,6 +148,7 @@ const Ads = () => {
             description: t.description || t.taskStatus || '',
             assignedMember: '',
             order: t.order || idx + 1,
+            taskStatus: t.taskStatus || MediaTaskStatus.InPreparation,
           }));
           setWorkflowTasks(loadedTasks);
           setLoadedWorkflowId(selectedAdType.mediaWorkflowId);
@@ -179,17 +184,18 @@ const Ads = () => {
   };
 
   const addWorkflowTask = () => {
-    const newTask: WorkflowTask = {
+    const newTask: MediaTask = {
       id: `task${Date.now()}`,
       taskName: '',
       description: '',
       assignedMember: '',
-      order: workflowTasks.length + 1,
+      order: mediaTasks.length + 1,
+      taskStatus: MediaTaskStatus.InPreparation,
     };
-    setWorkflowTasks([...workflowTasks, newTask]);
+    setWorkflowTasks([...mediaTasks, newTask]);
   };
 
-  const updateWorkflowTask = (taskId: string, field: keyof WorkflowTask, value: any) => {
+  const updateWorkflowTask = (taskId: string, field: keyof MediaTask, value: any) => {
     setWorkflowTasks((tasks) =>
       tasks.map((task) => (task.id === taskId ? { ...task, [field]: value } : task)),
     );
@@ -245,12 +251,12 @@ const Ads = () => {
       const newWorkflow = await MediaWorkflowService.createMediaWorkflow(workflowForm);
       workflowId = newWorkflow.mediaWorkflowId;
 
-      for (const task of workflowTasks) {
+      for (const task of mediaTasks) {
         if (task.taskName.trim()) {
           const taskForm: CreateMediaTaskForm = {
             taskName: task.taskName,
             order: task.order,
-            taskStatus: 'Pending',
+            taskStatus: task.taskStatus,
             workflowId: workflowId,
             managerId: task.assignedMember || undefined,
             adId: newAd.adId, // Link task to the newly created ad
@@ -260,12 +266,12 @@ const Ads = () => {
       }
     } else if (loadedWorkflowId) {
       // Using suggested workflow - create tasks with assignments
-      for (const task of workflowTasks) {
+      for (const task of mediaTasks) {
         if (task.assignedMember) {
           const taskForm: CreateMediaTaskForm = {
             taskName: task.taskName,
             order: task.order,
-            taskStatus: 'Pending',
+            taskStatus: task.taskStatus,
             workflowId: loadedWorkflowId,
             managerId: task.assignedMember,
             adId: newAd.adId, // Link task to the newly created ad
@@ -322,17 +328,17 @@ const Ads = () => {
   const handleEditAd = (ad: Ad) => {
     setEditingAd(ad);
     setEditForm({
-      Deadline: ad.deadline,
-      Title: ad.title || '',
-      CreationDate: ad.creationDate.split('T')[0],
-      CurrentPhase: ad.currentPhase,
-      PublicationDate: ad.publicationDate ? ad.publicationDate.split('T')[0] : '',
-      MediaWorkflowId: ad.mediaWorkflowId,
-      CampaignId: ad.campaignId,
-      AdTypeId: ad.adTypeId,
-      MediaVersionIds: ad.mediaVersionIds || [],
-      IntegrationStatusIds: ad.integrationStatusIds || [],
-      CreatedById: ad.createdById, // Will be set on submission
+      deadline: ad.deadline,
+      title: ad.title || '',
+      creationDate: ad.creationDate.split('T')[0],
+      currentPhase: ad.currentPhase,
+      publicationDate: ad.publicationDate ? ad.publicationDate.split('T')[0] : '',
+      mediaWorkflowId: ad.mediaWorkflowId,
+      campaignId: ad.campaignId,
+      adTypeId: ad.adTypeId,
+      mediaVersionIds: ad.mediaVersionIds || [],
+      integrationStatusIds: ad.integrationStatusIds || [],
+      createdById: ad.createdById, // Will be set on submission
     });
     setShowCreateModal(false);
   };
@@ -690,11 +696,11 @@ const Ads = () => {
 
                 {/* Workflow Tasks */}
                 <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-                  {workflowTasks.map((task, index) => (
+                  {mediaTasks.map((task, index) => (
                     <div key={task.id} className="p-4 bg-neutral-700/50 border border-neutral-600 rounded-xl hover:border-neutral-500 transition-colors">
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-neutral-300 text-sm font-medium">
-                          Task {index + 1} of {workflowTasks.length}
+                          Task {index + 1} of {mediaTasks.length}
                         </span>
                         <button
                           onClick={() => removeWorkflowTask(task.id)}

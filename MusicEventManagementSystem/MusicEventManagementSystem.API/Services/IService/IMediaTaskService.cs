@@ -1,4 +1,5 @@
 ﻿using MusicEventManagementSystem.API.DTOs.MediaCampaign;
+using MusicEventManagementSystem.Enums;
 
 namespace MusicEventManagementSystem.API.Services.IService
 {
@@ -12,7 +13,7 @@ namespace MusicEventManagementSystem.API.Services.IService
 
         Task<IEnumerable<MediaTaskResponseDto>> GetByTaskNameAsync(string taskName);
         Task<IEnumerable<MediaTaskResponseDto>> GetByOrderAsync(int order);
-        Task<IEnumerable<MediaTaskResponseDto>> GetByTaskStatusAsync(string taskStatus);
+        Task<IEnumerable<MediaTaskResponseDto>> GetByTaskStatusAsync(MediaTaskStatus taskStatus);
         Task<IEnumerable<MediaTaskResponseDto>> GetByWorkflowIdAsync(int workflowId);
         Task<IEnumerable<MediaTaskResponseDto>> GetTasksByManager(string managerId);
 

@@ -5,4 +5,6 @@ export interface MediaVersion {
   fileURL?: string;
   isFinalVersion: boolean;
   adId: number;
+  createdAt: string;
+  mediaTaskId?: number;
 }

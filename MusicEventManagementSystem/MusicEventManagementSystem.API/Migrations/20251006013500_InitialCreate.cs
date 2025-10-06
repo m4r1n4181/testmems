@@ -956,29 +956,6 @@ namespace MusicEventManagementSystem.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MediaVersions",
-                columns: table => new
-                {
-                    MediaVersionId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    AdId = table.Column<int>(type: "integer", nullable: false),
-                    VersionFileName = table.Column<string>(type: "text", nullable: true),
-                    FileType = table.Column<string>(type: "text", nullable: true),
-                    FileURL = table.Column<string>(type: "text", nullable: true),
-                    IsFinalVersion = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MediaVersions", x => x.MediaVersionId);
-                    table.ForeignKey(
-                        name: "FK_MediaVersions_Ads_AdId",
-                        column: x => x.AdId,
-                        principalTable: "Ads",
-                        principalColumn: "AdId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AdTypes",
                 columns: table => new
                 {
@@ -1005,7 +982,8 @@ namespace MusicEventManagementSystem.API.Migrations
                     ApprovalStatus = table.Column<string>(type: "text", nullable: true),
                     Comment = table.Column<string>(type: "text", nullable: true),
                     ApprovalDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    MediaTaskId = table.Column<int>(type: "integer", nullable: false)
+                    MediaTaskId = table.Column<int>(type: "integer", nullable: false),
+                    SubmittedMediaVersionId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1039,11 +1017,14 @@ namespace MusicEventManagementSystem.API.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TaskName = table.Column<string>(type: "text", nullable: true),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    TaskStatus = table.Column<string>(type: "text", nullable: true),
+                    TaskStatus = table.Column<int>(type: "integer", nullable: false),
                     WorkflowId = table.Column<int>(type: "integer", nullable: false),
                     ApprovalId = table.Column<int>(type: "integer", nullable: true),
                     ManagerId = table.Column<string>(type: "text", nullable: true),
-                    AdId = table.Column<int>(type: "integer", nullable: true)
+                    AdId = table.Column<int>(type: "integer", nullable: true),
+                    TaskStartedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    TaskCompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    SubmittedForApprovalAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1064,6 +1045,36 @@ namespace MusicEventManagementSystem.API.Migrations
                         principalTable: "MediaWorkflows",
                         principalColumn: "MediaWorkflowId",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MediaVersions",
+                columns: table => new
+                {
+                    MediaVersionId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    AdId = table.Column<int>(type: "integer", nullable: false),
+                    VersionFileName = table.Column<string>(type: "text", nullable: true),
+                    FileType = table.Column<string>(type: "text", nullable: true),
+                    FileURL = table.Column<string>(type: "text", nullable: true),
+                    IsFinalVersion = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    MediaTaskId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MediaVersions", x => x.MediaVersionId);
+                    table.ForeignKey(
+                        name: "FK_MediaVersions_Ads_AdId",
+                        column: x => x.AdId,
+                        principalTable: "Ads",
+                        principalColumn: "AdId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MediaVersions_MediaTasks_MediaTaskId",
+                        column: x => x.MediaTaskId,
+                        principalTable: "MediaTasks",
+                        principalColumn: "MediaTaskId");
                 });
 
             migrationBuilder.CreateIndex(
@@ -1096,6 +1107,11 @@ namespace MusicEventManagementSystem.API.Migrations
                 table: "Approvals",
                 column: "MediaTaskId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Approvals_SubmittedMediaVersionId",
+                table: "Approvals",
+                column: "SubmittedMediaVersionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -1189,6 +1205,11 @@ namespace MusicEventManagementSystem.API.Migrations
                 name: "IX_MediaVersions_AdId",
                 table: "MediaVersions",
                 column: "AdId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MediaVersions_MediaTaskId",
+                table: "MediaVersions",
+                column: "MediaTaskId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MediaWorkflows_ApprovalId",
@@ -1307,6 +1328,14 @@ namespace MusicEventManagementSystem.API.Migrations
                 principalTable: "MediaTasks",
                 principalColumn: "MediaTaskId",
                 onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Approvals_MediaVersions_SubmittedMediaVersionId",
+                table: "Approvals",
+                column: "SubmittedMediaVersionId",
+                principalTable: "MediaVersions",
+                principalColumn: "MediaVersionId",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
@@ -1371,9 +1400,6 @@ namespace MusicEventManagementSystem.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Locations");
-
-            migrationBuilder.DropTable(
-                name: "MediaVersions");
 
             migrationBuilder.DropTable(
                 name: "NegotiationUsers");
@@ -1470,6 +1496,9 @@ namespace MusicEventManagementSystem.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Approvals");
+
+            migrationBuilder.DropTable(
+                name: "MediaVersions");
 
             migrationBuilder.DropTable(
                 name: "MediaTasks");

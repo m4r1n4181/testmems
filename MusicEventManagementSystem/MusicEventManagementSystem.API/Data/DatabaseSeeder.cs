@@ -938,24 +938,24 @@ namespace MusicEventManagementSystem.API.Data
             var mediaTasks = new List<MediaTask>
             {
                 // Instagram Story Workflow Tasks
-                new MediaTask { TaskName = "Design Instagram Story Creative", Order = 1, TaskStatus = "Completed", WorkflowId = 1, ManagerId = marina.Id }, // ako vežeš na Ad },
-                new MediaTask { TaskName = "Add Interactive Elements", Order = 2, TaskStatus = "Completed", WorkflowId = 1, ManagerId = marina.Id },
-                new MediaTask { TaskName = "Schedule Instagram Story Post", Order = 3, TaskStatus = "In Progress", WorkflowId = 1, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Design Instagram Story Creative", Order = 1, TaskStatus = MediaTaskStatus.Approved, WorkflowId = 1, ManagerId = marina.Id }, // ako vežeš na Ad },
+                new MediaTask { TaskName = "Add Interactive Elements", Order = 2, TaskStatus = MediaTaskStatus.Approved,WorkflowId = 1, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Schedule Instagram Story Post", Order = 3,TaskStatus = MediaTaskStatus.Approved, WorkflowId = 1, ManagerId = marina.Id },
                 
                 // Facebook Post Workflow Tasks
-                new MediaTask { TaskName = "Create Facebook Post Design", Order = 1, TaskStatus = "Completed", WorkflowId = 2, ManagerId = marina.Id },
-                new MediaTask { TaskName = "Write Engaging Copy", Order = 2, TaskStatus = "Pending Review", WorkflowId = 2, ManagerId = marina.Id },
-                new MediaTask { TaskName = "Schedule Facebook Post", Order = 3, TaskStatus = "Not Started", WorkflowId = 2, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Create Facebook Post Design", Order = 1,TaskStatus = MediaTaskStatus.Approved, WorkflowId = 2, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Write Engaging Copy", Order = 2,TaskStatus = MediaTaskStatus.Approved, WorkflowId = 2, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Schedule Facebook Post", Order = 3,TaskStatus = MediaTaskStatus.Approved, WorkflowId = 2, ManagerId = marina.Id },
                 
                 // YouTube Video Workflow Tasks
-                new MediaTask { TaskName = "Edit Video Content", Order = 1, TaskStatus = "In Progress", WorkflowId = 3, ManagerId = marina.Id },
-                new MediaTask { TaskName = "Create Custom Thumbnail", Order = 2, TaskStatus = "Not Started", WorkflowId = 3, ManagerId = marina.Id },
-                new MediaTask { TaskName = "Upload to YouTube", Order = 3, TaskStatus = "Not Started", WorkflowId = 3, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Edit Video Content", Order = 1, TaskStatus = MediaTaskStatus.Approved,WorkflowId = 3, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Create Custom Thumbnail", Order = 2,TaskStatus = MediaTaskStatus.Approved, WorkflowId = 3, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Upload to YouTube", Order = 3,TaskStatus = MediaTaskStatus.Approved,WorkflowId = 3, ManagerId = marina.Id },
                 
                 // TikTok Short Workflow Tasks
-                new MediaTask { TaskName = "Edit TikTok Short", Order = 1, TaskStatus = "Completed", WorkflowId = 4, ManagerId = marina.Id},
-                new MediaTask { TaskName = "Add Trending Audio", Order = 2, TaskStatus = "Completed", WorkflowId = 4, ManagerId = marina.Id },
-                new MediaTask { TaskName = "Publish TikTok Short", Order = 3, TaskStatus = "Scheduled", WorkflowId = 4, ManagerId = marina.Id }
+                new MediaTask { TaskName = "Edit TikTok Short", Order = 1, TaskStatus = MediaTaskStatus.Approved,WorkflowId = 4, ManagerId = marina.Id},
+                new MediaTask { TaskName = "Add Trending Audio", Order = 2,TaskStatus = MediaTaskStatus.Approved, WorkflowId = 4, ManagerId = marina.Id },
+                new MediaTask { TaskName = "Publish TikTok Short", Order = 3,TaskStatus = MediaTaskStatus.Approved, WorkflowId = 4, ManagerId = marina.Id }
             };
             context.MediaTasks.AddRange(mediaTasks);
             await context.SaveChangesAsync();

@@ -2,6 +2,7 @@
 using MusicEventManagementSystem.API.Models;
 using MusicEventManagementSystem.API.Repositories.IRepositories;
 using MusicEventManagementSystem.Data;
+using MusicEventManagementSystem.Enums;
 
 namespace MusicEventManagementSystem.API.Repositories
 {
@@ -51,7 +52,7 @@ namespace MusicEventManagementSystem.API.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<MediaTask>> GetByTaskStatusAsync(string taskStatus)
+        public async Task<IEnumerable<MediaTask>> GetByTaskStatusAsync(MediaTaskStatus taskStatus)
         {
             return await _context.MediaTasks
                 .Where(m => m.TaskStatus == taskStatus)

@@ -18,14 +18,13 @@ import type { UpdateMediaWorkflowForm, CreateMediaWorkflowForm, MediaTaskForm } 
 interface TaskForm {
   mediaTaskId?: number;
   taskName: string;
-  description: string;
   order: number;
 }
 
 const DEFAULT_TASKS: TaskForm[] = [
-  { taskName: 'Design Visual', description: 'Create key visuals and thumbnails.', order: 1 },
-  { taskName: 'Write Copy', description: 'Craft captions and ad copy variations.', order: 2 },
-  { taskName: 'Edit Video', description: 'Assemble and edit short-form video.', order: 3 }
+  { taskName: 'Design Visual', order: 1 },
+  { taskName: 'Write Copy', order: 2 },
+  { taskName: 'Edit Video', order: 3 }
 ];
 
 const Workflows = () => {
@@ -82,7 +81,7 @@ const Workflows = () => {
         const taskForms: TaskForm[] = workflow.tasks.map((task: MediaTask) => ({
           mediaTaskId: task.mediaTaskId,
           taskName: task.taskName || '',
-          description: task.taskStatus || '',
+          taskStatus: task.taskStatus || '',
           order: task.order
         }));
         setWorkflowTasks(taskForms);
@@ -104,7 +103,6 @@ const Workflows = () => {
         tasks: workflowTasks.map((task, idx) => ({
           taskName: task.taskName,
           order: idx + 1,
-          taskStatus: task.description
         }))
       };
       const createdWorkflow = await MediaWorkflowService.createMediaWorkflow(createForm);
@@ -131,7 +129,6 @@ const Workflows = () => {
         tasks: workflowTasks.map((task, idx) => ({
           taskName: task.taskName,
           order: idx + 1,
-          taskStatus: task.description
         }))
       };
       await MediaWorkflowService.updateMediaWorkflow(selectedWorkflow.mediaWorkflowId, updateForm);
@@ -192,7 +189,6 @@ const Workflows = () => {
   const addTask = () => {
     setWorkflowTasks([...workflowTasks, {
       taskName: '',
-      description: '',
       order: workflowTasks.length + 1
     }]);
   };
@@ -293,19 +289,7 @@ const Workflows = () => {
                     <span className="text-white">{task.taskName}</span>
                   )}
                 </div>
-                <div className="col-span-5">
-                  <label className="block text-xs text-neutral-400 mb-2">Description</label>
-                  {editingTaskIndex === index ? (
-                    <input
-                      type="text"
-                      value={task.description}
-                      onChange={(e) => updateTask(index, 'description', e.target.value)}
-                      className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                    />
-                  ) : (
-                    <span className="text-white">{task.description}</span>
-                  )}
-                </div>
+  
                 <div className="col-span-1 flex justify-end gap-2">
                   {editingTaskIndex === index ? (
                     <button
@@ -514,16 +498,7 @@ const Workflows = () => {
                           disabled={actionLoading}
                         />
                       </div>
-                      <div className="col-span-5">
-                        <label className="block text-xs text-neutral-400 mb-2">Description</label>
-                        <input
-                          type="text"
-                          value={task.description}
-                          onChange={(e) => updateTask(index, 'description', e.target.value)}
-                          className="w-full p-2 bg-neutral-600 border border-neutral-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                          disabled={actionLoading}
-                        />
-                      </div>
+                      
                       <div className="col-span-1 flex justify-end">
                         <button 
                           onClick={() => removeTask(index)}

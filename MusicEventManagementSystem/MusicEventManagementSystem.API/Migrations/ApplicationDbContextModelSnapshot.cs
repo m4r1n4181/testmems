@@ -271,10 +271,15 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<int>("MediaTaskId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("SubmittedMediaVersionId")
+                        .HasColumnType("integer");
+
                     b.HasKey("ApprovalId");
 
                     b.HasIndex("MediaTaskId")
                         .IsUnique();
+
+                    b.HasIndex("SubmittedMediaVersionId");
 
                     b.ToTable("Approvals");
                 });
@@ -621,11 +626,20 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime?>("SubmittedForApprovalAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("TaskCompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("TaskName")
                         .HasColumnType("text");
 
-                    b.Property<string>("TaskStatus")
-                        .HasColumnType("text");
+                    b.Property<DateTime?>("TaskStartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("TaskStatus")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("WorkflowId")
                         .IsRequired()
@@ -653,6 +667,9 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<int>("AdId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("FileType")
                         .HasColumnType("text");
 
@@ -662,12 +679,17 @@ namespace MusicEventManagementSystem.API.Migrations
                     b.Property<bool>("IsFinalVersion")
                         .HasColumnType("boolean");
 
+                    b.Property<int?>("MediaTaskId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("VersionFileName")
                         .HasColumnType("text");
 
                     b.HasKey("MediaVersionId");
 
                     b.HasIndex("AdId");
+
+                    b.HasIndex("MediaTaskId");
 
                     b.ToTable("MediaVersions");
                 });
@@ -1635,7 +1657,14 @@ namespace MusicEventManagementSystem.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MusicEventManagementSystem.API.Models.MediaVersion", "SubmittedMediaVersion")
+                        .WithMany()
+                        .HasForeignKey("SubmittedMediaVersionId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.Navigation("MediaTask");
+
+                    b.Navigation("SubmittedMediaVersion");
                 });
 
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.Campaign", b =>
@@ -1732,7 +1761,13 @@ namespace MusicEventManagementSystem.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MusicEventManagementSystem.API.Models.MediaTask", "MediaTask")
+                        .WithMany()
+                        .HasForeignKey("MediaTaskId");
+
                     b.Navigation("Ad");
+
+                    b.Navigation("MediaTask");
                 });
 
             modelBuilder.Entity("MusicEventManagementSystem.API.Models.MediaWorkflow", b =>

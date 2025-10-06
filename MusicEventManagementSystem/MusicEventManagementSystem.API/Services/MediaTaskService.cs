@@ -50,11 +50,14 @@ namespace MusicEventManagementSystem.API.Services
 
             if (dto.TaskName != null) task.TaskName = dto.TaskName;
             if (dto.Order.HasValue) task.Order = dto.Order.Value;
-            if (dto.TaskStatus != null) task.TaskStatus = dto.TaskStatus;
+            if (dto.TaskStatus.HasValue) task.TaskStatus = dto.TaskStatus.Value;
             if (dto.WorkflowId.HasValue) task.WorkflowId = dto.WorkflowId.Value;
             if (dto.ApprovalId.HasValue) task.ApprovalId = dto.ApprovalId.Value;
             if (dto.ManagerId != null) task.ManagerId = dto.ManagerId;
             if (dto.AdId.HasValue) task.AdId = dto.AdId.Value;
+            if (dto.TaskStartedAt.HasValue) task.TaskStartedAt = dto.TaskStartedAt.Value;
+            if (dto.TaskCompletedAt.HasValue) task.TaskCompletedAt = dto.TaskCompletedAt.Value;
+            if (dto.SubmittedForApprovalAt.HasValue) task.SubmittedForApprovalAt = dto.SubmittedForApprovalAt.Value;
             _mediaTaskRepository.Update(task);
             await _mediaTaskRepository.SaveChangesAsync();
             return MapToResponseDto(task);
@@ -81,7 +84,7 @@ namespace MusicEventManagementSystem.API.Services
             return tasks.Select(MapToResponseDto);
         }
 
-        public async Task<IEnumerable<MediaTaskResponseDto>> GetByTaskStatusAsync(string taskStatus)
+        public async Task<IEnumerable<MediaTaskResponseDto>> GetByTaskStatusAsync(MediaTaskStatus taskStatus)
         {
             var tasks = await _mediaTaskRepository.GetByTaskStatusAsync(taskStatus);
             return tasks.Select(MapToResponseDto);
@@ -108,7 +111,10 @@ namespace MusicEventManagementSystem.API.Services
             WorkflowId = task.WorkflowId,
             ApprovalId = task.ApprovalId,
             ManagerId = task.ManagerId,
-            AdId = task.AdId
+            AdId = task.AdId,
+            TaskStartedAt = task.TaskStartedAt,
+            TaskCompletedAt = task.TaskCompletedAt,
+            SubmittedForApprovalAt = task.SubmittedForApprovalAt
         };
 
         private static MediaTask MapToEntity(MediaTaskCreateDto dto) => new()

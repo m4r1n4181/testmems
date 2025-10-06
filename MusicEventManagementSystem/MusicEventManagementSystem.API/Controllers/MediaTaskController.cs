@@ -3,6 +3,7 @@ using MusicEventManagementSystem.API.DTOs.MediaCampaign;
 using MusicEventManagementSystem.API.Services.IService;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using MusicEventManagementSystem.Enums;
 
 namespace MusicEventManagementSystem.API.Controllers
 {
@@ -79,7 +80,7 @@ namespace MusicEventManagementSystem.API.Controllers
         }
 
         [HttpGet("taskStatus/{taskStatus}")]
-        public async Task<ActionResult<IEnumerable<MediaTaskResponseDto>>> GetByTaskStatus(string taskStatus)
+        public async Task<ActionResult<IEnumerable<MediaTaskResponseDto>>> GetByTaskStatus(MediaTaskStatus taskStatus)
         {
             var tasks = await _mediaTaskService.GetByTaskStatusAsync(taskStatus);
             return Ok(tasks);
